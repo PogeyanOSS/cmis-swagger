@@ -1,8 +1,3 @@
-/**
- * Copyright (C) Pogeyan Technologies Private Limited - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential.
- */
 package com.pogeyan.swagger.server;
 
 /*import java.io.File;
