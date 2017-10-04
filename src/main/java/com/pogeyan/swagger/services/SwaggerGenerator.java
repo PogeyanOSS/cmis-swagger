@@ -31,7 +31,6 @@ public class SwaggerGenerator {
 			Map<String, SecurityDefinitionObject> securityDef = SwaggerHelpers.getSecurityDefinitions();
 			Map<String, DefinitionsObject> definitions = SwaggerHelpers.getDefinitions();
 			Map<String, PathObject> paths = SwaggerHelpers.generatePathForAllTypes();
-			LOG.info("Swagger URL:{}", System.getenv("HOST_SWAGGER_URL"));
 			SwaggerJsonObject swaggerObj = new SwaggerJsonObject(SwaggerHelpers.generateInfoObject().getVersion(),
 					SwaggerHelpers.getHostSwaggerUrl(), repoId, new String[] { "http" }, infoObj,
 					SwaggerHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
