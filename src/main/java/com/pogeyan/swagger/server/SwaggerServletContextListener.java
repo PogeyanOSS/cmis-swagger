@@ -81,15 +81,19 @@ public class SwaggerServletContextListener implements ServletContextListener {
 	public void contextDestroyed(ServletContextEvent sce) {
 	}
 
-	private boolean createServiceFactory(ServletContextEvent sce, String filename) throws FileNotFoundException {
+	private boolean createServiceFactory(ServletContextEvent sce, String fileName) throws FileNotFoundException {
 		// load properties
 		InputStream stream = null;
 		try {
+			String filePath = null;
 			String propertyFileLocation = System.getenv("SWAGGER_SERVER_PROPERTY_FILE_LOCATION");
 			if (propertyFileLocation == null) {
 				propertyFileLocation = DEFAULT_SERVER_PROPERTY_CLASS_PATH;
+				filePath = SwaggerServletContextListener.class.getClassLoader().getResource(fileName).getPath();
+			} else {
+				filePath = propertyFileLocation + fileName;
 			}
-			stream = new FileInputStream(new File(propertyFileLocation + filename));
+			stream = new FileInputStream(new File(filePath));
 		} catch (FileNotFoundException e) {
 			return initializePropertyDetails(DEFAULT_SERVER_TITLE, DEFAULT_SERVER_VERSION, DEFAULT_SERVER_NAME,
 					DEFAULT_SERVER_URL, DEFAULT_SERVER_DESCRIPTION, DEFAULT_SERVER_EMAIL,

@@ -35,9 +35,9 @@ This gives us very easy consumption in client applications using simple HTTP API
 * Run that cmis-swagger.jar file to start the server.
 
 ```
-java -jar cmis-swagger-1.0.0.jar
+java -jar cmis-swagger-1.0.0.jar -httpPort=8081
 ```
-* Navigate to "http://localhost:8080" to load the swagger UI.
+* Navigate to "http://localhost:8081" to load the swagger UI.
 * Specify the CMIS repository. In this case since we are running OpenCMIS InMemory Server we can specify 'A1,A2' to load that.
 
 > Note: CUSTOM_TYPE_HAS_FOLDER, this is a very specific CMIS implementation requirement and is not required when using with other CMIS server implementations.
