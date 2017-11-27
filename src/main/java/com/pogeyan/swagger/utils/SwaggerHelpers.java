@@ -160,22 +160,21 @@ public class SwaggerHelpers {
 			} else {
 				connectionString = connectionUrl;
 			}
-			LOG.info("Creating session for repository:{}", repoId);
+
+			LOG.info("Creating session for repository: {}, connection URL: {}", repoId, connectionUrl);
 			SessionFactory factory = SessionFactoryImpl.newInstance();
 			Map<String, String> parameters = new HashMap<String, String>();
-
 			// user credentials
 			parameters.put(SessionParameter.USER, userName);
 			parameters.put(SessionParameter.PASSWORD, password);
 			parameters.put(SessionParameter.BROWSER_URL, connectionString);
 			parameters.put(SessionParameter.BINDING_TYPE, BindingType.BROWSER.value());
 			parameters.put(SessionParameter.REPOSITORY_ID, repoId);
-
 			session = factory.createSession(parameters);
 			session.setDefaultContext(session.createOperationContext());
 			sessionMap.put(userName, session);
 		} catch (Exception e) {
-			LOG.error("Exception: {}", e.getMessage());
+			LOG.error("Exception on createSession: {}", e.getMessage());
 			ErrorResponse resp = SwaggerHelpers.handleException(e);
 			throw new ErrorResponse(resp);
 		}
