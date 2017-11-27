@@ -50,8 +50,6 @@ public class SwaggerGenerator {
 					SwaggerHelpers.getHostSwaggerUrl(), repoId, new String[] { "http" }, infoObj,
 					SwaggerHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
 			jsonString = mp.writeValueAsString(swaggerObj);
-			LOG.info("JsonDoc:{}, for repositoryId:{}", jsonString, repoId);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOG.error("Json generation exception: {}", e.getMessage());
