@@ -100,7 +100,7 @@ public class SwaggerHelpers {
 	public static String hostSwaggerUrl;
 	static {
 		typeCacheMap = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
-		sessionMap = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
+		sessionMap = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 	}
 
 	/**
@@ -126,6 +126,16 @@ public class SwaggerHelpers {
 		return sessionMap.getIfPresent(userName) != null ? sessionMap.getIfPresent(userName)
 				: createSession(repoId, userName, password);
 
+	}
+
+	/**
+	 * 
+	 * @param userName
+	 *            the property userName is used to login that particular user
+	 *            repository
+	 */
+	public static void removeSession(String userName) throws Exception {
+		sessionMap.invalidate(userName);
 	}
 
 	/**

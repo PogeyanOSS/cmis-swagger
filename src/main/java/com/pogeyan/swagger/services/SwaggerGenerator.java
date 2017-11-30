@@ -18,7 +18,6 @@ package com.pogeyan.swagger.services;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.chemistry.opencmis.client.api.Session;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +38,7 @@ public class SwaggerGenerator {
 		String jsonString = null;
 		try {
 			LOG.info("Generating Swagger Json for repository:{}", repoId);
-			Session session = SwaggerHelpers.createSession(repoId, "admin", "admin123");
-			SwaggerHelpers.getAllTypes(session);
+
 			InfoObject infoObj = SwaggerHelpers.generateInfoObject();
 			List<TagObject> tags = SwaggerHelpers.generateTagsForAllTypes();
 			Map<String, SecurityDefinitionObject> securityDef = SwaggerHelpers.getSecurityDefinitions();

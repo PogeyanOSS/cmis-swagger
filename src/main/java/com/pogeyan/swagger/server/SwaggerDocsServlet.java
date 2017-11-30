@@ -52,6 +52,7 @@ public class SwaggerDocsServlet extends HttpServlet {
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+
 		String pathFragments[] = HttpUtils.splitPath(request);
 		String repoId = pathFragments[0];
 		LOG.info("Swagger Docs for repository:{}", repoId);
