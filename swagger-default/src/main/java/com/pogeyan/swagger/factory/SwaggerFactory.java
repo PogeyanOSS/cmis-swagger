@@ -12,20 +12,17 @@ public class SwaggerFactory implements IObjectFacade {
 
 	@Override
 	public boolean beforeDelete(Session session, CmisObject obj) throws Exception {
-		// TODO Auto-generated method stub
 		return true;
 	}
 
 	@Override
 	public Map<String, Object> beforeUpdate(Session session, Map<String, Object> input, List<String> revIds)
 			throws Exception {
-		// TODO Auto-generated method stub
 		return input;
 	}
 
 	@Override
 	public Map<String, Object> beforecreate(Session session, Map<String, Object> input) throws Exception {
-		// TODO Auto-generated method stub
 		return input;
 	}
 
