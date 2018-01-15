@@ -1,12 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.pogeyan.swagger</groupId>
-  <artifactId>root</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  <name>root</name>
-   <properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.pogeyan.swagger</groupId>
+	<artifactId>root</artifactId>
+	<version>${app.version}</version>
+	<packaging>pom</packaging>
+	<name>root</name>
+	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<app.version>0.0.1-SNAPSHOT</app.version>
+		<cmis.version>1.1.0</cmis.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -35,33 +38,23 @@
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-api</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-impl</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-bindings</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
-<!-- 		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-			<version>2.10.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mongodb.morphia</groupId>
-			<artifactId>morphia</artifactId>
-			<version>1.2.1</version>
-		</dependency> -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -73,7 +66,7 @@
 			<version>1.7.21</version>
 		</dependency>
 	</dependencies>
-  <build>
+	<build>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -155,9 +148,11 @@
 			</plugin>
 		</plugins>
 	</build>
-  <modules>
-  	<module>swagger-sync</module>
-  	<module>swagger-default</module>
-  	<module>api</module>
-  </modules>
+	<modules>
+		<module>api</module>
+
+
+
+		<module>cmis-swagger</module>
+	</modules>
 </project>

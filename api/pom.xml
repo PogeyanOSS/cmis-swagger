@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.pogeyan.swagger</groupId>
 		<artifactId>root</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>${app.version}</version>
 	</parent>
 	<artifactId>api</artifactId>
 </project>

@@ -38,7 +38,7 @@ public class TomcatLauncher {
 		// Define a folder to hold web application contents.
 
 		// Define a folder to hold web application contents.
-		/*String webappDirLocation = "src/main/webapp/";
+/*		String webappDirLocation = "src/main/webapp/";
 		Tomcat tomcat = new Tomcat();
 
 		// Define port number for the web application
@@ -69,7 +69,7 @@ public class TomcatLauncher {
 		}
 
 		tomcat.start();
-		tomcat.getServer().await();
-*/
+		tomcat.getServer().await();*/
+
 	}
 }
