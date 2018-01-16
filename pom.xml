@@ -2,14 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.pogeyan.swagger</groupId>
-	<artifactId>cmis-swagger</artifactId>
-	<version>1.0.0</version>
-	<packaging>war</packaging>
-	<name>cmis-swagger</name>
-	<url>http://maven.apache.org</url>
+	<artifactId>root</artifactId>
+	<version>${app.version}</version>
+	<packaging>pom</packaging>
+	<name>root</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tomcat.version>8.0.21</tomcat.version>
+		<app.version>0.0.1-SNAPSHOT</app.version>
+		<cmis.version>1.1.0</cmis.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -38,32 +38,22 @@
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-api</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-impl</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-client-bindings</artifactId>
-			<version>1.0.0</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.chemistry.opencmis</groupId>
 			<artifactId>chemistry-opencmis-commons-impl</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mongodb</groupId>
-			<artifactId>mongo-java-driver</artifactId>
-			<version>2.10.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.mongodb.morphia</groupId>
-			<artifactId>morphia</artifactId>
-			<version>1.2.1</version>
+			<version>${cmis.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -75,19 +65,6 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.21</version>
 		</dependency>
-
-		<!-- Uncomment this for debugging purposes only. -->
-		<!-- <dependency> <groupId>org.apache.tomcat.embed</groupId> <artifactId>tomcat-embed-core</artifactId> 
-			<version>${tomcat.version}</version> </dependency> <dependency> <groupId>org.apache.tomcat.embed</groupId> 
-			<artifactId>tomcat-embed-logging-juli</artifactId> <version>${tomcat.version}</version> 
-			</dependency> <dependency> <groupId>org.apache.tomcat.embed</groupId> <artifactId>tomcat-embed-jasper</artifactId> 
-			<version>${tomcat.version}</version> </dependency> <dependency> <groupId>org.apache.tomcat</groupId> 
-			<artifactId>tomcat-jasper</artifactId> <version>${tomcat.version}</version> 
-			</dependency> <dependency> <groupId>org.apache.tomcat</groupId> <artifactId>tomcat-jasper-el</artifactId> 
-			<version>${tomcat.version}</version> </dependency> <dependency> <groupId>org.apache.tomcat</groupId> 
-			<artifactId>tomcat-jsp-api</artifactId> <version>${tomcat.version}</version> 
-			</dependency> -->
-
 	</dependencies>
 	<build>
 		<resources>
@@ -171,4 +148,11 @@
 			</plugin>
 		</plugins>
 	</build>
+	<modules>
+		<module>api</module>
+
+
+
+		<module>cmis-swagger</module>
+	</modules>
 </project>
