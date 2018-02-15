@@ -6,9 +6,9 @@
 		<artifactId>root</artifactId>
 		<version>${app.version}</version>
 	</parent>
-	<artifactId>cmis-swagger</artifactId>
+	<artifactId>copper-swagger</artifactId>
 	<packaging>war</packaging>
-	<name>cmis-swagger</name>
+	<name>copper-swagger</name>
 	<properties>
 		<tomcat.version>8.0.21</tomcat.version>
 	</properties>
@@ -26,7 +26,7 @@
 			</dependency> -->
 		<dependency>
 			<groupId>com.pogeyan.swagger</groupId>
-			<artifactId>api</artifactId>
+			<artifactId>copper-swagger-api</artifactId>
 			<version>${app.version}</version>
 		</dependency>
 	</dependencies>

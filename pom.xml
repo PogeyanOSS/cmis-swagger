@@ -8,7 +8,7 @@
 	<name>root</name>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<app.version>0.0.1-SNAPSHOT</app.version>
+		<app.version>1.0.0</app.version>
 		<cmis.version>1.1.0</cmis.version>
 	</properties>
 	<dependencies>
@@ -104,28 +104,6 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>2.3-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>tomcat-war</id>
-						<goals>
-							<goal>exec-war</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<path>/</path>
-							<enableNaming>false</enableNaming>
-							<finalName>cmis-swagger-${project.version}.jar</finalName>
-							<charset>utf-8</charset>
-							<attachartifactclassifier>exec-war</attachartifactclassifier>
-							<attachartifactclassifiertype>jar</attachartifactclassifiertype>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
 				<groupId>com.mycila</groupId>
 				<artifactId>license-maven-plugin</artifactId>
 				<version>3.0</version>
@@ -149,10 +127,8 @@
 		</plugins>
 	</build>
 	<modules>
-		<module>api</module>
-
-
-
-		<module>cmis-swagger</module>
+		<module>copper-swagger-api</module>
+		<module>copper-swagger</module>
+		<module>external</module>
 	</modules>
 </project>

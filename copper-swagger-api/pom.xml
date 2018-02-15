@@ -6,5 +6,5 @@
 		<artifactId>root</artifactId>
 		<version>${app.version}</version>
 	</parent>
-	<artifactId>api</artifactId>
+	<artifactId>copper-swagger-api</artifactId>
 </project>
