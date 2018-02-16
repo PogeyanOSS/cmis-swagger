@@ -39,7 +39,6 @@ import com.pogeyan.swagger.impl.factory.IObjectFacade;
 
 @WebListener
 public class SwaggerServletContextListener implements ServletContextListener {
-	private static final String CONFIG_INIT_PARAM = "org.apache.chemistry.opencmis.SWAGGER_SERVER_CONFIG_FILE";
 	private static final String CONFIG_FILENAME = "swaggerrepo.properties";
 	private static final String DEFAULT_SERVER_PROPERTY_CLASS_PATH = "src/main/resources/";
 	private static final String PROPERTY_SERVER_DESCRIPTION = "serverDescription";
@@ -67,26 +66,21 @@ public class SwaggerServletContextListener implements ServletContextListener {
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 
-		String configFilename = sce.getServletContext().getInitParameter(CONFIG_INIT_PARAM);
-		if (configFilename == null) {
-			configFilename = CONFIG_FILENAME;
-		}
 		try {
-			boolean factory = createServiceFactory(sce, configFilename);
+			boolean factory = createServiceFactory(sce);
 			if (!factory) {
 				throw new IllegalArgumentException("Swagger server property manager class not initilaized");
 			}
 		} catch (Exception e) {
 			LOG.error("Service factory couldn't be created: {}", e.toString(), e);
 		}
-
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent sce) {
 	}
 
-	private boolean createServiceFactory(ServletContextEvent sce, String fileName) throws FileNotFoundException {
+	private boolean createServiceFactory(ServletContextEvent sce) throws FileNotFoundException {
 		// load properties
 		InputStream stream = null;
 		try {
@@ -94,9 +88,9 @@ public class SwaggerServletContextListener implements ServletContextListener {
 			String propertyFileLocation = System.getenv("SWAGGER_SERVER_PROPERTY_FILE_LOCATION");
 			if (propertyFileLocation == null) {
 				propertyFileLocation = DEFAULT_SERVER_PROPERTY_CLASS_PATH;
-				filePath = SwaggerServletContextListener.class.getClassLoader().getResource(fileName).getPath();
+				filePath = SwaggerServletContextListener.class.getClassLoader().getResource(CONFIG_FILENAME).getPath();
 			} else {
-				filePath = propertyFileLocation + fileName;
+				filePath = propertyFileLocation;
 			}
 			stream = new FileInputStream(new File(filePath));
 		} catch (FileNotFoundException e) {
