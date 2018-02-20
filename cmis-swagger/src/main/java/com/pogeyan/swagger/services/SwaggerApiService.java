@@ -33,6 +33,7 @@ import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
+import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectFactory;
@@ -50,8 +51,11 @@ import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
+import org.apache.chemistry.opencmis.commons.enums.DateTimeFormat;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
+import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.apache.chemistry.opencmis.commons.impl.json.JSONArray;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,7 +109,7 @@ public class SwaggerApiService {
 			throws Exception {
 		CmisObject cmisObj = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObj = SwaggerHelpers.getType(session, typeId);
+		ObjectType typeObj = SwaggerHelpers.getType(typeId);
 		if (pathFragments.length > 2 && pathFragments[2] != null) {
 			String idName = SwaggerHelpers.getIdName(typeObj);
 			String customId = null;
@@ -428,9 +432,9 @@ public class SwaggerApiService {
 	 * @throws Exception
 	 */
 	public static Map<String, Object> invokeGetMethod(String repositoryId, String typeId, String id, String userName,
-			String password) throws Exception {
+			String password, String filter) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(session, typeId);
+		ObjectType typeobj = SwaggerHelpers.getType(typeId);
 
 		String idName = SwaggerHelpers.getIdName(typeobj);
 		String customId = null;
@@ -439,7 +443,12 @@ public class SwaggerApiService {
 		} else {
 			customId = id;
 		}
-		CmisObject obj = session.getObject(customId);
+		OperationContext context = new OperationContextImpl();
+		if (filter != null) {
+			context.setFilterString(filter);
+		}
+
+		CmisObject obj = session.getObject(customId, context);
 		LOG.info("TypeId:{},id:{},Object:{}", typeId, customId, obj);
 		if (obj != null && typeobj.getId().equals(obj.getType().getId())) {
 			Map<String, Object> propMap = compileProperties(obj, session);
@@ -469,7 +478,7 @@ public class SwaggerApiService {
 	public static boolean invokeDeleteMethod(String repositoryId, String typeId, String id, String userName,
 			String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(session, typeId);
+		ObjectType typeobj = SwaggerHelpers.getType(typeId);
 		String idName = SwaggerHelpers.getIdName(typeobj);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
@@ -514,7 +523,7 @@ public class SwaggerApiService {
 	public static Map<String, Object> invokePutMethod(String repositoryId, String typeId, String id,
 			Map<String, Object> input, String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(session, typeId);
+		ObjectType typeobj = SwaggerHelpers.getType(typeId);
 		String idName = SwaggerHelpers.getIdName(typeobj);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
@@ -580,7 +589,7 @@ public class SwaggerApiService {
 			String password, HttpServletResponse response) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(session, typeId);
+		ObjectType typeobj = SwaggerHelpers.getType(typeId);
 		String idName = SwaggerHelpers.getIdName(typeobj);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
@@ -773,18 +782,29 @@ public class SwaggerApiService {
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */
-	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String skipCount, String maxItems,
-			String userName, String password) throws Exception {
+	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String id, String skipCount,
+			String maxItems, String userName, String password, String filter, String orderBy) throws Exception {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObj = SwaggerHelpers.getType(session, type);
+		ObjectType typeObj = SwaggerHelpers.getType(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
 		}
+		if (filter != null) {
+			context.setFilterString(filter);
+		}
+		if (orderBy != null) {
+			context.setOrderBy(orderBy);
+		}
 		if (typeObj.isBaseType()) {
-			children = session.getRootFolder().getChildren(context);
+			if (id != null) {
+				Folder object = (Folder) session.getObject(id);
+				children = object.getChildren(context);
+			} else {
+				children = session.getRootFolder().getChildren(context);
+			}
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
@@ -799,5 +819,37 @@ public class SwaggerApiService {
 			json.put(child.getName(), propmap);
 		}
 		return json;
+	}
+
+	public static JSONObject invokeGetRelationshipMethod(String repositoryId, String typeId, String userName,
+			String password, String filter, String orderBy, boolean includeRelationship) throws Exception {
+		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		JSONObject json = new JSONObject();
+		if (!SwaggerHelpers.getTypeIsPresents()) {
+			SwaggerHelpers.getAllTypes(session);
+		}
+		JSONArray JsonArray = new JSONArray();
+		TypeDefinition typedef = SwaggerHelpers.getType(typeId);
+		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
+		if (includeRelationship) {
+			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationShipType(session, typeId);
+			JSONArray childJson = getRelationshipChild(session, relationType, JsonArray);
+			obj.put("relations", childJson);
+		}
+		return obj;
+
+	}
+
+	private static JSONArray getRelationshipChild(Session session, List<FileableCmisObject> relationType,
+			JSONArray JsonArray) throws Exception {
+		if (relationType.size() > 0) {
+			for (CmisObject types : relationType) {
+				JSONObject childObject = new JSONObject();
+				Map<String, Object> propmap = compileProperties(types, session);
+				childObject.put(types.getName(), propmap);
+				JsonArray.add(childObject);
+			}
+		}
+		return JsonArray;
 	}
 }

@@ -26,8 +26,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
+import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
+import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.api.Tree;
@@ -211,6 +215,13 @@ public class SwaggerHelpers {
 		LOG.debug("Types in repository:{}", typeCacheMap.toString());
 	}
 
+	public static Boolean getTypeIsPresents() {
+		if (typeCacheMap.size() > 0) {
+			return true;
+		}
+		return false;
+	}
+
 	/**
 	 * @param session
 	 *            the property session is used to get all details about that
@@ -220,8 +231,38 @@ public class SwaggerHelpers {
 	 *            on this id.
 	 * @return the Object Type
 	 */
-	public static ObjectType getType(Session session, String typeId) {
+	public static ObjectType getType(String typeId) {
 		return typeCacheMap.getIfPresent(typeId);
+	}
+
+	public static List<FileableCmisObject> getRelationShipType(Session session, String typeId) {
+		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis:relation_ext");
+		if (relationshipType != null) {
+			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
+			if (relationObject != null) {
+				List<Tree<FileableCmisObject>> relationDescendants = relationObject.getDescendants(-1);
+				if (relationDescendants.size() > 0) {
+					List<FileableCmisObject> relationchildObject = relationDescendants.stream()
+							.filter(t -> checkSourceDetails(t.getItem().getProperties(), typeId)).map(t -> t.getItem())
+							.collect(Collectors.toList());
+					return relationchildObject;
+				}
+			}
+		} else {
+			return null;
+		}
+		return null;
+	}
+
+	private static boolean checkSourceDetails(List<Property<?>> list, String typeId) {
+		for (Property<?> props : list) {
+			if (props.getId().equalsIgnoreCase("source_table")) {
+				if (props.getFirstValue().equals(typeId)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**

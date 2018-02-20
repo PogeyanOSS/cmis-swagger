@@ -127,8 +127,23 @@ public class ApiDocsServlet extends HttpServlet {
 			JSONObject obj = null;
 			ContentStream stream = null;
 			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1];
-			String id = pathFragments[2];
+			String typeId = null;
+			String id = null;
+			String query = request.getQueryString();
+
+			if (query != null) {
+				typeId = pathFragments[1];
+				if (query.contains("_metadata")) {
+					String includeRelationship = request.getParameter("includeRelationship");
+					if (includeRelationship != null) {
+						obj = SwaggerApiService.invokeGetRelationshipMethod(repositoryId, typeId, credentials[0],
+								credentials[1], null, null, Boolean.parseBoolean(includeRelationship));
+					}
+				}
+			} else {
+				typeId = pathFragments[1];
+				id = pathFragments[2];
+			}
 
 			if (id != null && !id.equals("media")) {
 				if (id.equals("type")) {
@@ -138,17 +153,18 @@ public class ApiDocsServlet extends HttpServlet {
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
 					String maxItems = request.getParameter("maxitems");
-					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, skipCount, maxItems,
-							credentials[0], credentials[1]);
+					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, null, skipCount, maxItems,
+							credentials[0], credentials[1], null, null);
 				} else {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
-							credentials[1]);
+							credentials[1], null);
 				}
 			}
 			if (pathFragments.length > 3 && pathFragments[3] != null && pathFragments[2].equals("media")) {
 				stream = SwaggerApiService.invokeDownloadMethod(repositoryId, typeId, pathFragments[3], credentials[0],
 						credentials[1], response);
 			}
+
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
 			} else if (obj != null) {
