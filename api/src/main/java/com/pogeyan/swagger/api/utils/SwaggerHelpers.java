@@ -235,7 +235,7 @@ public class SwaggerHelpers {
 		return typeCacheMap.getIfPresent(typeId);
 	}
 
-	public static List<FileableCmisObject> getRelationShipType(Session session, String typeId) {
+	public static List<FileableCmisObject> getRelationshipType(Session session, String typeId) {
 		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis:relation_ext");
 		if (relationshipType != null) {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
@@ -255,12 +255,11 @@ public class SwaggerHelpers {
 	}
 
 	private static boolean checkSourceDetails(List<Property<?>> list, String typeId) {
-		for (Property<?> props : list) {
-			if (props.getId().equalsIgnoreCase("source_table")) {
-				if (props.getFirstValue().equals(typeId)) {
-					return true;
-				}
-			}
+		Property<?> propertyDef = list.stream()
+				.filter(t -> t.getId().equals("source_table") && t.getFirstValue().equals(typeId)).findFirst()
+				.orElse(null);
+		if (propertyDef != null) {
+			return true;
 		}
 		return false;
 	}

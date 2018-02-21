@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLDecoder;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -434,6 +436,9 @@ public class SwaggerApiService {
 	public static Map<String, Object> invokeGetMethod(String repositoryId, String typeId, String id, String userName,
 			String password, String filter) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		if (!SwaggerHelpers.getTypeIsPresents()) {
+			SwaggerHelpers.getAllTypes(session);
+		}
 		ObjectType typeobj = SwaggerHelpers.getType(typeId);
 
 		String idName = SwaggerHelpers.getIdName(typeobj);
@@ -649,12 +654,22 @@ public class SwaggerApiService {
 	 *         server
 	 * @throws Exception
 	 */
-	public static TypeDefinition invokeGetTypeDefMethod(String repositoryId, String id, String userName,
-			String password) throws Exception {
+	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
+			String password, boolean includeRelationship) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		TypeDefinition typeDef = session.getTypeDefinition(id);
-		LOG.info("Get TypeDefinition:{}", typeDef);
-		return typeDef;
+		JSONObject json = new JSONObject();
+		if (!SwaggerHelpers.getTypeIsPresents()) {
+			SwaggerHelpers.getAllTypes(session);
+		}
+		JSONArray JsonArray = new JSONArray();
+		TypeDefinition typedef = SwaggerHelpers.getType(typeId);
+		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
+		if (includeRelationship) {
+			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
+			JSONArray childJson = getRelationshipChild(session, relationType, JsonArray);
+			obj.put("relations", childJson);
+		}
+		return obj;
 	}
 
 	/**
@@ -787,6 +802,9 @@ public class SwaggerApiService {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		if (!SwaggerHelpers.getTypeIsPresents()) {
+			SwaggerHelpers.getAllTypes(session);
+		}
 		ObjectType typeObj = SwaggerHelpers.getType(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
@@ -801,9 +819,21 @@ public class SwaggerApiService {
 		if (typeObj.isBaseType()) {
 			if (id != null) {
 				Folder object = (Folder) session.getObject(id);
+				json.put(object.getName(), object);
 				children = object.getChildren(context);
 			} else {
-				children = session.getRootFolder().getChildren(context);
+				if (!type.equalsIgnoreCase("cmis:folder") && !type.equalsIgnoreCase("cmis:document")
+						&& !type.equalsIgnoreCase("cmis:relationship") && !type.equalsIgnoreCase("cmis:item")
+						&& !type.equalsIgnoreCase("cmis:secondary")) {
+					Folder typeFolder = (Folder) session.getObjectByPath("/" + type);
+					id = typeFolder.getId();
+					if (id != null) {
+						json.put(typeFolder.getName(), typeFolder);
+						children = typeFolder.getChildren(context);
+					}
+				} else {
+					children = session.getRootFolder().getChildren(context);
+				}
 			}
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
@@ -814,30 +844,12 @@ public class SwaggerApiService {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		}
+
 		for (CmisObject child : children.getPage()) {
 			Map<String, Object> propmap = compileProperties(child, session);
 			json.put(child.getName(), propmap);
 		}
 		return json;
-	}
-
-	public static JSONObject invokeGetRelationshipMethod(String repositoryId, String typeId, String userName,
-			String password, String filter, String orderBy, boolean includeRelationship) throws Exception {
-		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		JSONObject json = new JSONObject();
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
-		JSONArray JsonArray = new JSONArray();
-		TypeDefinition typedef = SwaggerHelpers.getType(typeId);
-		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-		if (includeRelationship) {
-			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationShipType(session, typeId);
-			JSONArray childJson = getRelationshipChild(session, relationType, JsonArray);
-			obj.put("relations", childJson);
-		}
-		return obj;
-
 	}
 
 	private static JSONArray getRelationshipChild(Session session, List<FileableCmisObject> relationType,
