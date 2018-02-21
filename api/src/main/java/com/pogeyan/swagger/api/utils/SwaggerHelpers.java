@@ -248,10 +248,9 @@ public class SwaggerHelpers {
 					return relationchildObject;
 				}
 			}
-		} else {
-			return null;
 		}
 		return null;
+
 	}
 
 	private static boolean checkSourceDetails(List<Property<?>> list, String typeId) {
