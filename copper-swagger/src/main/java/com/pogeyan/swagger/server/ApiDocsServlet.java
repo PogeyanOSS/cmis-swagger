@@ -15,6 +15,7 @@
  */
 package com.pogeyan.swagger.server;
 
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -127,28 +128,46 @@ public class ApiDocsServlet extends HttpServlet {
 			JSONObject obj = null;
 			ContentStream stream = null;
 			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1];
+			String typeId = pathFragments[1].replace("_", ":");
 			String id = pathFragments[2];
 
+			String select = null;
+			String filter = null;
+			String order = null;
+			if (request.getQueryString() != null) {
+				select = request.getParameter("select").replace("_", ":");
+				filter = request.getParameter("filter").replace("_", ":");
+				order = request.getParameter("orderby").replace("_", ":");
+			}
+			if (select != null && filter != null) {
+				select = select + "," + URLDecoder.decode(filter, "UTF-8");
+			} else if (select == null && filter != null) {
+				select = "*," + filter;
+			}
 			if (id != null && !id.equals("media")) {
 				if (id.equals("type")) {
-					TypeDefinition typedef = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, pathFragments[3],
-							credentials[0], credentials[1]);
-					obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
+					String includeRelationship = request.getParameter("includeRelationship");
+					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, pathFragments[3], credentials[0],
+							credentials[1],
+							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
 					String maxItems = request.getParameter("maxitems");
-					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, skipCount, maxItems,
-							credentials[0], credentials[1]);
+					String parentId = request.getParameter("parentId");
+
+					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
+							skipCount, maxItems, credentials[0], credentials[1], select, order);
 				} else {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
-							credentials[1]);
+							credentials[1], select);
 				}
 			}
+
 			if (pathFragments.length > 3 && pathFragments[3] != null && pathFragments[2].equals("media")) {
 				stream = SwaggerApiService.invokeDownloadMethod(repositoryId, typeId, pathFragments[3], credentials[0],
 						credentials[1], response);
 			}
+
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
 			} else if (obj != null) {
