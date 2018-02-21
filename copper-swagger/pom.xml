@@ -2,13 +2,13 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.pogeyan.swagger</groupId>
+		<groupId>com.pogeyan.cmis</groupId>
 		<artifactId>root</artifactId>
 		<version>${app.version}</version>
 	</parent>
-	<artifactId>cmis-swagger</artifactId>
+	<artifactId>copper-swagger</artifactId>
 	<packaging>war</packaging>
-	<name>cmis-swagger</name>
+	<name>copper-swagger</name>
 	<properties>
 		<tomcat.version>8.0.21</tomcat.version>
 	</properties>
@@ -25,8 +25,8 @@
 			<artifactId>tomcat-jsp-api</artifactId> <version>${tomcat.version}</version> 
 			</dependency> -->
 		<dependency>
-			<groupId>com.pogeyan.swagger</groupId>
-			<artifactId>api</artifactId>
+			<groupId>com.pogeyan.cmis</groupId>
+			<artifactId>copper-swagger-api</artifactId>
 			<version>${app.version}</version>
 		</dependency>
 	</dependencies>

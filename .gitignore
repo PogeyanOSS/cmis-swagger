@@ -20,3 +20,4 @@ tomcat*/
 output*/
 build/cmis-server/files/*
 .vscode/
+external/
