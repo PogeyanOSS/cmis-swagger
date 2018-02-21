@@ -153,8 +153,10 @@ public class ApiDocsServlet extends HttpServlet {
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
 					String maxItems = request.getParameter("maxitems");
-					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, null, skipCount, maxItems,
-							credentials[0], credentials[1], select, order);
+					String parentId = request.getParameter("parentId");
+
+					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
+							skipCount, maxItems, credentials[0], credentials[1], select, order);
 				} else {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
 							credentials[1], select);
