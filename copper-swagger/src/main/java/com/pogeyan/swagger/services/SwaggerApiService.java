@@ -162,9 +162,17 @@ public class SwaggerApiService {
 								setContentStream);
 						LOG.info("objectType:{} properties:{}", targetObj.getId(), relationpropMap);
 						context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
-						ItemIterable<CmisObject> relationObject1 = ((Folder) session
-								.getObjectByPath("/cmis_ext:relationmd")).getChildren(context);
-						if (relationObject1.getTotalNumItems() > 0) {
+						ItemIterable<CmisObject> relationObject1 = ((Folder) session.getObjectByPath("/cmis_ext:relationmd"))
+								.getChildren(context);
+						for (CmisObject obj1 : relationObject1) {
+							Map<String, Object> map = new HashMap<String, Object>();
+							map.put("cmis:objectTypeId", "cmis_ext:relationship");
+							map.put("cmis:sourceId", propMap.get("cmis:objectId"));
+							map.put("cmis:targetId", relationpropMap.get("cmis:objectId"));
+							map.put("cmis:name", relationShipName + "_" + propMap.get("cmis:objectId") + "_"
+									+ relationpropMap.get("cmis:objectId"));
+							map.put("relation_name", relationShipName);
+							session.createRelationship(map);
 							someList1.add(relationpropMap);
 						}
 					}
@@ -714,11 +722,11 @@ public class SwaggerApiService {
 			JSONArray childJson = null;
 			if (relationType != null) {
 				childJson = getRelationshipChild(session, relationType, JsonArray);
+
 				obj.put("relations", childJson);
 			} else {
 				obj.put("relations", childJson);
 			}
-
 		}
 		return obj;
 	}
