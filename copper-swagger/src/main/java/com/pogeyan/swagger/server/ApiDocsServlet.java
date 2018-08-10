@@ -31,10 +31,13 @@ import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.DateTimeFormat;
 import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
+import org.apache.chemistry.opencmis.commons.impl.json.JSONArray;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
+import org.apache.chemistry.opencmis.commons.impl.json.parser.JSONParser;
 import org.apache.cxf.helpers.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +74,7 @@ public class ApiDocsServlet extends HttpServlet {
 			boolean skip = false;
 			Map<String, Object> input = null;
 			Part filePart = null;
+			String relation = null;
 			String method = request.getMethod();
 			String auth = request.getHeader("Authorization");
 			String credentials[] = HttpUtils.getCredentials(auth);
@@ -87,9 +91,28 @@ public class ApiDocsServlet extends HttpServlet {
 				} else if (pathFragments[1].equals("_metadata")) {
 					skip = true;
 				} else {
-					String jsonString = IOUtils.toString(request.getInputStream());
-					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
-					});
+					if (request.getQueryString() != null) {
+						boolean includeRelationship = Boolean.parseBoolean(request.getParameter("includeRelationship"));
+						if (includeRelationship) {
+							JSONParser parser = new JSONParser();
+							String jsonString = IOUtils.toString(request.getInputStream());
+							Object obj = parser.parse(jsonString);
+							JSONObject jsonObject = (JSONObject) obj;
+							JSONArray relations = (JSONArray) jsonObject.get("relations");
+							relation = relations.toString();
+							jsonObject.remove("relations");
+							input = jsonObject;
+						} else {
+							String jsonString = IOUtils.toString(request.getInputStream());
+							input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+							});
+						}
+					} else {
+						String jsonString = IOUtils.toString(request.getInputStream());
+						input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+						});
+					}
+
 				}
 			}
 			if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
@@ -102,7 +125,7 @@ public class ApiDocsServlet extends HttpServlet {
 				}
 			}
 			if (METHOD_POST.equals(method)) {
-				doPost(request, response, credentials, pathFragments, input, filePart);
+				doPost(request, response, credentials, pathFragments, input, filePart, relation);
 			} else if (METHOD_GET.equals(method)) {
 				doGet(request, response, credentials, pathFragments);
 			} else if (METHOD_PUT.equals(method)) {
@@ -128,16 +151,20 @@ public class ApiDocsServlet extends HttpServlet {
 			JSONObject obj = null;
 			ContentStream stream = null;
 			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1].replace("_", ":");
+			// String typeId = pathFragments[1].replace("_", ":");
+			String typeId = pathFragments[1];
 			String id = pathFragments[2];
 
 			String select = null;
 			String filter = null;
 			String order = null;
 			if (request.getQueryString() != null) {
-				select = request.getParameter("select").replace("_", ":");
-				filter = request.getParameter("filter").replace("_", ":");
-				order = request.getParameter("orderby").replace("_", ":");
+				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
+						: null;
+				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
+						: null;
+				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
+						: null;
 			}
 			if (select != null && filter != null) {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
@@ -147,8 +174,7 @@ public class ApiDocsServlet extends HttpServlet {
 			if (id != null && !id.equals("media")) {
 				if (id.equals("type")) {
 					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, pathFragments[3], credentials[0],
-							credentials[1],
+					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, typeId, credentials[0], credentials[1],
 							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
@@ -161,6 +187,7 @@ public class ApiDocsServlet extends HttpServlet {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
 							credentials[1], select);
 				}
+
 			}
 
 			if (pathFragments.length > 3 && pathFragments[3] != null && pathFragments[2].equals("media")) {
@@ -188,7 +215,7 @@ public class ApiDocsServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
-			String pathFragments[], Map<String, Object> input, Part filePart) throws Exception {
+			String pathFragments[], Map<String, Object> input, Part filePart, String relation) throws Exception {
 		try {
 			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			JSONObject obj = null;
@@ -206,7 +233,7 @@ public class ApiDocsServlet extends HttpServlet {
 						credentials[1]);
 			} else {
 				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, credentials[0],
-						credentials[1], pathFragments, filePart);
+						credentials[1], pathFragments, filePart, relation);
 			}
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
