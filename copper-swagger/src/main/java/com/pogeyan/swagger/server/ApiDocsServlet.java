@@ -159,12 +159,9 @@ public class ApiDocsServlet extends HttpServlet {
 			String filter = null;
 			String order = null;
 			if (request.getQueryString() != null) {
-				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
-						: null;
-				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
-						: null;
-				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
-						: null;
+				select = request.getParameter("select").replace("_", ":");
+				filter = request.getParameter("filter").replace("_", ":");
+				order = request.getParameter("orderby").replace("_", ":");
 			}
 			if (select != null && filter != null) {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
@@ -217,7 +214,7 @@ public class ApiDocsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String pathFragments[], Map<String, Object> input, Part filePart, String relation) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {}, repositoryId: {}, type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			JSONObject obj = null;
 			Acl acl = null;
 			Map<String, Object> propMap = null;

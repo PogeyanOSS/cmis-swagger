@@ -138,42 +138,42 @@ public class SwaggerApiService {
 				CmisObject newObj = doc.updateProperties(updateProperties);
 			}
 			Map<String, Object> propMap = compileProperties(doc, session);
-			LOG.info("customId:{} properties:{}", customId, propMap);
+			LOG.info("customId: {}, properties: {}", customId, propMap);
 			return propMap;
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
 			// baseType
 			if (typeObj != null) {
 				Map<String, Object> propMap = createObject(input, typeObj, session, parentId, setContentStream);
-				LOG.info("objectType:{} properties:{}", typeObj.getId(), propMap);
+				LOG.info("objectType: {}, properties: {}", typeObj.getId(), propMap);
 				if (relation != null) {
 					JSONParser parser = new JSONParser();
 					Object obj = parser.parse(relation);
 					JSONArray jsonObject = (JSONArray) obj;
-					LOG.info("Relation:{} properties:{}", relation, obj);
+					LOG.info("relation: {}, properties: {}", relation, obj);
 					for (Object ob : jsonObject) {
 						Map<String, Object> relationObject = (Map<String, Object>) ob;
-						String targetTypeID = relationObject.get("cmis:objectTypeId").toString();
-						String SourceTypeID = propMap.get("cmis:objectTypeId").toString();
-						String relationShipName = SourceTypeID + "_" + targetTypeID;
-						LOG.info("RelationShipName:{}", relationShipName);
-						ObjectType targetObj = SwaggerHelpers.getType(targetTypeID);
-						Map<String, Object> relationpropMap = createObject(relationObject, targetObj, session, parentId,
+						String targetTypeId = relationObject.get("cmis:objectTypeId").toString();
+						String sourceTypeId = propMap.get("cmis:objectTypeId").toString();
+						String relationShipName = sourceTypeId + "_" + targetTypeId;
+						LOG.info("relationShipName: {}", relationShipName);
+						ObjectType targetObj = SwaggerHelpers.getType(targetTypeId);
+						Map<String, Object> relationPropMap = createObject(relationObject, targetObj, session, parentId,
 								setContentStream);
-						LOG.info("objectType:{} properties:{}", targetObj.getId(), relationpropMap);
+						LOG.info("objectType: {}, properties: {}", targetObj.getId(), relationPropMap);
 						context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
-						ItemIterable<CmisObject> relationObject1 = ((Folder) session.getObjectByPath("/cmis_ext:relationmd"))
-								.getChildren(context);
+						ItemIterable<CmisObject> relationObject1 = ((Folder) session
+								.getObjectByPath("/cmis_ext:relationmd")).getChildren(context);
 						for (CmisObject obj1 : relationObject1) {
 							Map<String, Object> map = new HashMap<String, Object>();
 							map.put("cmis:objectTypeId", "cmis_ext:relationship");
 							map.put("cmis:sourceId", propMap.get("cmis:objectId"));
-							map.put("cmis:targetId", relationpropMap.get("cmis:objectId"));
+							map.put("cmis:targetId", relationPropMap.get("cmis:objectId"));
 							map.put("cmis:name", relationShipName + "_" + propMap.get("cmis:objectId") + "_"
-									+ relationpropMap.get("cmis:objectId"));
+									+ relationPropMap.get("cmis:objectId"));
 							map.put("relation_name", relationShipName);
 							session.createRelationship(map);
-							someList1.add(relationpropMap);
+							someList1.add(relationPropMap);
 						}
 					}
 					propMap.put("relations", someList1);
@@ -181,6 +181,9 @@ public class SwaggerApiService {
 				} else {
 					return propMap;
 				}
+			}
+			if (typeObj == null) {
+				LOG.error("objectType: {}, repositoryId: {}", typeObj, repositoryId);
 			}
 		}
 		return null;
