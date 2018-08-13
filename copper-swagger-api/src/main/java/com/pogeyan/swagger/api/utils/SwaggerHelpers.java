@@ -246,6 +246,8 @@ public class SwaggerHelpers {
 						.collect(Collectors.toList());
 				return relationchildObject;
 			}
+		} else {
+			LOG.error("relationshipType doesnot exists: {}", relationshipType);
 		}
 		return null;
 

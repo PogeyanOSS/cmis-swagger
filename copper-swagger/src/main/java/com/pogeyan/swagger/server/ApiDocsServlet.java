@@ -131,7 +131,6 @@ public class ApiDocsServlet extends HttpServlet {
 			// String typeId = pathFragments[1].replace("_", ":");
 			String typeId = pathFragments[1];
 			String id = pathFragments[2];
-
 			String select = null;
 			String filter = null;
 			String order = null;

@@ -8,6 +8,7 @@
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  *    Unless required by applicable law or agreed to in writing, software
+ *    
  *    distributed under the License is distributed on an "AS IS" BASIS,
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
@@ -669,7 +670,7 @@ public class SwaggerApiService {
 		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
-			JSONArray childJson = null;
+
 		}
 		return obj;
 	}
@@ -850,62 +851,43 @@ public class SwaggerApiService {
 
 		}
 
-		for (CmisObject child : children.getPage()) {
-			Map<String, Object> propmap = compileProperties(child, session);
+		for (CmisObject Child : children.getPage()) {
+			Map<String, Object> propmap = compileProperties(Child, session);
 			if (includeRelationship) {
+				LOG.info("Fetching RelationshipType for type: {}, for repoId: {}", type, repositoryId);
 				List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, type);
-				JSONArray childArray = new JSONArray();
-				for (FileableCmisObject ob : relationType) {
-					Object typeObj1 = ob.getPropertyValue("target_table");
-					ItemIterable<CmisObject> children1 = ((Folder) session.getObjectByPath("/" + typeObj1))
+				JSONArray ChildArray = new JSONArray();
+				for (FileableCmisObject object : relationType) {
+					Object typeObject1 = object.getPropertyValue("target_table");
+					ItemIterable<CmisObject> Children1 = ((Folder) session.getObjectByPath("/" + typeObject1))
 							.getChildren(context);
-					for (CmisObject child1 : children1.getPage()) {
-						JSONObject childjson = new JSONObject();
-						OperationContext ctx = new OperationContextImpl();
-						Map<String, Object> propmap1 = compileProperties(child1, session);
-						String objRel = child.getId() + "_" + child1.getId();
-						ctx.setFilterString("cmis:name,cmis:name eq " + objRel);
+					for (CmisObject Child1 : Children1.getPage()) {
+						JSONObject Childjson = new JSONObject();
+						OperationContext Context = new OperationContextImpl();
+						Map<String, Object> Propmap1 = compileProperties(Child1, session);
+						String objectRelation = Child.getId() + "_" + Child1.getId();
+						Context.setFilterString("cmis:name,cmis:name eq " + objectRelation);
 						ItemIterable<CmisObject> relationObject1 = ((Folder) session
-								.getObjectByPath("/cmis_ext:relationship")).getChildren(ctx);
+								.getObjectByPath("/cmis_ext:relationship")).getChildren(Context);
 						for (CmisObject a : relationObject1) {
-							childjson.put(child1.getName(), propmap1);
-							childArray.add(childjson);
-							LOG.info("Adding relation object between sourceobject:{},targetobject:{}", child.getId(),
-									child1.getId());
+							Childjson.put(Child1.getName(), Propmap1);
+							ChildArray.add(Childjson);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Reading relation object between sourceobject: {}, targetobject: {}",
+										Child.getId(), Child1.getId());
+							}
 
 						}
 
 					}
 				}
 
-				propmap.put("relation", childArray);
+				propmap.put("relation", ChildArray);
 			}
-			json.put(child.getName(), propmap);
+			json.put(Child.getName(), propmap);
 		}
 
 		return json;
-	}
-
-	private static Object JsonArray() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static CmisObject Childjson() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private static CmisObject newJSONArray() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	// }
-
-	private static CmisObjectProperties getRelationshipType() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	private static JSONArray getRelationshipChild(Session session, List<FileableCmisObject> relationType,
