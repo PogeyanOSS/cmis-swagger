@@ -128,16 +128,19 @@ public class ApiDocsServlet extends HttpServlet {
 			JSONObject obj = null;
 			ContentStream stream = null;
 			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1].replace("_", ":");
+			// String typeId = pathFragments[1].replace("_", ":");
+			String typeId = pathFragments[1];
 			String id = pathFragments[2];
-
 			String select = null;
 			String filter = null;
 			String order = null;
 			if (request.getQueryString() != null) {
-				select = request.getParameter("select").replace("_", ":");
-				filter = request.getParameter("filter").replace("_", ":");
-				order = request.getParameter("orderby").replace("_", ":");
+				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
+						: null;
+				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
+						: null;
+				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
+						: null;
 			}
 			if (select != null && filter != null) {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
@@ -154,9 +157,10 @@ public class ApiDocsServlet extends HttpServlet {
 					String skipCount = request.getParameter("skipcount");
 					String maxItems = request.getParameter("maxitems");
 					String parentId = request.getParameter("parentId");
-
+					String includeRelationship = request.getParameter("includeRelationship");
 					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
-							skipCount, maxItems, credentials[0], credentials[1], select, order);
+							skipCount, maxItems, credentials[0], credentials[1], select, order,
+							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
 							credentials[1], select);
