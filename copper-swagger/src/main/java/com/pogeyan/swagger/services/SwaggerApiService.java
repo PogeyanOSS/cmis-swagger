@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.CmisObjectProperties;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
@@ -42,6 +43,7 @@ import org.apache.chemistry.opencmis.client.api.ObjectFactory;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
+import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.util.TypeUtils;
@@ -49,6 +51,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.Ace;
 import org.apache.chemistry.opencmis.commons.data.Acl;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.data.PropertyData;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
@@ -666,8 +669,7 @@ public class SwaggerApiService {
 		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
-			JSONArray childJson = getRelationshipChild(session, relationType, JsonArray);
-			obj.put("relations", childJson);
+			JSONArray childJson = null;
 		}
 		return obj;
 	}
@@ -798,9 +800,11 @@ public class SwaggerApiService {
 	 * @throws Exception
 	 */
 	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String id, String skipCount,
-			String maxItems, String userName, String password, String filter, String orderBy) throws Exception {
+			String maxItems, String userName, String password, String filter, String orderBy,
+			boolean includeRelationship) throws Exception {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
+
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
@@ -823,7 +827,7 @@ public class SwaggerApiService {
 				children = object.getChildren(context);
 			} else {
 				if (!type.equalsIgnoreCase("cmis:folder") && !type.equalsIgnoreCase("cmis:document")
-						&& !type.equalsIgnoreCase("cmis:relationship") && !type.equalsIgnoreCase("cmis:item")
+						&& !type.equalsIgnoreCase("cmis_ext:relation") && !type.equalsIgnoreCase("cmis:item")
 						&& !type.equalsIgnoreCase("cmis:secondary")) {
 					Folder typeFolder = (Folder) session.getObjectByPath("/" + type);
 					id = typeFolder.getId();
@@ -843,13 +847,65 @@ public class SwaggerApiService {
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
+
 		}
 
 		for (CmisObject child : children.getPage()) {
 			Map<String, Object> propmap = compileProperties(child, session);
+			if (includeRelationship) {
+				List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, type);
+				JSONArray childArray = new JSONArray();
+				for (FileableCmisObject ob : relationType) {
+					Object typeObj1 = ob.getPropertyValue("target_table");
+					ItemIterable<CmisObject> children1 = ((Folder) session.getObjectByPath("/" + typeObj1))
+							.getChildren(context);
+					for (CmisObject child1 : children1.getPage()) {
+						JSONObject childjson = new JSONObject();
+						OperationContext ctx = new OperationContextImpl();
+						Map<String, Object> propmap1 = compileProperties(child1, session);
+						String objRel = child.getId() + "_" + child1.getId();
+						ctx.setFilterString("cmis:name,cmis:name eq " + objRel);
+						ItemIterable<CmisObject> relationObject1 = ((Folder) session
+								.getObjectByPath("/cmis_ext:relationship")).getChildren(ctx);
+						for (CmisObject a : relationObject1) {
+							childjson.put(child1.getName(), propmap1);
+							childArray.add(childjson);
+							LOG.info("Adding relation object between sourceobject:{},targetobject:{}", child.getId(),
+									child1.getId());
+
+						}
+
+					}
+				}
+
+				propmap.put("relation", childArray);
+			}
 			json.put(child.getName(), propmap);
 		}
+
 		return json;
+	}
+
+	private static Object JsonArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static CmisObject Childjson() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private static CmisObject newJSONArray() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	// }
+
+	private static CmisObjectProperties getRelationshipType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	private static JSONArray getRelationshipChild(Session session, List<FileableCmisObject> relationType,
