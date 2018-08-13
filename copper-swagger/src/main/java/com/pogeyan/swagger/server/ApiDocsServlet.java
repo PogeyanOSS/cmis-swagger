@@ -214,7 +214,8 @@ public class ApiDocsServlet extends HttpServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String pathFragments[], Map<String, Object> input, Part filePart, String relation) throws Exception {
 		try {
-			LOG.info("method: {}, repositoryId: {}, type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {}, repositoryId: {}, type: {}, relation: {}", request.getMethod(), pathFragments[0],
+					pathFragments[1], relation);
 			JSONObject obj = null;
 			Acl acl = null;
 			Map<String, Object> propMap = null;

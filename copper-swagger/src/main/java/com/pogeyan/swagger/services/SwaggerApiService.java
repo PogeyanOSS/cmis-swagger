@@ -116,7 +116,7 @@ public class SwaggerApiService {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeObj = SwaggerHelpers.getType(typeId);
 		OperationContext context = new OperationContextImpl();
-		List<Map<String, Object>> someList1 = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> relationObjectArray = new ArrayList<Map<String, Object>>();
 		if (typeObj == null) {
 			SwaggerHelpers.getAllTypes(session);
 			typeObj = SwaggerHelpers.getType(typeId);
@@ -162,9 +162,9 @@ public class SwaggerApiService {
 								setContentStream);
 						LOG.info("objectType: {}, properties: {}", targetObj.getId(), relationPropMap);
 						context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
-						ItemIterable<CmisObject> relationObject1 = ((Folder) session
+						ItemIterable<CmisObject> relationTargetObject = ((Folder) session
 								.getObjectByPath("/cmis_ext:relationmd")).getChildren(context);
-						for (CmisObject obj1 : relationObject1) {
+						for (CmisObject targetObject : relationTargetObject) {
 							Map<String, Object> map = new HashMap<String, Object>();
 							map.put("cmis:objectTypeId", "cmis_ext:relationship");
 							map.put("cmis:sourceId", propMap.get("cmis:objectId"));
@@ -173,10 +173,10 @@ public class SwaggerApiService {
 									+ relationPropMap.get("cmis:objectId"));
 							map.put("relation_name", relationShipName);
 							session.createRelationship(map);
-							someList1.add(relationPropMap);
+							relationObjectArray.add(relationPropMap);
 						}
 					}
-					propMap.put("relations", someList1);
+					propMap.put("relations", relationObjectArray);
 					return propMap;
 				} else {
 					return propMap;
