@@ -234,7 +234,7 @@ public class SwaggerHelpers {
 	}
 
 	public static List<FileableCmisObject> getRelationshipType(Session session, String typeId) {
-		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis:relation_ext");
+		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
 		if (relationshipType != null) {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {
