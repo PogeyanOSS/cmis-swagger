@@ -8,6 +8,7 @@
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  *    Unless required by applicable law or agreed to in writing, software
+ *    
  *    distributed under the License is distributed on an "AS IS" BASIS,
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URLDecoder;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -666,8 +665,7 @@ public class SwaggerApiService {
 		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
-			JSONArray childJson = getRelationshipChild(session, relationType, JsonArray);
-			obj.put("relations", childJson);
+
 		}
 		return obj;
 	}
@@ -798,9 +796,11 @@ public class SwaggerApiService {
 	 * @throws Exception
 	 */
 	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String id, String skipCount,
-			String maxItems, String userName, String password, String filter, String orderBy) throws Exception {
+			String maxItems, String userName, String password, String filter, String orderBy,
+			boolean includeRelationship) throws Exception {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
+
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
@@ -823,7 +823,7 @@ public class SwaggerApiService {
 				children = object.getChildren(context);
 			} else {
 				if (!type.equalsIgnoreCase("cmis:folder") && !type.equalsIgnoreCase("cmis:document")
-						&& !type.equalsIgnoreCase("cmis:relationship") && !type.equalsIgnoreCase("cmis:item")
+						&& !type.equalsIgnoreCase("cmis_ext:relation") && !type.equalsIgnoreCase("cmis:item")
 						&& !type.equalsIgnoreCase("cmis:secondary")) {
 					Folder typeFolder = (Folder) session.getObjectByPath("/" + type);
 					id = typeFolder.getId();
@@ -843,12 +843,45 @@ public class SwaggerApiService {
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
+
 		}
 
 		for (CmisObject child : children.getPage()) {
-			Map<String, Object> propmap = compileProperties(child, session);
-			json.put(child.getName(), propmap);
+			Map<String, Object> RealtionPropMap = compileProperties(child, session);
+			LOG.info("Fetching RelationshipType for type: {}, for repoId: {}", type, repositoryId);
+			if (includeRelationship) {
+				List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, type);
+				JSONArray relationChildArray = new JSONArray();
+				for (FileableCmisObject object : relationType) {
+					Object targetObject = object.getPropertyValue("target_table");
+					ItemIterable<CmisObject> targetRelationChildren = ((Folder) session
+							.getObjectByPath("/" + targetObject)).getChildren(context);
+					for (CmisObject childRelationObject : targetRelationChildren.getPage()) {
+						JSONObject Childjson = new JSONObject();
+						OperationContext Ctx = new OperationContextImpl();
+						Map<String, Object> relationPropMap = compileProperties(childRelationObject, session);
+						Ctx.setFilterString("cmis:sourceId,cmis:targetId,cmis:sourceId eq " + child.getId()
+								+ " and cmis:targetId eq " + childRelationObject.getId());
+						ItemIterable<CmisObject> childRealtionChildren = ((Folder) session
+								.getObjectByPath("/cmis_ext:relationship")).getChildren(Ctx);
+						for (CmisObject obj : childRealtionChildren) {
+							Childjson.put(childRelationObject.getName(), relationPropMap);
+							relationChildArray.add(Childjson);
+							if (LOG.isDebugEnabled()) {
+								LOG.debug("Reading relation object between sourceobject: {}, targetobject: {}",
+										child.getId(), childRelationObject.getId());
+							}
+
+						}
+
+					}
+				}
+
+				RealtionPropMap.put("relation", relationChildArray);
+			}
+			json.put(child.getName(), RealtionPropMap);
 		}
+
 		return json;
 	}
 
