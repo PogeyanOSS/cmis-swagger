@@ -722,7 +722,6 @@ public class SwaggerApiService {
 			JSONArray childJson = null;
 			if (relationType != null) {
 				childJson = getRelationshipChild(session, relationType, JsonArray);
-
 				obj.put("relations", childJson);
 			} else {
 				obj.put("relations", childJson);
@@ -916,8 +915,12 @@ public class SwaggerApiService {
 		if (relationType.size() > 0) {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
-				Map<String, Object> propmap = compileProperties(types, session);
-				childObject.put(types.getName(), propmap);
+				Map<String, Object> propMap = compileProperties(types, session);
+				childObject.put(types.getName(), propMap);
+				String target_table = (String) propMap.get("target_table");
+				ObjectType targetObject = session.getTypeDefinition(target_table);
+				LOG.info("targetObject: {}",targetObject.getId());
+				propMap.put("target_relation", JSONConverter.convert(targetObject, DateTimeFormat.SIMPLE));
 				JsonArray.add(childObject);
 			}
 		}
