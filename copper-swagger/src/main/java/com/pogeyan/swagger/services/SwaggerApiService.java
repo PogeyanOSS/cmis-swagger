@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URLDecoder;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -857,8 +855,12 @@ public class SwaggerApiService {
 		if (relationType.size() > 0) {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
-				Map<String, Object> propmap = compileProperties(types, session);
-				childObject.put(types.getName(), propmap);
+				Map<String, Object> propMap = compileProperties(types, session);
+				childObject.put(types.getName(), propMap);
+				String target_table = (String) propMap.get("target_table");
+				ObjectType targetObject = session.getTypeDefinition(target_table);
+				LOG.info("targetObject: {}", targetObject.getId());
+				propMap.put("target_relation", JSONConverter.convert(targetObject, DateTimeFormat.SIMPLE));
 				JsonArray.add(childObject);
 			}
 		}
