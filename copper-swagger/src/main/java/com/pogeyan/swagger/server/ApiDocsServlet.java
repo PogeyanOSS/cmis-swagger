@@ -135,9 +135,12 @@ public class ApiDocsServlet extends HttpServlet {
 			String filter = null;
 			String order = null;
 			if (request.getQueryString() != null) {
-				select = request.getParameter("select").replace("_", ":");
-				filter = request.getParameter("filter").replace("_", ":");
-				order = request.getParameter("orderby").replace("_", ":");
+				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
+						: null;
+				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
+						: null;
+				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
+						: null;
 			}
 			if (select != null && filter != null) {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
@@ -147,8 +150,8 @@ public class ApiDocsServlet extends HttpServlet {
 			if (id != null && !id.equals("media")) {
 				if (id.equals("type")) {
 					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, pathFragments[3], credentials[0],
-							credentials[1],
+					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId,
+							pathFragments.length > 3 ? pathFragments[3] : typeId, credentials[0], credentials[1],
 							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
