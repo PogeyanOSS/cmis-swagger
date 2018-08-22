@@ -78,6 +78,7 @@ import com.pogeyan.swagger.pojos.ErrorResponse;
 @SuppressWarnings("unused")
 public class SwaggerApiService {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerApiService.class);
+	private static boolean object;
 
 	/**
 	 * @param repositoryId
@@ -105,15 +106,13 @@ public class SwaggerApiService {
 	 * @return response object
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
+
 	public static Map<String, Object> invokePostMethod(String repositoryId, String typeId, String parentId,
 			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart,
 			String relation) throws Exception {
 		CmisObject cmisObj = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeObj = SwaggerHelpers.getType(typeId);
-		OperationContext context = new OperationContextImpl();
-		List<Map<String, Object>> relationObjectArray = new ArrayList<Map<String, Object>>();
 		if (typeObj == null) {
 			SwaggerHelpers.getAllTypes(session);
 			typeObj = SwaggerHelpers.getType(typeId);
@@ -136,7 +135,6 @@ public class SwaggerApiService {
 			}
 			Map<String, Object> propMap = compileProperties(doc, session);
 			LOG.info("customId: {}, properties: {}", customId, propMap);
-			return propMap;
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
 			// baseType
@@ -144,36 +142,7 @@ public class SwaggerApiService {
 				Map<String, Object> propMap = createObject(input, typeObj, session, parentId, setContentStream);
 				LOG.info("objectType: {}, properties: {}", typeObj.getId(), propMap);
 				if (relation != null) {
-					JSONParser parser = new JSONParser();
-					Object obj = parser.parse(relation);
-					JSONArray jsonObject = (JSONArray) obj;
-					LOG.info("relation: {}, properties: {}", relation, obj);
-					for (Object ob : jsonObject) {
-						Map<String, Object> relationObject = (Map<String, Object>) ob;
-						String targetTypeId = relationObject.get("cmis:objectTypeId").toString();
-						String sourceTypeId = propMap.get("cmis:objectTypeId").toString();
-						String relationShipName = sourceTypeId + "_" + targetTypeId;
-						LOG.info("relationShipName: {}", relationShipName);
-						ObjectType targetObj = SwaggerHelpers.getType(targetTypeId);
-						Map<String, Object> relationPropMap = createObject(relationObject, targetObj, session, parentId,
-								setContentStream);
-						LOG.info("objectType: {}, properties: {}", targetObj.getId(), relationPropMap);
-						context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
-						ItemIterable<CmisObject> relationTargetObject = ((Folder) session
-								.getObjectByPath("/cmis_ext:relationmd")).getChildren(context);
-						for (CmisObject targetObject : relationTargetObject) {
-							Map<String, Object> map = new HashMap<String, Object>();
-							map.put("cmis:objectTypeId", "cmis_ext:relationship");
-							map.put("cmis:sourceId", propMap.get("cmis:objectId"));
-							map.put("cmis:targetId", relationPropMap.get("cmis:objectId"));
-							map.put("cmis:name", relationShipName + "_" + propMap.get("cmis:objectId") + "_"
-									+ relationPropMap.get("cmis:objectId"));
-							map.put("relation_name", relationShipName);
-							session.createRelationship(map);
-							relationObjectArray.add(relationPropMap);
-						}
-					}
-					propMap.put("relations", relationObjectArray);
+					relationShipObject(propMap, repositoryId, parentId, userName, password, filePart, relation);
 					return propMap;
 				} else {
 					return propMap;
@@ -184,6 +153,61 @@ public class SwaggerApiService {
 			}
 		}
 		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> relationShipObject(Map<String, Object> propMap, String repositoryId,
+			String parentId, String userName, String password, Part filePart, String relation) throws Exception {
+		JSONParser parser = new JSONParser();
+		Object obj = parser.parse(relation);
+		JSONArray jsonObject = (JSONArray) obj;
+		OperationContext context = new OperationContextImpl();
+		ContentStream setContentStream = getContentStream(filePart);
+		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		List<Map<String, Object>> relationObjectArray = new ArrayList<Map<String, Object>>();
+		LOG.info("relationShipObject relation: {}, propMap: {}", relation, propMap);
+		for (Object relObject : jsonObject) {
+			Map<String, Object> relationObject = (Map<String, Object>) relObject;
+			JSONArray innerRelObj = (JSONArray) relationObject.remove("relations");
+			String targetTypeId = relationObject.get("cmis:objectTypeId").toString();
+			String sourceTypeId = propMap.get("cmis:objectTypeId").toString();
+			String relationShipName = sourceTypeId + "_" + targetTypeId;
+			ObjectType targetObj = SwaggerHelpers.getType(targetTypeId);
+			Map<String, Object> relationPropMap = createObject(relationObject, targetObj, session, parentId,
+					setContentStream);
+			context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
+			ItemIterable<CmisObject> relationTargetObject = ((Folder) session.getObjectByPath("/cmis_ext:relationmd"))
+					.getChildren(context);
+			propMap = createRelationShip(relationTargetObject, propMap, relationPropMap, relationShipName, session,
+					innerRelObj, repositoryId, parentId, userName, password, filePart, relationObjectArray);
+		}
+		return propMap;
+	}
+
+	private static Map<String, Object> createRelationShip(ItemIterable<CmisObject> relationTargetObject,
+			Map<String, Object> propMap, Map<String, Object> relationPropMap, String relationShipName, Session session,
+			JSONArray innerRelObj, String repositoryId, String parentId, String userName, String password,
+			Part filePart, List<Map<String, Object>> relationObjectArray) throws Exception {
+		LOG.info("createRelationShip innerRelObj: {}, relationShipName: {}, relationObjectArray: {}", innerRelObj,
+				relationShipName, relationObjectArray);
+		for (CmisObject targetObject : relationTargetObject) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("cmis:objectTypeId", "cmis_ext:relationship");
+			map.put("cmis:sourceId", propMap.get("cmis:objectId"));
+			map.put("cmis:targetId", relationPropMap.get("cmis:objectId"));
+			map.put("cmis:name",
+					relationShipName + "_" + propMap.get("cmis:objectId") + "_" + relationPropMap.get("cmis:objectId"));
+			map.put("relation_name", relationShipName);
+			session.createRelationship(map);
+			relationObjectArray.add(relationPropMap);
+			if (innerRelObj != null) {
+				propMap.put("relations", relationObjectArray);
+				relationShipObject(relationPropMap, repositoryId, parentId, userName, password, filePart,
+						innerRelObj.toString());
+			}
+			propMap.put("relations", relationObjectArray);
+		}
+		return propMap;
 	}
 
 	private static Map<String, Object> createObject(Map<String, Object> input, ObjectType typeObj, Session session,
