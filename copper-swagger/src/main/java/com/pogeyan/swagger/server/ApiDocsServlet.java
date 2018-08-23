@@ -150,8 +150,8 @@ public class ApiDocsServlet extends HttpServlet {
 			if (id != null && !id.equals("media")) {
 				if (id.equals("type")) {
 					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, pathFragments[3], credentials[0],
-							credentials[1],
+					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId,
+							pathFragments.length > 3 ? pathFragments[3] : typeId, credentials[0], credentials[1],
 							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else if (id.equals("getAll")) {
 					String skipCount = request.getParameter("skipcount");
