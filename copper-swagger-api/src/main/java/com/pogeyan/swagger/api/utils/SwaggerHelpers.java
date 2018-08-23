@@ -248,7 +248,6 @@ public class SwaggerHelpers {
 		return typeCacheMap.getIfPresent(typeId);
 	}
 
-
 	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
 		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
 		if (relationshipType != null) {
