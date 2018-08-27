@@ -139,7 +139,8 @@ public class SwaggerApiService {
 			// baseType
 			if (typeObj != null) {
 				Map<String, Object> propMap = createObject(input, typeObj, session, parentId, setContentStream);
-				LOG.info("objectType: {}, properties: {}", typeObj.getId(), propMap);
+				LOG.info("className: {}, methodName: {}, objectType: {}, repoId: {}, properties: {}",
+						"SwaggerApiService", "invokePostMethod", typeObj.getId(), propMap);
 				if (relation != null) {
 					relationShipObject(propMap, repositoryId, parentId, userName, password, filePart, relation);
 					return propMap;
@@ -148,7 +149,8 @@ public class SwaggerApiService {
 				}
 			}
 			if (typeObj == null) {
-				LOG.error("objectType: {}, repositoryId: {}", typeObj, repositoryId);
+				LOG.error("className: {}, methodName: {}, repoId: {}, objectType: {}", "SwaggerApiService",
+						"invokePostMethod", typeObj);
 			}
 		}
 		return null;
@@ -164,7 +166,8 @@ public class SwaggerApiService {
 		ContentStream setContentStream = getContentStream(filePart);
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		List<Map<String, Object>> relationObjectArray = new ArrayList<Map<String, Object>>();
-		LOG.info("relationShipObject relation: {}, propMap: {}", relation, propMap);
+		LOG.info("className: {},  methodName: {},  repoId: {}, propMap: {}, relation: {}", "SwaggerApiService",
+				"relationShipObject", repositoryId, propMap, relation);
 		for (Object relObject : jsonObject) {
 			Map<String, Object> relationObject = (Map<String, Object>) relObject;
 			JSONArray innerRelObj = (JSONArray) relationObject.remove("relations");
@@ -187,8 +190,10 @@ public class SwaggerApiService {
 			Map<String, Object> propMap, Map<String, Object> relationPropMap, String relationShipName, Session session,
 			JSONArray innerRelObj, String repositoryId, String parentId, String userName, String password,
 			Part filePart, List<Map<String, Object>> relationObjectArray) throws Exception {
-		LOG.info("createRelationShip innerRelObj: {}, relationShipName: {}, relationObjectArray: {}", innerRelObj,
-				relationShipName, relationObjectArray);
+		LOG.info(
+				"className: {}, methodName: {}, repoId: {}, innerRelObj: {}, relationShipName: {}, relationObjectArray: {}",
+				"SwaggerApiService", "createRelationShip", repositoryId, innerRelObj, relationShipName,
+				relationObjectArray);
 		for (CmisObject targetObject : relationTargetObject) {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("cmis:objectTypeId", "cmis_ext:relationship");
@@ -218,11 +223,6 @@ public class SwaggerApiService {
 		CmisObject cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
 		propMap = compileProperties(cmisObj, session);
 		return propMap;
-	}
-
-	private static Map<String, Object> compileProperties(Object obj, Session session) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@SuppressWarnings("unchecked")
