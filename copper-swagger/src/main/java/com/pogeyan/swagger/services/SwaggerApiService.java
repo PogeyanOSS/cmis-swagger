@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.net.URLDecoder;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -59,6 +57,7 @@ import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONArray;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
+import org.apache.chemistry.opencmis.commons.impl.json.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,29 +83,39 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param parentId
-	 *            the property parentId is used to get the object-type�s immediate
-	 *            parent type.
+	 *            the property parentId is used to get the object-type�s
+	 *            immediate parent type.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param pathFragments
-	 *            the property pathFragments is used to get request path parameters.
+	 *            the property pathFragments is used to get request path
+	 *            parameters.
 	 * @param filePart
-	 *            the property filePart is used to get file details from request.
+	 *            the property filePart is used to get file details from
+	 *            request.
 	 * @return response object
 	 * @throws Exception
 	 */
+
 	public static Map<String, Object> invokePostMethod(String repositoryId, String typeId, String parentId,
-			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart)
-			throws Exception {
+			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart,
+			String relation) throws Exception {
 		CmisObject cmisObj = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeObj = SwaggerHelpers.getType(typeId);
+		if (typeObj == null) {
+			SwaggerHelpers.getAllTypes(session);
+			typeObj = SwaggerHelpers.getType(typeId);
+		}
 		if (pathFragments.length > 2 && pathFragments[2] != null) {
 			String idName = SwaggerHelpers.getIdName(typeObj);
 			String customId = null;
@@ -124,23 +133,105 @@ public class SwaggerApiService {
 				CmisObject newObj = doc.updateProperties(updateProperties);
 			}
 			Map<String, Object> propMap = compileProperties(doc, session);
-			LOG.info("customId:{} properties:{}", customId, propMap);
-			return propMap;
+			LOG.info("customId: {}, properties: {}", customId, propMap);
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
 			// baseType
 			if (typeObj != null) {
-				Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
-				BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
-						: typeObj.getBaseType().getBaseTypeId();
-				Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
-						serializeMap);
-				cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
-				Map<String, Object> propMap = compileProperties(cmisObj, session);
-				LOG.info("objectType:{} properties:{}", typeObj.getId(), propMap);
-				return propMap;
+				Map<String, Object> propMap = createObject(input, typeObj, session, parentId, setContentStream);
+				LOG.info("objectType: {}, properties: {}", typeObj.getId(), propMap);
+				if (relation != null) {
+					relationShipObject(propMap, repositoryId, parentId, userName, password, filePart, relation);
+					return propMap;
+				} else {
+					return propMap;
+				}
+			}
+			if (typeObj == null) {
+				LOG.error("objectType: {}, repositoryId: {}", typeObj, repositoryId);
 			}
 		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> relationShipObject(Map<String, Object> propMap, String repositoryId,
+			String parentId, String userName, String password, Part filePart, String relation) throws Exception {
+		JSONParser parser = new JSONParser();
+		Object obj = parser.parse(relation);
+		JSONArray jsonObject = (JSONArray) obj;
+		OperationContext context = new OperationContextImpl();
+		ContentStream setContentStream = getContentStream(filePart);
+		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		List<Map<String, Object>> relationObjectArray = new ArrayList<Map<String, Object>>();
+		LOG.info("relationShipObject relation: {}, propMap: {}", relation, propMap);
+		for (Object relObject : jsonObject) {
+			Map<String, Object> relationObject = (Map<String, Object>) relObject;
+			JSONArray innerRelObj = (JSONArray) relationObject.remove("relations");
+			String targetTypeId = relationObject.get("cmis:objectTypeId").toString();
+			String sourceTypeId = propMap.get("cmis:objectTypeId").toString();
+			String relationShipName = sourceTypeId + "_" + targetTypeId;
+			ObjectType targetObj = SwaggerHelpers.getType(targetTypeId);
+			Map<String, Object> relationPropMap = createObject(relationObject, targetObj, session, parentId,
+					setContentStream);
+			context.setFilterString("cmis:name,cmis:name eq " + relationShipName);
+			ItemIterable<CmisObject> relationTargetObject = ((Folder) session.getObjectByPath("/cmis_ext:relationmd"))
+					.getChildren(context);
+			propMap = createRelationShip(relationTargetObject, propMap, relationPropMap, relationShipName, session,
+					innerRelObj, repositoryId, parentId, userName, password, filePart, relationObjectArray);
+		}
+		return propMap;
+	}
+
+	private static Map<String, Object> createRelationShip(ItemIterable<CmisObject> relationTargetObject,
+			Map<String, Object> propMap, Map<String, Object> relationPropMap, String relationShipName, Session session,
+			JSONArray innerRelObj, String repositoryId, String parentId, String userName, String password,
+			Part filePart, List<Map<String, Object>> relationObjectArray) throws Exception {
+		LOG.info("createRelationShip innerRelObj: {}, relationShipName: {}, relationObjectArray: {}", innerRelObj,
+				relationShipName, relationObjectArray);
+		for (CmisObject targetObject : relationTargetObject) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("cmis:objectTypeId", "cmis_ext:relationship");
+			map.put("cmis:sourceId", propMap.get("cmis:objectId"));
+			map.put("cmis:targetId", relationPropMap.get("cmis:objectId"));
+			map.put("cmis:name",
+					relationShipName + "_" + propMap.get("cmis:objectId") + "_" + relationPropMap.get("cmis:objectId"));
+			map.put("relation_name", relationShipName);
+			session.createRelationship(map);
+			relationObjectArray.add(relationPropMap);
+			if (innerRelObj != null) {
+				propMap.put("relations", relationObjectArray);
+				relationShipObject(relationPropMap, repositoryId, parentId, userName, password, filePart,
+						innerRelObj.toString());
+			}
+			propMap.put("relations", relationObjectArray);
+		}
+		return propMap;
+	}
+
+	private static Map<String, Object> createObject(Map<String, Object> input, ObjectType typeObj, Session session,
+			String parentId, ContentStream setContentStream) throws Exception {
+		Map<String, Object> propMap = null;
+		Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
+		Object updateId = input.get("id") != null ? serializeMap.put("cmis:objectId", input.get("id")) : null;
+		if (updateId != null) {
+			// CmisObject newObj = obj.updateProperties(updateProperties);
+			// Map<String, Object> updatedPropMap = compileProperties(newObj,
+			// session);
+			// return updatedPropMap;
+		} else {
+			BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
+					: typeObj.getBaseType().getBaseTypeId();
+			Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
+					serializeMap);
+			CmisObject cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
+			propMap = compileProperties(cmisObj, session);
+		}
+		return propMap;
+	}
+
+	private static Map<String, Object> compileProperties(Object obj, Session session) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -412,16 +503,19 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param parentId
-	 *            the property parentId is used to get the object-type�s immediate
-	 *            parent type.
+	 *            the property parentId is used to get the object-type�s
+	 *            immediate parent type.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return response object
 	 * @throws Exception
 	 */
@@ -459,13 +553,16 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property id is used to get the object.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return if true means object deleted successfully.
 	 * @throws Exception
 	 */
@@ -499,15 +596,18 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property parentId is used to get the object.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return response object
 	 * @throws Exception
 	 */
@@ -559,15 +659,18 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property parentId is used to get the object.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param response
 	 *            the property response is used to get the file response.
 	 * @return ContentStream
@@ -594,13 +697,16 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static TypeDefinition invokePostTypeDefMethod(String repositoryId, String userName, String password,
@@ -625,10 +731,13 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
@@ -642,8 +751,14 @@ public class SwaggerApiService {
 		TypeDefinition typedef = SwaggerHelpers.getType(typeId);
 		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
-			ItemIterable<CmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
-			getRelationshipChild(session, relationType, obj);
+			List<FileableCmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
+			JSONArray childJson = null;
+			if (relationType != null) {
+				childJson = getRelationshipChild(session, relationType, JsonArray);
+				obj.put("relations", childJson);
+			} else {
+				obj.put("relations", childJson);
+			}
 		}
 		return obj;
 	}
@@ -656,10 +771,13 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return true if type deleted successfully,false type not deleted successfully
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return true if type deleted successfully,false type not deleted
+	 *         successfully
 	 * @throws Exception
 	 */
 	public static boolean invokeDeleteTypeDefMethod(String repositoryId, String id, String userName, String password)
@@ -680,13 +798,16 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static TypeDefinition invokePutTypeDefMethod(String repositoryId, String id, InputStream inputType,
@@ -708,14 +829,16 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return Access Control List is used to get user list of read / write access
-	 *         for that particular object
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return Access Control List is used to get user list of read / write
+	 *         access for that particular object
 	 * @throws Exception
 	 */
 	public static Acl invokePostAcl(String repositoryId, String id, Map<String, Object> input, String userName,
@@ -751,14 +874,17 @@ public class SwaggerApiService {
 	 * @param type
 	 *            the property type is used to get particular type definition.
 	 * @param skipCount
-	 *            the property skipCount is used to how many objects user want to
-	 *            skip.
+	 *            the property skipCount is used to how many objects user want
+	 *            to skip.
 	 * @param maxItems
-	 *            the property maxItems is used to how many objects want per page.
+	 *            the property maxItems is used to how many objects want per
+	 *            page.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */
@@ -817,26 +943,16 @@ public class SwaggerApiService {
 		return json;
 	}
 
-	private static JSONObject getRelationshipChild(Session session, ItemIterable<CmisObject> relationType,
-			JSONObject mainObject) throws Exception {
-		JSONArray JsonArray = new JSONArray();
-		if (relationType != null) {
+	private static JSONArray getRelationshipChild(Session session, List<FileableCmisObject> relationType,
+			JSONArray JsonArray) throws Exception {
+		if (relationType.size() > 0) {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
 				Map<String, Object> propmap = compileProperties(types, session);
-				TypeDefinition typedef = SwaggerHelpers.getType(propmap.get("target_table").toString());
-				JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-				ItemIterable<CmisObject> relationInnerChildType = SwaggerHelpers.getRelationshipType(session,
-						typedef.getId());
-				if (relationInnerChildType != null) {
-					getRelationshipChild(session, relationInnerChildType, obj);
-				}
-				childObject.put(typedef.getId(), obj);
+				childObject.put(types.getName(), propmap);
 				JsonArray.add(childObject);
 			}
 		}
-		mainObject.put("relations", JsonArray);
-		return mainObject;
+		return JsonArray;
 	}
-
 }
