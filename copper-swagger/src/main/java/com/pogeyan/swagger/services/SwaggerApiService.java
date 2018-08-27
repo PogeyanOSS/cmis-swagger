@@ -213,10 +213,20 @@ public class SwaggerApiService {
 			String parentId, ContentStream setContentStream) throws Exception {
 		Map<String, Object> propMap = null;
 		Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
-		BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId() : typeObj.getBaseType().getBaseTypeId();
-		Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session, serializeMap);
-		CmisObject cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
-		propMap = compileProperties(cmisObj, session);
+		Object updateId = input.get("id") != null ? serializeMap.put("cmis:objectId", input.get("id")) : null;
+		if (updateId != null) {
+			// CmisObject newObj = obj.updateProperties(updateProperties);
+			// Map<String, Object> updatedPropMap = compileProperties(newObj,
+			// session);
+			// return updatedPropMap;
+		} else {
+			BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
+					: typeObj.getBaseType().getBaseTypeId();
+			Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
+					serializeMap);
+			CmisObject cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
+			propMap = compileProperties(cmisObj, session);
+		}
 		return propMap;
 	}
 

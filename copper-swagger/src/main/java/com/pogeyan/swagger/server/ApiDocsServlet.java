@@ -73,7 +73,7 @@ public class ApiDocsServlet extends HttpServlet {
 			boolean skip = false;
 			Map<String, Object> input = null;
 			Part filePart = null;
-			String relation = null;
+			boolean includeRelationship = false;
 			String method = request.getMethod();
 			String auth = request.getHeader("Authorization");
 			String credentials[] = HttpUtils.getCredentials(auth);
@@ -91,15 +91,12 @@ public class ApiDocsServlet extends HttpServlet {
 					skip = true;
 				} else {
 					if (request.getQueryString() != null) {
-						boolean includeRelationship = Boolean.parseBoolean(request.getParameter("includeRelationship"));
+						includeRelationship = Boolean.parseBoolean(request.getParameter("includeRelationship"));
 						if (includeRelationship) {
 							JSONParser parser = new JSONParser();
 							String jsonString = IOUtils.toString(request.getInputStream());
 							Object obj = parser.parse(jsonString);
 							JSONObject jsonObject = (JSONObject) obj;
-							JSONArray relations = (JSONArray) jsonObject.get("relations");
-							relation = relations.toString();
-							jsonObject.remove("relations");
 							input = jsonObject;
 						} else {
 							String jsonString = IOUtils.toString(request.getInputStream());
@@ -124,7 +121,7 @@ public class ApiDocsServlet extends HttpServlet {
 				}
 			}
 			if (METHOD_POST.equals(method)) {
-				doPost(request, response, credentials, pathFragments, input, filePart, relation);
+				doPost(request, response, credentials, pathFragments, input, filePart, includeRelationship);
 			} else if (METHOD_GET.equals(method)) {
 				doGet(request, response, credentials, pathFragments);
 			} else if (METHOD_PUT.equals(method)) {
@@ -214,11 +211,13 @@ public class ApiDocsServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
-			String pathFragments[], Map<String, Object> input, Part filePart, String relation) throws Exception {
+			String pathFragments[], Map<String, Object> input, Part filePart, boolean includeRelationship)
+			throws Exception {
 		try {
 			LOG.info("method: {}, repositoryId: {}, type: {}, relation: {}", request.getMethod(), pathFragments[0],
-					pathFragments[1], relation);
+					pathFragments[1]);
 			JSONObject obj = null;
+			String relation = null;
 			Acl acl = null;
 			Map<String, Object> propMap = null;
 			String repositoryId = pathFragments[0];
@@ -232,6 +231,11 @@ public class ApiDocsServlet extends HttpServlet {
 				acl = SwaggerApiService.invokePostAcl(repositoryId, pathFragments[2], input, credentials[0],
 						credentials[1]);
 			} else {
+				if (includeRelationship) {
+					JSONArray relations = (JSONArray) input.get("relations");
+					relation = relations.toString();
+					input.remove("relations");
+				}
 				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, credentials[0],
 						credentials[1], pathFragments, filePart, relation);
 			}
