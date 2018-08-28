@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
@@ -1068,8 +1069,7 @@ public class SwaggerHelpers {
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 				if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-						? propertiesValues.getValue().getLocalName().equals("primaryKey")
-						: false) {
+						? propertiesValues.getValue().getLocalName().equals("primaryKey") : false) {
 					objectIdName = propertiesValues.getKey();
 					return objectIdName;
 				}
@@ -1327,7 +1327,7 @@ public class SwaggerHelpers {
 						: new ArrayList<>();
 				ArrayList<Object> children1 = (ArrayList<Object>) relationObjectMap.get("children");
 				if (children1 != null) {
-					jsonSub.putAll(formRelationData(session, children1));
+					jsonSub.put("relation", formRelationData(session, children1));
 				}
 				list.add(jsonSub);
 				relMap.put(relId, list);
