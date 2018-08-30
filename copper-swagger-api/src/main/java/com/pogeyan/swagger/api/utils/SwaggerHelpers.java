@@ -26,15 +26,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import org.apache.chemistry.opencmis.client.api.CmisObject;
+import java.util.stream.Collectors;
+
+import org.apache.chemistry.opencmis.client.api.FileableCmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
-import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
-import org.apache.chemistry.opencmis.client.api.OperationContext;
+import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.api.Tree;
-import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
@@ -233,21 +233,34 @@ public class SwaggerHelpers {
 		return typeCacheMap.getIfPresent(typeId);
 	}
 
-	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
+	public static List<FileableCmisObject> getRelationshipType(Session session, String typeId) {
 		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
 		if (relationshipType != null) {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {
-				OperationContext context = new OperationContextImpl();
-				context.setFilterString("target_table,source_table eq " + typeId);
-				ItemIterable<CmisObject> relationDescendants = relationObject.getChildren(context);
-				return relationDescendants;
+				List<Tree<FileableCmisObject>> relationDescendants = relationObject.getDescendants(-1);
+				if (relationDescendants.size() > 0) {
+					List<FileableCmisObject> relationChildObject = relationDescendants.stream()
+							.filter(t -> checkSourceDetails(t.getItem().getProperties(), typeId)).map(t -> t.getItem())
+							.collect(Collectors.toList());
+					return relationChildObject;
+				}
 			}
 		}
 		return null;
 
 	}
-
+	
+	private static boolean checkSourceDetails(List<Property<?>> list, String typeId) {
+		Property<?> propertyDef = list.stream()
+				.filter(t -> t.getId().equals("source_table") && t.getFirstValue().equals(typeId)).findFirst()
+				.orElse(null);
+		if (propertyDef != null) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * @param typeChildren
 	 *            the property typeChildren it will give children's of one
