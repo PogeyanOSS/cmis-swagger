@@ -240,10 +240,10 @@ public class SwaggerHelpers {
 			if (relationObject != null) {
 				List<Tree<FileableCmisObject>> relationDescendants = relationObject.getDescendants(-1);
 				if (relationDescendants.size() > 0) {
-					List<FileableCmisObject> relationchildObject = relationDescendants.stream()
+					List<FileableCmisObject> relationChildObject = relationDescendants.stream()
 							.filter(t -> checkSourceDetails(t.getItem().getProperties(), typeId)).map(t -> t.getItem())
 							.collect(Collectors.toList());
-					return relationchildObject;
+					return relationChildObject;
 				}
 			}
 		}
