@@ -128,9 +128,9 @@ public class ApiDocsServlet extends HttpServlet {
 			JSONObject obj = null;
 			ContentStream stream = null;
 			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1].replace("_", ":");
+			// String typeId = pathFragments[1].replace("_", ":");
+			String typeId = pathFragments[1];
 			String id = pathFragments[2];
-
 			String select = null;
 			String filter = null;
 			String order = null;
@@ -157,9 +157,10 @@ public class ApiDocsServlet extends HttpServlet {
 					String skipCount = request.getParameter("skipcount");
 					String maxItems = request.getParameter("maxitems");
 					String parentId = request.getParameter("parentId");
-
+					String includeRelationship = request.getParameter("includeRelationship");
 					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
-							skipCount, maxItems, credentials[0], credentials[1], select, order);
+							skipCount, maxItems, credentials[0], credentials[1], select, order,
+							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
 				} else {
 					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
 							credentials[1], select);
