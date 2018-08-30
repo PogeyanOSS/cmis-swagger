@@ -843,9 +843,8 @@ public class SwaggerApiService {
 			}
 
 		}
-		LOG.info(
-				"class-name: SwaggerapiService, method-name: invokeGetAllMethod, repositoryId: {}, Fetching RelationshipType for type: {}",
-				repositoryId, type);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
+				"SwaggerapiService", "invokeGetAllMethod", repositoryId, type);
 		JSONArray JsonArray = new JSONArray();
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {

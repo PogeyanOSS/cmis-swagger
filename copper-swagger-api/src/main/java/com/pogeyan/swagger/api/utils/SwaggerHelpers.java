@@ -1279,7 +1279,7 @@ public class SwaggerHelpers {
 	public static ArrayList<Object> getDescendantsForRelationObjects(String username, String password, String repoId,
 			String objectId) {
 		// TODO Auto-generated method stub
-		CloseableHttpClient httpclient = HttpClients.createDefault();
+		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse httpResponse = null;
 		try {
 			String connectionString = System.getenv("SWAGGER_CMIS_SESSION_CONNECTION_URL") + repoId;
@@ -1288,7 +1288,7 @@ public class SwaggerHelpers {
 			HttpGet getRequest = new HttpGet(reqUrl.trim());
 			getRequest.addHeader("Content-Type", "application/json");
 			getRequest.addHeader("Authorization", getB64Auth(username, password));
-			httpResponse = httpclient.execute(getRequest);
+			httpResponse = httpClient.execute(getRequest);
 			int resCode = httpResponse.getStatusLine().getStatusCode();
 			HttpEntity resEntity = httpResponse.getEntity();
 			if (resEntity != null) {
@@ -1296,16 +1296,21 @@ public class SwaggerHelpers {
 				ArrayList<Object> json = new ObjectMapper().readValue(resBody, ArrayList.class);
 				return json;
 			} else {
-				LOG.error("Empty ResponseEntity with resCode: {}", resCode);
+				LOG.error("class name: {}, method name: {}, repositoryId: {},Empty ResponseEntity with resCode: {}",
+						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, resCode);
 				throw new Exception("resCode:" + resCode);
 			}
 		} catch (Exception e) {
-			LOG.info("Error in building an HTTP Request or Descendants are null!");
+			LOG.info(
+					"class name: {}, method name: {}, repositoryId: {},Error in building an HTTP Request or Descendants are null!",
+					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, e);
 		} finally {
 			try {
-				httpclient.close();
+				httpClient.close();
 			} catch (IOException ex) {
-				LOG.error("Execption in closing httpClient stream: {}", ex);
+				LOG.error(
+						"class name: {}, method name: {}, repositoryId: {},Execption in closing httpClient stream: {}",
+						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, ex);
 			}
 		}
 		return null;
@@ -1316,20 +1321,20 @@ public class SwaggerHelpers {
 		Map<String, Object> relMap = new LinkedHashMap<String, Object>();
 		if (relationData != null) {
 			relationData.forEach(relationObj -> {
-				JSONObject jsonSub = new JSONObject();
+				JSONObject childJson = new JSONObject();
 				LinkedHashMap<Object, Object> relationObjectMap = (LinkedHashMap<Object, Object>) relationObj;
 				LinkedHashMap<Object, Object> object1 = (LinkedHashMap<Object, Object>) relationObjectMap.get("object");
 				LinkedHashMap<Object, Object> object2 = (LinkedHashMap<Object, Object>) object1.get("object");
 				Map<String, Object> succintProps = (Map<String, Object>) object2.get("succinctProperties");
-				jsonSub.putAll(succintProps);
+				childJson.putAll(succintProps);
 				String relId = succintProps.get(PropertyIds.OBJECT_ID).toString();
 				ArrayList<JSONObject> list = relMap.get(relId) != null ? (ArrayList<JSONObject>) relMap.get(relId)
 						: new ArrayList<>();
-				ArrayList<Object> children1 = (ArrayList<Object>) relationObjectMap.get("children");
-				if (children1 != null) {
-					jsonSub.put("relation", formRelationData(session, children1));
+				ArrayList<Object> childrenRelationData = (ArrayList<Object>) relationObjectMap.get("children");
+				if (childrenRelationData != null) {
+					childJson.put("relation", formRelationData(session, childrenRelationData));
 				}
-				list.add(jsonSub);
+				list.add(childJson);
 				relMap.put(relId, list);
 			});
 		}
