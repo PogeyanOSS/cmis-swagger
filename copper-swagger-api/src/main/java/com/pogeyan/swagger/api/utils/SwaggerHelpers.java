@@ -1302,14 +1302,14 @@ public class SwaggerHelpers {
 			}
 		} catch (Exception e) {
 			LOG.info(
-					"class name: {}, method name: {}, repositoryId: {},Error in building an HTTP Request or Descendants are null!",
+					"class name: {}, method name: {}, repositoryId: {}, Error in building an HTTP Request or Descendants are null!",
 					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, e);
 		} finally {
 			try {
 				httpClient.close();
 			} catch (IOException ex) {
 				LOG.error(
-						"class name: {}, method name: {}, repositoryId: {},Execption in closing httpClient stream: {}",
+						"class name: {}, method name: {}, repositoryId: {}, Execption in closing httpClient stream: {}",
 						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, ex);
 			}
 		}
@@ -1323,9 +1323,12 @@ public class SwaggerHelpers {
 			relationData.forEach(relationObj -> {
 				JSONObject childJson = new JSONObject();
 				LinkedHashMap<Object, Object> relationObjectMap = (LinkedHashMap<Object, Object>) relationObj;
-				LinkedHashMap<Object, Object> object1 = (LinkedHashMap<Object, Object>) relationObjectMap.get("object");
-				LinkedHashMap<Object, Object> object2 = (LinkedHashMap<Object, Object>) object1.get("object");
-				Map<String, Object> succintProps = (Map<String, Object>) object2.get("succinctProperties");
+				LinkedHashMap<Object, Object> getRelationshipData = (LinkedHashMap<Object, Object>) relationObjectMap
+						.get("object");
+				LinkedHashMap<Object, Object> getRelationshipObjectData = (LinkedHashMap<Object, Object>) getRelationshipData
+						.get("object");
+				Map<String, Object> succintProps = (Map<String, Object>) getRelationshipObjectData
+						.get("succinctProperties");
 				childJson.putAll(succintProps);
 				String relId = succintProps.get(PropertyIds.OBJECT_ID).toString();
 				ArrayList<JSONObject> list = relMap.get(relId) != null ? (ArrayList<JSONObject>) relMap.get(relId)
