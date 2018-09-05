@@ -189,7 +189,8 @@ public class SwaggerHelpers {
 				connectionString = connectionUrl;
 			}
 
-			LOG.info("Creating session for repository: {}, connection URL: {}", repoId, connectionUrl);
+			LOG.info("class name: {}, method name: {}, Creating session for repository: {}, connection URL: {}",
+					"SwaggerHelpers", "createSession", repoId, connectionUrl);
 			SessionFactory factory = SessionFactoryImpl.newInstance();
 			Map<String, String> parameters = new HashMap<String, String>();
 			// user credentials
@@ -203,8 +204,8 @@ public class SwaggerHelpers {
 			sessionMap.put(userName, session);
 		} catch (Exception e) {
 			LOG.error("Exception on createSession: {}", e.getMessage());
-			ErrorResponse resp = SwaggerHelpers.handleException(e);
-			throw new ErrorResponse(resp);
+			ErrorResponse response = SwaggerHelpers.handleException(e);
+			throw new ErrorResponse(response);
 		}
 		return session;
 
@@ -216,7 +217,7 @@ public class SwaggerHelpers {
 	 *            particular repository
 	 */
 	public static void getAllTypes(Session session) {
-		LOG.info("Getting all types in repository");
+		LOG.info("class name: {}, method name: {}, Getting all types in repository", "SwaggerHelpers", "getAllTypes");
 		List<String> list = getBaseTypeList();
 		for (String type : list) {
 			ObjectType baseType = session.getTypeDefinition(type);
@@ -1170,8 +1171,8 @@ public class SwaggerHelpers {
 	public static ErrorResponse handleException(Exception ex) {
 		String errorMessage;
 		int code;
-		ex.printStackTrace();
-		LOG.error("CmisBaseResponse error: {},{}", ex.getMessage(), ex.getStackTrace());
+		// ex.printStackTrace();
+		LOG.error("CmisBaseResponse error: {}", ex.getMessage(), ex.getStackTrace());
 
 		if (ex instanceof CmisInvalidArgumentException) {
 			errorMessage = ((CmisInvalidArgumentException) ex).getErrorContent();

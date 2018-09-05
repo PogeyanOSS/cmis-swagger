@@ -77,6 +77,7 @@ import com.pogeyan.swagger.pojos.ErrorResponse;
 @SuppressWarnings("unused")
 public class SwaggerApiService {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerApiService.class);
+	private static final Session session = null;
 
 	/**
 	 * @param repositoryId
@@ -105,79 +106,79 @@ public class SwaggerApiService {
 	 * @throws Exception
 	 */
 	public static Map<String, Object> invokePostMethod(String repositoryId, String typeId, String parentId,
-			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart)
+			Map<String, Object> input, String userName, String password, String objectId, Part filePart)
 			throws Exception {
-		CmisObject cmisObj = null;
+		Map<String, Object> propMap = new HashMap<String, Object>();
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObj = SwaggerHelpers.getType(typeId);
-		if (pathFragments.length > 2 && pathFragments[2] != null) {
-			String idName = SwaggerHelpers.getIdName(typeObj);
+		ObjectType typeDefinitionObj = SwaggerHelpers.getType(typeId);
+		if (objectId != null) {
+			String typeidName = SwaggerHelpers.getIdName(typeDefinitionObj);
 			String customId = null;
 			if (SwaggerHelpers.customTypeHasFolder()) {
-				customId = typeObj.isBaseType() ? pathFragments[2] : typeId + "::" + idName + "::" + pathFragments[2];
+				customId = typeDefinitionObj.isBaseType() ? objectId : typeId + "::" + typeidName + "::" + objectId;
 			} else {
-				customId = pathFragments[2];
+				customId = objectId;
 			}
-			Document doc = ((Document) session.getObject(customId)).setContentStream(getContentStream(filePart), true);
+			Document document = ((Document) session.getObject(customId)).setContentStream(getContentStream(filePart),
+					true);
 
 			HashMap<String, Object> properties = new HashMap<String, Object>();
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
-					properties, doc.getPropertyValue("revisionId"));
-			if (updateProperties != null) {
-				CmisObject newObj = doc.updateProperties(updateProperties);
+					properties, document.getPropertyValue("revisionId"));
+			if (updateProperties != null && !updateProperties.isEmpty()) {
+				CmisObject newObject = document.updateProperties(updateProperties);
 			}
-			Map<String, Object> propMap = compileProperties(doc, session);
-			LOG.info("customId:{} properties:{}", customId, propMap);
+			propMap = compileProperties(document, session);
 			return propMap;
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
-			// baseType
-			if (typeObj != null) {
-				Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
-				BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
-						: typeObj.getBaseType().getBaseTypeId();
+			if (typeDefinitionObj != null) {
+				Map<String, Object> serializeMap = deserializeInput(input, typeDefinitionObj, session);
+				BaseTypeId baseTypeId = typeDefinitionObj.isBaseType() ? typeDefinitionObj.getBaseTypeId()
+						: typeDefinitionObj.getBaseType().getBaseTypeId();
 				Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
 						serializeMap);
-				cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
-				Map<String, Object> propMap = compileProperties(cmisObj, session);
-				LOG.info("objectType:{} properties:{}", typeObj.getId(), propMap);
+				CmisObject cmisObject = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
+				propMap = compileProperties(cmisObject, session);
 				return propMap;
 			}
 		}
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId:{}, properties: {}", "SwaggerApiService",
+				"invokePostMethod", repositoryId, typeId, propMap);
 		return null;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType obj, Session session)
+	private static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType object, Session session)
 			throws Exception {
-		LOG.info("deSerializing Input:{}", input);
+		LOG.info("class name: {}, method name: {}, deSerializing Input: {}", "SwaggerApiService", "deserializeInput",
+				input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
-		Map<String, PropertyDefinition<?>> dataPropDef = obj.getPropertyDefinitions();
+		Map<String, PropertyDefinition<?>> dataPropertyDefinition = object.getPropertyDefinitions();
 		for (String var : input.keySet()) {
 			Object valueOfType = input.get(var);
 			if (var.equals("parentId")) {
 				continue;
 			}
 			if (valueOfType != null) {
-				PropertyType reqPropType = null;
-				PropertyDefinition<?> defObj = dataPropDef.get(var);
-				if (defObj == null) {
-
+				PropertyType reqPropertyType = null;
+				PropertyDefinition<?> definitionObject = dataPropertyDefinition.get(var);
+				if (definitionObject == null) {
 					List<?> secondaryValues = (List<?>) input.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
 					for (Object stype : secondaryValues) {
 						TypeDefinition type = session.getTypeDefinition((String) stype);
 						for (Entry<String, PropertyDefinition<?>> t : type.getPropertyDefinitions().entrySet()) {
 							if (t.getValue().getId().equals(var)) {
-								reqPropType = t.getValue().getPropertyType();
+								reqPropertyType = t.getValue().getPropertyType();
 							}
 						}
 					}
 
 				} else {
-					reqPropType = defObj.getPropertyType();
+					reqPropertyType = definitionObject.getPropertyType();
 				}
 
-				if (reqPropType.equals(PropertyType.INTEGER)) {
+				if (reqPropertyType.equals(PropertyType.INTEGER)) {
 					if (valueOfType instanceof Integer) {
 						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
 						serializeMap.put(var, valueBigInteger);
@@ -186,7 +187,7 @@ public class SwaggerApiService {
 						serializeMap.put(var, value);
 					}
 
-				} else if (reqPropType.equals(PropertyType.BOOLEAN)) {
+				} else if (reqPropertyType.equals(PropertyType.BOOLEAN)) {
 					if (valueOfType instanceof Boolean) {
 						Boolean booleanValue = convertInstanceOfObject(valueOfType, Boolean.class);
 						serializeMap.put(var, booleanValue);
@@ -195,7 +196,7 @@ public class SwaggerApiService {
 						serializeMap.put(var, booleanValue);
 					}
 
-				} else if (reqPropType.equals(PropertyType.DATETIME)) {
+				} else if (reqPropertyType.equals(PropertyType.DATETIME)) {
 
 					// SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd
 					// HH:mm:ss Z yyyy", Locale.US);
@@ -216,7 +217,7 @@ public class SwaggerApiService {
 						serializeMap.put(var, calenderList);
 					}
 
-				} else if (reqPropType.equals(PropertyType.DECIMAL)) {
+				} else if (reqPropertyType.equals(PropertyType.DECIMAL)) {
 					if (valueOfType instanceof Double) {
 						Double value = convertInstanceOfObject(valueOfType, Double.class);
 						serializeMap.put(var, value);
@@ -243,11 +244,12 @@ public class SwaggerApiService {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> deserializeInputForResponse(Map<String, Object> input, ObjectType obj,
+	private static Map<String, Object> deserializeInputForResponse(Map<String, Object> input, ObjectType object,
 			Session session) throws Exception {
-		LOG.info("deSerializing Input:{}", input);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, deSerializing Input:{}", "SwaggerApiService",
+				"deserializeInputForResponse", session.getRepositoryInfo().getId(), input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
-		Map<String, PropertyDefinition<?>> dataPropDef = obj.getPropertyDefinitions();
+		Map<String, PropertyDefinition<?>> dataPropDef = object.getPropertyDefinitions();
 		for (String var : input.keySet()) {
 			List<?> valueOfType = (List<?>) input.get(var);
 
@@ -256,12 +258,12 @@ public class SwaggerApiService {
 			}
 			if (valueOfType != null) {
 				PropertyType reqPropType = null;
-				PropertyDefinition<?> defObj = dataPropDef.get(var);
-				if (defObj == null) {
+				PropertyDefinition<?> definitionObject = dataPropDef.get(var);
+				if (definitionObject == null) {
 
 					List<?> secondaryValues = (List<?>) input.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
-					for (Object stype : secondaryValues) {
-						TypeDefinition type = session.getTypeDefinition((String) stype);
+					for (Object stringtype : secondaryValues) {
+						TypeDefinition type = session.getTypeDefinition((String) stringtype);
 						for (Entry<String, PropertyDefinition<?>> t : type.getPropertyDefinitions().entrySet()) {
 							if (t.getValue().getId().equals(var)) {
 								reqPropType = t.getValue().getPropertyType();
@@ -270,7 +272,7 @@ public class SwaggerApiService {
 					}
 
 				} else {
-					reqPropType = defObj.getPropertyType();
+					reqPropType = definitionObject.getPropertyType();
 				}
 
 				if (reqPropType.equals(PropertyType.INTEGER)) {
@@ -334,12 +336,12 @@ public class SwaggerApiService {
 		return serializeMap;
 	}
 
-	private static Map<String, Object> compileProperties(CmisObject cmisObj, Session session) throws Exception {
+	private static Map<String, Object> compileProperties(CmisObject cmisObject, Session session) throws Exception {
 		Map<String, Object> propMap = new HashMap<String, Object>();
-		cmisObj.getProperties().stream().forEach(a -> {
+		cmisObject.getProperties().stream().forEach(a -> {
 			propMap.put(a.getDefinition().getId(), a.getValues());
 		});
-		Map<String, Object> outputMap = deserializeInputForResponse(propMap, cmisObj.getType(), session);
+		Map<String, Object> outputMap = deserializeInputForResponse(propMap, cmisObject.getType(), session);
 
 		return outputMap;
 	}
@@ -355,27 +357,29 @@ public class SwaggerApiService {
 	private static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
 			Map<String, Object> input, ContentStream stream) throws Exception {
 		try {
-			LOG.info("BaseTypeID:{}", baseTypeId.value());
+			// LOG.info("BaseTypeID:{}", baseTypeId.value());
+			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID:{}", "SwaggerApiService",
+					"createForBaseTypes", session.getRepositoryInfo().getId(), baseTypeId.value());
 			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
-				CmisObject fol = null;
+				CmisObject folder = null;
 				if (parentId != null) {
-					fol = ((Folder) session.getObject(parentId)).createFolder(input);
-					return fol;
+					folder = ((Folder) session.getObject(parentId)).createFolder(input);
+					return folder;
 				} else {
 					ObjectId id = session.getRootFolder().createFolder(input);
-					fol = session.getObject(id);
-					return fol;
+					folder = session.getObject(id);
+					return folder;
 				}
 			} else if (baseTypeId.equals(BaseTypeId.CMIS_DOCUMENT)) {
-				CmisObject doc = null;
+				CmisObject document = null;
 				if (parentId != null) {
-					doc = ((Folder) session.getObject(parentId)).createDocument(input, stream != null ? stream : null,
-							null);
-					return doc;
+					document = ((Folder) session.getObject(parentId)).createDocument(input,
+							stream != null ? stream : null, null);
+					return document;
 				} else {
 					ObjectId id = session.createDocument(input, null, stream != null ? stream : null, null);
-					doc = session.getObject(id);
-					return doc;
+					document = session.getObject(id);
+					return document;
 				}
 			} else if (baseTypeId.equals(BaseTypeId.CMIS_ITEM)) {
 				CmisObject item = null;
@@ -389,8 +393,8 @@ public class SwaggerApiService {
 				}
 			} else if (baseTypeId.equals(BaseTypeId.CMIS_RELATIONSHIP)) {
 				ObjectId id = session.createRelationship(input);
-				CmisObject rel = session.getObject(id);
-				return rel;
+				CmisObject relationship = session.getObject(id);
+				return relationship;
 			} else if (baseTypeId.equals(BaseTypeId.CMIS_POLICY)) {
 				CmisObject policy = null;
 				if (parentId != null) {
@@ -431,30 +435,29 @@ public class SwaggerApiService {
 	 * @return response object
 	 * @throws Exception
 	 */
-	public static Map<String, Object> invokeGetMethod(String repositoryId, String typeId, String id, String userName,
-			String password, String filter) throws Exception {
+	public static Map<String, Object> invokeGetMethod(String repositoryId, String typeId, String objectId,
+			String userName, String password, String filter) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
 		}
-		ObjectType typeobj = SwaggerHelpers.getType(typeId);
-
-		String idName = SwaggerHelpers.getIdName(typeobj);
+		ObjectType typeobject = SwaggerHelpers.getType(typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeobject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeobj.isBaseType() ? id : typeId + "::" + idName + "::" + id;
+			customId = typeobject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
-			customId = id;
+			customId = objectId;
 		}
 		OperationContext context = new OperationContextImpl();
 		if (filter != null) {
 			context.setFilterString(filter);
 		}
-
-		CmisObject obj = session.getObject(customId, context);
-		LOG.info("TypeId:{},id:{},Object:{}", typeId, customId, obj);
-		if (obj != null && typeobj.getId().equals(obj.getType().getId())) {
-			Map<String, Object> propMap = compileProperties(obj, session);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ObjectId: {}", "SwaggerApiService",
+				"invokeGetMethod", repositoryId, typeId, customId);
+		CmisObject object = session.getObject(customId, context);
+		if (object != null && typeobject.getId().equals(object.getType().getId())) {
+			Map<String, Object> propMap = compileProperties(object, session);
 			return propMap;
 		} else {
 			throw new Exception("Type Missmatch");
@@ -541,8 +544,8 @@ public class SwaggerApiService {
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
 					serializeMap, obj.getPropertyValue("revisionId"));
 			if (updateProperties != null) {
-				CmisObject newObj = obj.updateProperties(updateProperties);
-				Map<String, Object> propMap = compileProperties(newObj, session);
+				CmisObject newObject = obj.updateProperties(updateProperties);
+				Map<String, Object> propMap = compileProperties(newObject, session);
 				return propMap;
 			}
 			return null;
@@ -559,7 +562,11 @@ public class SwaggerApiService {
 			String name = Files.getNameWithoutExtension(file);
 			InputStream fileContent = filePart.getInputStream();
 			BigInteger size = BigInteger.valueOf(filePart.getSize());
-			LOG.info("filName:{},extension:{},size:{}", name, extension, size);
+			// LOG.info( "filName:{},extension:{},size:{}", name, extension,
+			// size);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, filName:{}, extension:{}, size:{}",
+					"SwaggerApiService", "getContentStream", session.getRepositoryInfo().getId(), name, extension,
+					size);
 			setContentStream = new ContentStreamImpl(name, size, MimeUtils.guessMimeTypeFromExtension(extension),
 					fileContent);
 			return setContentStream;
@@ -588,20 +595,21 @@ public class SwaggerApiService {
 	 * @return ContentStream
 	 * @throws Exception
 	 */
-	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String id, String userName,
-			String password, HttpServletResponse response) throws Exception {
+	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String objectId,
+			String userName, String password, HttpServletResponse response) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(typeId);
-		String idName = SwaggerHelpers.getIdName(typeobj);
-		String customId = null;
+		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		String customObjectId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeobj.isBaseType() ? id : typeId + "::" + idName + "::" + id;
+			customObjectId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
-			customId = id;
+			customObjectId = objectId;
 		}
-		LOG.info("TypeId:{},id:{}", typeId, customId);
-		ContentStream stream = ((Document) session.getObject(customId)).getContentStream(customId);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId:{}, objectId:{}", "SwaggerApiService",
+				"invokeDownloadMethod", repositoryId, typeId, customObjectId);
+		ContentStream stream = ((Document) session.getObject(customObjectId)).getContentStream(customObjectId);
 		return stream;
 	}
 
@@ -624,15 +632,19 @@ public class SwaggerApiService {
 	public static TypeDefinition invokePostTypeDefMethod(String repositoryId, String userName, String password,
 			InputStream inputType) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		TypeDefinition typeDef = TypeUtils.readFromJSON(inputType);
-		TypeDefinition returnedType = session.createType(typeDef);
-		LOG.info("Created TypeDefinition:{}", returnedType);
+		TypeDefinition typeDefinition = TypeUtils.readFromJSON(inputType);
+		TypeDefinition returnedType = session.createType(typeDefinition);
+		LOG.info("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggerApiService",
+				"invokePostTypeDefMethod", repositoryId, inputType);
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			CmisObject obj = session.getObjectByPath("/" + returnedType.getId());
+			CmisObject object = session.getObjectByPath("/" + returnedType.getId());
 			HashMap<String, Object> properties = new HashMap<String, Object>();
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
 					properties);
-			CmisObject newObj = obj.updateProperties(updateProperties);
+			if (updateProperties != null && !updateProperties.isEmpty()) {
+				CmisObject newObject = object.updateProperties(updateProperties);
+			}
+			CmisObject newObject = object.updateProperties(updateProperties);
 		}
 		return returnedType;
 	}
@@ -660,13 +672,13 @@ public class SwaggerApiService {
 			SwaggerHelpers.getAllTypes(session);
 		}
 		JSONArray JsonArray = new JSONArray();
-		TypeDefinition typedef = SwaggerHelpers.getType(typeId);
-		JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
+		TypeDefinition typedefinition = SwaggerHelpers.getType(typeId);
+		JSONObject object = JSONConverter.convert(typedefinition, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			ItemIterable<CmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
-			getRelationshipChild(session, relationType, obj);
+			getRelationshipChild(session, relationType, object);
 		}
-		return obj;
+		return object;
 	}
 
 	/**
@@ -747,30 +759,33 @@ public class SwaggerApiService {
 	 *         access for that particular object
 	 * @throws Exception
 	 */
-	public static Acl invokePostAcl(String repositoryId, String id, Map<String, Object> input, String userName,
+	public static Acl invokePostAcl(String repositoryId, String aclParam, Map<String, Object> input, String userName,
 			String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectFactory of = session.getObjectFactory();
 		List<Ace> addAces = new ArrayList<Ace>();
 		List<Ace> removeAces = new ArrayList<Ace>();
-		CmisObject obj = session.getObject(input.get("objectId").toString());
-		if (id.equals("addAcl")) {
+		CmisObject object = session.getObject(input.get("objectId").toString());
+		if (aclParam.equals("addAcl")) {
 			addAces.add(of.createAce(input.get("principalId").toString(),
 					Collections.singletonList(input.get("permission").toString())));
 			removeAces = null;
-		} else if (id.equals("removeAcl")) {
+		} else if (aclParam.equals("removeAcl")) {
 			removeAces.add(of.createAce(input.get("principalId").toString(),
 					Collections.singletonList(input.get("permission").toString())));
 		}
-		LOG.info("id :{} Adding {} , removing {} given ACEs, propagation:{}", id, addAces, removeAces,
-				AclPropagation.OBJECTONLY);
-		Acl acl = session.applyAcl(obj, addAces, removeAces, AclPropagation.OBJECTONLY);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}",
+				"aclParam: {}, Adding: {}, removing: {}, given ACEs", "SwaggerApiService", "invokePostAcl",
+				repositoryId, aclParam, addAces, removeAces);
+		Acl acl = session.applyAcl(object, addAces, removeAces, AclPropagation.OBJECTONLY);
 		HashMap<String, Object> properties = new HashMap<String, Object>();
-		CmisObject upObj = session.getObject(input.get("objectId").toString());
-		Map<String, Object> updateproperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
-				properties, upObj.getPropertyValue("revisionId"));
-		CmisObject newObj = upObj.updateProperties(updateproperties);
 
+		CmisObject updateObject = session.getObject(input.get("objectId").toString());
+		Map<String, Object> updateproperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
+				properties, updateObject.getPropertyValue("revisionId"));
+		if (updateproperties != null && !updateproperties.isEmpty()) {
+			CmisObject newObject = updateObject.updateProperties(updateproperties);
+		}
 		return acl;
 	}
 
@@ -794,7 +809,7 @@ public class SwaggerApiService {
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */
-	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String id, String skipCount,
+	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String parentId, String skipCount,
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
 		JSONObject json = new JSONObject();
@@ -803,7 +818,7 @@ public class SwaggerApiService {
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
 		}
-		ObjectType typeObj = SwaggerHelpers.getType(type);
+		ObjectType typeObject = SwaggerHelpers.getType(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
@@ -814,9 +829,9 @@ public class SwaggerApiService {
 		if (orderBy != null) {
 			context.setOrderBy(orderBy);
 		}
-		if (typeObj.isBaseType()) {
-			if (id != null) {
-				Folder object = (Folder) session.getObject(id);
+		if (typeObject.isBaseType()) {
+			if (parentId != null) {
+				Folder object = (Folder) session.getObject(parentId);
 				json.put(object.getName(), object);
 				children = object.getChildren(context);
 			} else {
@@ -824,8 +839,8 @@ public class SwaggerApiService {
 						&& !type.equalsIgnoreCase("cmis_ext:relation") && !type.equalsIgnoreCase("cmis:item")
 						&& !type.equalsIgnoreCase("cmis:secondary")) {
 					Folder typeFolder = (Folder) session.getObjectByPath("/" + type);
-					id = typeFolder.getId();
-					if (id != null) {
+					parentId = typeFolder.getId();
+					if (parentId != null) {
 						json.put(typeFolder.getName(), typeFolder);
 						children = typeFolder.getChildren(context);
 					}
@@ -837,7 +852,7 @@ public class SwaggerApiService {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		} else {
-			children = ((Folder) session.getObjectByPath("/" + typeObj.getId())).getChildren(context);
+			children = ((Folder) session.getObjectByPath("/" + typeObject.getId())).getChildren(context);
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}

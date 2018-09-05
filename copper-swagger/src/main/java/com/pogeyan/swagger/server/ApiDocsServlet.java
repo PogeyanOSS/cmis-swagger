@@ -16,6 +16,7 @@
 package com.pogeyan.swagger.server;
 
 import java.net.URLDecoder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -67,15 +68,13 @@ public class ApiDocsServlet extends HttpServlet {
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			@SuppressWarnings("unused")
-			boolean skip = false;
 			Map<String, Object> input = null;
 			Part filePart = null;
 			String method = request.getMethod();
-			String auth = request.getHeader("Authorization");
-			String credentials[] = HttpUtils.getCredentials(auth);
+			String authorization = request.getHeader("Authorization");
+			String credentials[] = HttpUtils.getCredentials(authorization);
 			String pathFragments[] = HttpUtils.splitPath(request);
-
+			String typeId = pathFragments[1];
 			if (METHOD_POST.equals(method)) {
 				if (request.getContentType().contains("multipart/form-data")) {
 					input = request.getParameterMap().entrySet().stream()
@@ -84,32 +83,30 @@ public class ApiDocsServlet extends HttpServlet {
 				} else if (request.getContentType().equals("application/x-www-form-urlencoded")) {
 					input = request.getParameterMap().entrySet().stream()
 							.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
-				} else if (pathFragments[1].equals("_metadata")) {
-					skip = true;
+				} else if (typeId.equals("_metadata")) {
 				} else {
 					String jsonString = IOUtils.toString(request.getInputStream());
 					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
 					});
 				}
-			}
-			if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
-				if (pathFragments[1].equals("_metadata")) {
-					skip = true;
-				} else {
-					String jsonString = IOUtils.toString(request.getInputStream());
-					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
-					});
-				}
-			}
-			if (METHOD_POST.equals(method)) {
 				doPost(request, response, credentials, pathFragments, input, filePart);
 			} else if (METHOD_GET.equals(method)) {
 				doGet(request, response, credentials, pathFragments);
 			} else if (METHOD_PUT.equals(method)) {
+
+				if (request.getInputStream() != null) {
+					if (typeId.equals("_metadata")) {
+					} else {
+						String jsonString = IOUtils.toString(request.getInputStream());
+						input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+						});
+					}
+				}
 				doPut(request, response, credentials, pathFragments, input);
 			} else if (METHOD_DELETE.equals(method)) {
 				doDelete(request, response, credentials, pathFragments);
 			}
+
 		} catch (Exception e) {
 			ErrorResponse resp = SwaggerHelpers.handleException(e);
 			HttpUtils.invokeResponseWriter(response, resp.getErrorCode(), resp.getError());
@@ -123,14 +120,17 @@ public class ApiDocsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String[] pathFragments) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			Map<String, Object> propMap = null;
-			JSONObject obj = null;
+			JSONObject object = null;
 			ContentStream stream = null;
+			String username = credentials[0];
+			String password = credentials[1];
 			String repositoryId = pathFragments[0];
-			// String typeId = pathFragments[1].replace("_", ":");
 			String typeId = pathFragments[1];
-			String id = pathFragments[2];
+			String type = pathFragments[2];
+			String inputId = pathFragments.length > 3 ? pathFragments[3] : null;
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doGet",
+					repositoryId, typeId);
 			String select = null;
 			String filter = null;
 			String order = null;
@@ -142,45 +142,43 @@ public class ApiDocsServlet extends HttpServlet {
 				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
 						: null;
 			}
+
 			if (select != null && filter != null) {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
 			} else if (select == null && filter != null) {
 				select = "*," + filter;
 			}
-			if (id != null && !id.equals("media")) {
-				if (id.equals("type")) {
+			if (inputId != null) {
+				if (type.equals("type")) {
 					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId,
-							pathFragments.length > 3 ? pathFragments[3] : typeId, credentials[0], credentials[1],
+					object = SwaggerApiService.invokeGetTypeDefMethod(repositoryId, typeId, username, password,
 							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
-				} else if (id.equals("getAll")) {
-					String skipCount = request.getParameter("skipcount");
-					String maxItems = request.getParameter("maxitems");
-					String parentId = request.getParameter("parentId");
-					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
-							skipCount, maxItems, credentials[0], credentials[1], select, order,
-							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
-				} else {
-					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
-							credentials[1], select);
 				}
-			}
 
-			if (pathFragments.length > 3 && pathFragments[3] != null && pathFragments[2].equals("media")) {
-				stream = SwaggerApiService.invokeDownloadMethod(repositoryId, typeId, pathFragments[3], credentials[0],
-						credentials[1], response);
+				else if (type.equals("media")) {
+					stream = SwaggerApiService.invokeDownloadMethod(repositoryId, typeId, inputId, username, password,
+							response);
+				}
+			} else if (type.equals("getAll")) {
+				String skipCount = request.getParameter("skipcount");
+				String maxItems = request.getParameter("maxitems");
+				String parentId = request.getParameter("parentId");
+				String includeRelationship = request.getParameter("includeRelationship");
+				object = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
+						skipCount, maxItems, username, password, select, order,
+						includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
+			} else {
+				propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, type, username, password, select);
 			}
 
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
-			} else if (obj != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, obj);
+			} else if (object != null) {
+				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, object);
 			} else if (stream != null) {
 				HttpUtils.invokeDownloadWriter(stream, response);
 			} else {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_FOUND,
-						pathFragments[1] + " not found");
+				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_FOUND, typeId + " not found");
 			}
 		} catch (ErrorResponse e) {
 			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getMessage());
@@ -191,37 +189,43 @@ public class ApiDocsServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
+
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String pathFragments[], Map<String, Object> input, Part filePart) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
-			JSONObject obj = null;
-			Acl acl = null;
-			Map<String, Object> propMap = null;
+			JSONObject typedefinitonObject = null;
+			Acl objectacl = null;
+			Map<String, Object> propMap = new HashMap<>();
+			String username = credentials[0];
+			String password = credentials[1];
 			String repositoryId = pathFragments[0];
 			String typeId = pathFragments[1];
 			String parentId = request.getParameter("parentId");
-			if (pathFragments.length > 2 && pathFragments[2].equals("type")) {
-				TypeDefinition typedef = SwaggerApiService.invokePostTypeDefMethod(repositoryId, credentials[0],
-						credentials[1], request.getInputStream());
-				obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-			} else if (typeId.equals("Acl")) {
-				acl = SwaggerApiService.invokePostAcl(repositoryId, pathFragments[2], input, credentials[0],
-						credentials[1]);
+			String typeInput = pathFragments.length > 2 ? pathFragments[2] : null;
+
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServelet", "doPost",
+					repositoryId, typeId);
+			if (typeInput != null) {
+				if (typeInput.equals("type")) {
+					TypeDefinition typedefiniton = SwaggerApiService.invokePostTypeDefMethod(repositoryId, username,
+							password, request.getInputStream());
+					typedefinitonObject = JSONConverter.convert(typedefiniton, DateTimeFormat.SIMPLE);
+				} else if (typeId.equals("Acl")) {
+					objectacl = SwaggerApiService.invokePostAcl(repositoryId, typeInput, input, username, password);
+				}
 			} else {
-				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, credentials[0],
-						credentials[1], pathFragments, filePart);
+				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, username, password,
+						typeInput, filePart);
 			}
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
-			} else if (obj != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, obj);
-			} else if (acl != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, acl);
+			} else if (typedefinitonObject != null) {
+				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, typedefinitonObject);
+			} else if (objectacl != null) {
+				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, objectacl);
 			} else {
 				// error
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT,
-						pathFragments[1] + " not created.");
+				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT, typeId + " not created.");
 			}
 		} catch (ErrorResponse e) {
 			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getError());
