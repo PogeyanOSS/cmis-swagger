@@ -442,10 +442,10 @@ public class SwaggerApiService {
 			SwaggerHelpers.getAllTypes(session);
 		}
 		ObjectType typeobject = SwaggerHelpers.getType(typeId);
-		String typeidName = SwaggerHelpers.getIdName(typeobject);
+		String typeIdName = SwaggerHelpers.getIdName(typeobject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeobject.isBaseType() ? objectId : typeId + "::" + typeidName + "::" + objectId;
+			customId = typeobject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
@@ -453,10 +453,9 @@ public class SwaggerApiService {
 		if (filter != null) {
 			context.setFilterString(filter);
 		}
-
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ObjectId: {}", "SwaggerApiService",
+				"invokeGetMethod", repositoryId, typeId, customId);
 		CmisObject object = session.getObject(customId, context);
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "id: {}, Object: {}",
-				"SwaggerApiService", "invokeGetMethod", repositoryId, typeId, customId, object);
 		if (object != null && typeobject.getId().equals(object.getType().getId())) {
 			Map<String, Object> propMap = compileProperties(object, session);
 			return propMap;
@@ -777,7 +776,7 @@ public class SwaggerApiService {
 		}
 		LOG.info("class name: {}, method name: {}, repositoryId: {}",
 				"aclParam: {}, Adding: {}, removing: {}, given ACEs", "SwaggerApiService", "invokePostAcl",
-				repositoryId, aclParam, addAces, removeAces, AclPropagation.OBJECTONLY);
+				repositoryId, aclParam, addAces, removeAces);
 		Acl acl = session.applyAcl(object, addAces, removeAces, AclPropagation.OBJECTONLY);
 		HashMap<String, Object> properties = new HashMap<String, Object>();
 
@@ -810,7 +809,7 @@ public class SwaggerApiService {
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */
-	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String id, String skipCount,
+	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String parentId, String skipCount,
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
 		JSONObject json = new JSONObject();
@@ -831,8 +830,8 @@ public class SwaggerApiService {
 			context.setOrderBy(orderBy);
 		}
 		if (typeObject.isBaseType()) {
-			if (id != null) {
-				Folder object = (Folder) session.getObject(id);
+			if (parentId != null) {
+				Folder object = (Folder) session.getObject(parentId);
 				json.put(object.getName(), object);
 				children = object.getChildren(context);
 			} else {
@@ -840,8 +839,8 @@ public class SwaggerApiService {
 						&& !type.equalsIgnoreCase("cmis_ext:relation") && !type.equalsIgnoreCase("cmis:item")
 						&& !type.equalsIgnoreCase("cmis:secondary")) {
 					Folder typeFolder = (Folder) session.getObjectByPath("/" + type);
-					id = typeFolder.getId();
-					if (id != null) {
+					parentId = typeFolder.getId();
+					if (parentId != null) {
 						json.put(typeFolder.getName(), typeFolder);
 						children = typeFolder.getChildren(context);
 					}
