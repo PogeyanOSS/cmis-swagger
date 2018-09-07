@@ -131,11 +131,10 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
+	 * @return session is a connection to a CMIS repository with a specific user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
+	 *             Swagger CMIS session connection URL not defined in environment
+	 *             variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -166,11 +165,10 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
+	 * @return session is a connection to a CMIS repository with a specific user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
+	 *             Swagger CMIS session connection URL not defined in environment
+	 *             variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -241,8 +239,8 @@ public class SwaggerHelpers {
 	 *            the property session is used to get all details about that
 	 *            repository.
 	 * @param typeId
-	 *            the property typeId is used to get that particular type based
-	 *            on this id.
+	 *            the property typeId is used to get that particular type based on
+	 *            this id.
 	 * @return the Object Type
 	 */
 	public static ObjectType getType(String typeId) {
@@ -255,7 +253,9 @@ public class SwaggerHelpers {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {
 				OperationContext context = new OperationContextImpl();
-				context.setFilterString("target_table,source_table eq " + typeId);
+				context.setFilterString(
+						"target_table,source_table,source_column,target_column,copper_relationType,source_table eq "
+								+ typeId);
 				ItemIterable<CmisObject> relationDescendants = relationObject.getChildren(context);
 				return relationDescendants;
 			}
@@ -285,14 +285,13 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return TagObject is adds metadata to a single tag that is used by the
-	 *         Operation Object. It is not mandatory to have a Tag Object per
-	 *         tag defined in the Operation Object instances. List of tags used
-	 *         by the specification with additional metadata. The order of the
-	 *         tags can be used to reflect on their order by the parsing tools.
-	 *         Not all tags that are used by the Operation Object must be
-	 *         declared. The tags that are not declared MAY be organized
-	 *         randomly or based on the tools' logic. Each tag name in the list
-	 *         MUST be unique.
+	 *         Operation Object. It is not mandatory to have a Tag Object per tag
+	 *         defined in the Operation Object instances. List of tags used by the
+	 *         specification with additional metadata. The order of the tags can be
+	 *         used to reflect on their order by the parsing tools. Not all tags
+	 *         that are used by the Operation Object must be declared. The tags that
+	 *         are not declared MAY be organized randomly or based on the tools'
+	 *         logic. Each tag name in the list MUST be unique.
 	 */
 	public static List<TagObject> generateTagsForAllTypes() {
 		List<TagObject> tagsList = new ArrayList<TagObject>();
@@ -316,11 +315,10 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return it will returns Map<String, SecurityDefinitionObject> defines a
-	 *         security scheme that can be used by the operations. Supported
-	 *         schemes are HTTP authentication, an API key (either as a header
-	 *         or as a query parameter), OAuth2's common flows (implicit,
-	 *         password, application and access code) as defined in RFC6749, and
-	 *         OpenID Connect Discovery
+	 *         security scheme that can be used by the operations. Supported schemes
+	 *         are HTTP authentication, an API key (either as a header or as a query
+	 *         parameter), OAuth2's common flows (implicit, password, application
+	 *         and access code) as defined in RFC6749, and OpenID Connect Discovery
 	 */
 	public static Map<String, SecurityDefinitionObject> getSecurityDefinitions() {
 		Map<String, SecurityDefinitionObject> security = new HashMap<String, SecurityDefinitionObject>();
@@ -333,8 +331,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return it will Map<String, DefinitionsObject> defines it will store each
-	 *         and every request schema definitions for all ObjectType data
+	 * @return it will Map<String, DefinitionsObject> defines it will store each and
+	 *         every request schema definitions for all ObjectType data
 	 */
 	public static Map<String, DefinitionsObject> getDefinitions() {
 		Map<String, DefinitionsObject> definitionsMap = new HashMap<String, DefinitionsObject>();
@@ -511,20 +509,19 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return it will return Map<String, PathObject> that include
-	 *         ParameterObject,ResponseObject,PathCommonObject finally it will
-	 *         club into one object as PathObject and returns. ParameterObject
-	 *         describes a single operation parameter. A unique parameter is
-	 *         defined by a combination of a name and location. ResponseObject
-	 *         describes a single response from an API Operation, including
-	 *         design-time, static links to operations based on the response.
-	 *         PathCommonObject describes the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will
-	 *         not know which operations and parameters are available.
-	 *         PathObject holds the relative paths to the individual end points
-	 *         and their operations. The path is appended to the URL from the
-	 *         Server Object in order to construct the full URL. The Paths MAY
-	 *         be empty, due to ACL constraints
+	 *         ParameterObject,ResponseObject,PathCommonObject finally it will club
+	 *         into one object as PathObject and returns. ParameterObject describes
+	 *         a single operation parameter. A unique parameter is defined by a
+	 *         combination of a name and location. ResponseObject describes a single
+	 *         response from an API Operation, including design-time, static links
+	 *         to operations based on the response. PathCommonObject describes the
+	 *         operations available on a single path. A Path Item MAY be empty, due
+	 *         to ACL constraints. The path itself is still exposed to the
+	 *         documentation viewer but they will not know which operations and
+	 *         parameters are available. PathObject holds the relative paths to the
+	 *         individual end points and their operations. The path is appended to
+	 *         the URL from the Server Object in order to construct the full URL.
+	 *         The Paths MAY be empty, due to ACL constraints
 	 */
 	public static Map<String, PathObject> generatePathForAllTypes() {
 		Map<String, PathObject> pathMap = new HashMap<String, PathObject>();
@@ -731,12 +728,12 @@ public class SwaggerHelpers {
 	 *            the property pathMap is used to store pathMap.It will give
 	 *            Map<String, PathObject> pathMap.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations. The
+	 *         path is appended to the URL from the Server Object in order to
+	 *         construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> PostTypeDefinitionCreation(Map<String, PathObject> pathMap,
@@ -765,17 +762,16 @@ public class SwaggerHelpers {
 	 * @param schema
 	 *            the property schema is used to hold all swagger object.
 	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
+	 *            the property typeResponse it will give map of ResponseObject. it
+	 *            describes a single response from an API Operation, including
+	 *            design-time, static links to operations based on the response.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations. The
+	 *         path is appended to the URL from the Server Object in order to
+	 *         construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postCreateTypeDefinitionCreation(Map<String, PathObject> pathMap,
@@ -794,16 +790,16 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
-	 * @return PathCommonObject describes the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will
-	 *         not know which operations and parameters are available
+	 *            the property typeParams is used to get that ParameterObject. it
+	 *            describes a single operation parameter. A unique parameter is
+	 *            defined by a combination of a name and location.
+	 * @return PathCommonObject describes the operations available on a single path.
+	 *         A Path Item MAY be empty, due to ACL constraints. The path itself is
+	 *         still exposed to the documentation viewer but they will not know
+	 *         which operations and parameters are available
 	 */
 	private static PathCommonObject postGetTypeDefinitionCreation(List<Map<String, String[]>> security,
 			ParameterObject typeParams) {
@@ -826,21 +822,20 @@ public class SwaggerHelpers {
 	 * @param schema
 	 *            the property schema is used to hold all swagger object.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
+	 *            the property typeParams is used to get that ParameterObject. it
+	 *            describes a single operation parameter. A unique parameter is
+	 *            defined by a combination of a name and location.
 	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
-	 * @return PathCommonObject is used to do the operations available on a
-	 *         single path. A Path Item MAY be empty, due to ACL constraints.
-	 *         The path itself is still exposed to the documentation viewer but
-	 *         they will not know which operations and parameters are available
+	 *            the property typeResponse it will give map of ResponseObject. it
+	 *            describes a single response from an API Operation, including
+	 *            design-time, static links to operations based on the response.
+	 * @return PathCommonObject is used to do the operations available on a single
+	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
+	 *         itself is still exposed to the documentation viewer but they will not
+	 *         know which operations and parameters are available
 	 * 
 	 */
 	private static PathCommonObject postUpdateTypeDefinitionCreation(Map<String, String> schema,
@@ -858,16 +853,16 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
-	 * @return PathCommonObject is used to do the operations available on a
-	 *         single path. A Path Item MAY be empty, due to ACL constraints.
-	 *         The path itself is still exposed to the documentation viewer but
-	 *         they will not know which operations and parameters are available
+	 *            the property typeParams is used to get that ParameterObject. it
+	 *            describes a single operation parameter. A unique parameter is
+	 *            defined by a combination of a name and location.
+	 * @return PathCommonObject is used to do the operations available on a single
+	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
+	 *         itself is still exposed to the documentation viewer but they will not
+	 *         know which operations and parameters are available
 	 */
 	private static PathCommonObject postDeleteTypeDefinitionCreation(List<Map<String, String[]>> security,
 			ParameterObject typeParams) {
@@ -888,12 +883,12 @@ public class SwaggerHelpers {
 	 *            the property pathMap is used to store pathMap.It will give
 	 *            Map<String, PathObject> pathMap.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations. The
+	 *         path is appended to the URL from the Server Object in order to
+	 *         construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -919,17 +914,16 @@ public class SwaggerHelpers {
 	 * @param schemAcl
 	 *            the property schemAcl is used to hold all swagger object.
 	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
+	 *            the property aclResponses it will give map of ResponseObject. it
+	 *            describes a single response from an API Operation, including
+	 *            design-time, static links to operations based on the response.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual end points and their operations. The
+	 *         path is appended to the URL from the Server Object in order to
+	 *         construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postAddAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -953,17 +947,16 @@ public class SwaggerHelpers {
 	 * @param schemAcl
 	 *            the property schemAcl is used to hold all swagger object.
 	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
+	 *            the property aclResponses it will give map of ResponseObject. it
+	 *            describes a single response from an API Operation, including
+	 *            design-time, static links to operations based on the response.
 	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
+	 *            the property security is used to defines a security scheme that
+	 *            can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual end points and their operations. The
+	 *         path is appended to the URL from the Server Object in order to
+	 *         construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postRemoveAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -983,9 +976,8 @@ public class SwaggerHelpers {
 	/**
 	 * @param type
 	 *            the property type is used to get that ObjectType.
-	 * @return list of parameterObject is used to do a single operation
-	 *         parameter. A unique parameter is defined by a combination of a
-	 *         name and location
+	 * @return list of parameterObject is used to do a single operation parameter. A
+	 *         unique parameter is defined by a combination of a name and location
 	 */
 	private static List<ParameterObject> getFormDataObjects(ObjectType type) {
 		List<ParameterObject> list = new ArrayList<>();
@@ -1069,7 +1061,8 @@ public class SwaggerHelpers {
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 				if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-						? propertiesValues.getValue().getLocalName().equals("primaryKey") : false) {
+						? propertiesValues.getValue().getLocalName().equals("primaryKey")
+						: false) {
 					objectIdName = propertiesValues.getKey();
 					return objectIdName;
 				}
@@ -1089,9 +1082,9 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return InfoObject used provides metadata about the API. The metadata MAY
-	 *         be used by the clients if needed, and MAY be presented in editing
-	 *         or documentation generation tools for convenience
+	 * @return InfoObject used provides metadata about the API. The metadata MAY be
+	 *         used by the clients if needed, and MAY be presented in editing or
+	 *         documentation generation tools for convenience
 	 */
 	public static InfoObject generateInfoObject() {
 		return infoObj;
@@ -1107,17 +1100,16 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param description
-	 *            A short description of the application. CommonMark syntax MAY
-	 *            be used for rich text representation.
+	 *            A short description of the application. CommonMark syntax MAY be
+	 *            used for rich text representation.
 	 * @param version
-	 *            The version of the OpenAPI document (which is distinct from
-	 *            the OpenAPI Specification version or the API implementation
-	 *            version).
+	 *            The version of the OpenAPI document (which is distinct from the
+	 *            OpenAPI Specification version or the API implementation version).
 	 * @param title
 	 *            The title of the application.
 	 * @param termsOfService
-	 *            A URL to the Terms of Service for the API. MUST be in the
-	 *            format of a URL.
+	 *            A URL to the Terms of Service for the API. MUST be in the format
+	 *            of a URL.
 	 * @param contact
 	 *            The contact information for the exposed API.
 	 * @param license
@@ -1135,11 +1127,11 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param description
-	 *            A short description of the target documentation. CommonMark
-	 *            syntax MAY be used for rich text representation.
+	 *            A short description of the target documentation. CommonMark syntax
+	 *            MAY be used for rich text representation.
 	 * @param url
-	 *            The URL for the target documentation. Value MUST be in the
-	 *            format of a URL.
+	 *            The URL for the target documentation. Value MUST be in the format
+	 *            of a URL.
 	 */
 	public static void setExternalDocsObject(String description, String url) {
 		externalDocsObject.setDescription(description);
@@ -1232,8 +1224,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return true means type have custom folder,false means type does not have
-	 *         any custom folder
+	 * @return true means type have custom folder,false means type does not have any
+	 *         custom folder
 	 */
 	public static boolean customTypeHasFolder() {
 		final String value = System.getenv("CUSTOM_TYPE_HAS_FOLDER");
