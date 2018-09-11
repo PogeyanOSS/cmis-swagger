@@ -122,7 +122,7 @@ public class ApiDocsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String[] pathFragments) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			Map<String, Object> propMap = null;
 			JSONObject obj = null;
 			ContentStream stream = null;
@@ -187,13 +187,14 @@ public class ApiDocsServlet extends HttpServlet {
 	}
 
 	/**
+	 * @param input
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String pathFragments[], Map<String, Object> input, Part filePart, String inputString) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			JSONObject obj = null;
 			Acl acl = null;
 			Map<String, Object> propMap = null;
@@ -203,11 +204,10 @@ public class ApiDocsServlet extends HttpServlet {
 			boolean crudOpreation = false;
 			if (request.getQueryString() != null) {
 				crudOpreation = request.getParameter("includeRelation") != null
-						? Boolean.parseBoolean(request.getParameter("includeRelation"))
-						: false;
+						? Boolean.parseBoolean(request.getParameter("includeRelation")) : false;
 			}
 
-			if (!crudOpreation) {
+			if (!crudOpreation && inputString != null) {
 				input = mapper.readValue(inputString, new TypeReference<Map<String, String>>() {
 				});
 			}

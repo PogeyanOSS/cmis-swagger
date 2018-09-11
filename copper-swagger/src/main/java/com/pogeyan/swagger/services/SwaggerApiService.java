@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.json.JsonArray;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
@@ -39,7 +37,6 @@ import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectFactory;
-import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
@@ -66,7 +63,6 @@ import com.google.common.io.Files;
 import com.pogeyan.swagger.api.utils.MimeUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 import com.pogeyan.swagger.factory.SwaggerApiServiceFactory;
-import com.pogeyan.swagger.pojos.ErrorResponse;
 
 /**
  * SwaggerApiService Operations
@@ -84,20 +80,25 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param parentId
-	 *            the property parentId is used to get the object-type�s immediate
-	 *            parent type.
+	 *            the property parentId is used to get the object-type�s
+	 *            immediate parent type.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param pathFragments
-	 *            the property pathFragments is used to get request path parameters.
+	 *            the property pathFragments is used to get request path
+	 *            parameters.
 	 * @param filePart
-	 *            the property filePart is used to get file details from request.
+	 *            the property filePart is used to get file details from
+	 *            request.
 	 * @return response object
 	 * @throws Exception
 	 */
@@ -129,14 +130,16 @@ public class SwaggerApiService {
 				CmisObject newObj = doc.updateProperties(updateProperties);
 			}
 			Map<String, Object> propMap = SwaggerHelpers.compileProperties(doc, session);
-			LOG.info("customId:{} properties:{}", customId, propMap);
+			LOG.info("customId: {} properties: {}", customId, propMap);
 			return propMap;
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
 			// baseType
 			if (typeObj != null) {
 				if (includeCrud) {
-					SwaggerHelpers.crudOperation(session, repositoryId, typeObj, inputString, userName, password);
+					Map<String, Object> resultPropMap = SwaggerHelpers.crudOperation(session, repositoryId, typeObj,
+							inputString, userName, password);
+					return resultPropMap;
 				} else {
 					Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
 					BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
@@ -146,7 +149,7 @@ public class SwaggerApiService {
 					cmisObj = SwaggerHelpers.createForBaseTypes(session, baseTypeId, parentId, properties,
 							setContentStream, null);
 					Map<String, Object> propMap = SwaggerHelpers.compileProperties(cmisObj, session);
-					LOG.info("objectType:{} properties:{}", typeObj.getId(), propMap);
+					LOG.info("objectType: {} properties: {}", typeObj.getId(), propMap);
 					return propMap;
 				}
 
@@ -158,7 +161,7 @@ public class SwaggerApiService {
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType obj, Session session)
 			throws Exception {
-		LOG.info("deSerializing Input:{}", input);
+		LOG.info("deSerializing Input: {}", input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
 		Map<String, PropertyDefinition<?>> dataPropDef = obj.getPropertyDefinitions();
 		for (String var : input.keySet()) {
@@ -254,16 +257,19 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param parentId
-	 *            the property parentId is used to get the object-type�s immediate
-	 *            parent type.
+	 *            the property parentId is used to get the object-type�s
+	 *            immediate parent type.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return response object
 	 * @throws Exception
 	 */
@@ -301,13 +307,16 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property id is used to get the object.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return if true means object deleted successfully.
 	 * @throws Exception
 	 */
@@ -341,15 +350,18 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property parentId is used to get the object.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return response object
 	 * @throws Exception
 	 */
@@ -401,15 +413,18 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param typeId
-	 *            the property typeId of an object-type specified in the repository.
+	 *            the property typeId of an object-type specified in the
+	 *            repository.
 	 * @param id
 	 *            the property parentId is used to get the object.
 	 * @param input
 	 *            the property input is used to get all request parameters.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param response
 	 *            the property response is used to get the file response.
 	 * @return ContentStream
@@ -436,13 +451,16 @@ public class SwaggerApiService {
 	 * @param repositoryId
 	 *            the property repositoryId is identifier for the repository.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static TypeDefinition invokePostTypeDefMethod(String repositoryId, String userName, String password,
@@ -467,10 +485,13 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
@@ -498,10 +519,13 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return true if type deleted successfully,false type not deleted successfully
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return true if type deleted successfully,false type not deleted
+	 *         successfully
 	 * @throws Exception
 	 */
 	public static boolean invokeDeleteTypeDefMethod(String repositoryId, String id, String userName, String password)
@@ -522,13 +546,16 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return TypeDefinition is used to get the user define data fields to server
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return TypeDefinition is used to get the user define data fields to
+	 *         server
 	 * @throws Exception
 	 */
 	public static TypeDefinition invokePutTypeDefMethod(String repositoryId, String id, InputStream inputType,
@@ -550,14 +577,16 @@ public class SwaggerApiService {
 	 * @param id
 	 *            the property id is used to get the particular type definition.
 	 * @param inputType
-	 *            the property inputType is used to get the objectType and convert
-	 *            into type definition.
+	 *            the property inputType is used to get the objectType and
+	 *            convert into type definition.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
-	 * @return Access Control List is used to get user list of read / write access
-	 *         for that particular object
+	 *            the property password is used to login the particular
+	 *            repository.
+	 * @return Access Control List is used to get user list of read / write
+	 *         access for that particular object
 	 * @throws Exception
 	 */
 	public static Acl invokePostAcl(String repositoryId, String id, Map<String, Object> input, String userName,
@@ -593,14 +622,17 @@ public class SwaggerApiService {
 	 * @param type
 	 *            the property type is used to get particular type definition.
 	 * @param skipCount
-	 *            the property skipCount is used to how many objects user want to
-	 *            skip.
+	 *            the property skipCount is used to how many objects user want
+	 *            to skip.
 	 * @param maxItems
-	 *            the property maxItems is used to how many objects want per page.
+	 *            the property maxItems is used to how many objects want per
+	 *            page.
 	 * @param userName
-	 *            the property userName is used to login the particular repository.
+	 *            the property userName is used to login the particular
+	 *            repository.
 	 * @param password
-	 *            the property password is used to login the particular repository.
+	 *            the property password is used to login the particular
+	 *            repository.
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */

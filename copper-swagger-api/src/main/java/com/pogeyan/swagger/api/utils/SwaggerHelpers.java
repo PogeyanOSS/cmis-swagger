@@ -48,6 +48,7 @@ import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
+import org.apache.chemistry.opencmis.client.api.Relationship;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.api.Tree;
@@ -65,6 +66,7 @@ import org.apache.chemistry.opencmis.commons.enums.AclPropagation;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
+import org.apache.chemistry.opencmis.commons.enums.RelationshipDirection;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisFilterNotValidException;
@@ -154,10 +156,11 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific user.
+	 * @return session is a connection to a CMIS repository with a specific
+	 *         user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in environment
-	 *             variable
+	 *             Swagger CMIS session connection URL not defined in
+	 *             environment variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -188,10 +191,11 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific user.
+	 * @return session is a connection to a CMIS repository with a specific
+	 *         user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in environment
-	 *             variable
+	 *             Swagger CMIS session connection URL not defined in
+	 *             environment variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -262,8 +266,8 @@ public class SwaggerHelpers {
 	 *            the property session is used to get all details about that
 	 *            repository.
 	 * @param typeId
-	 *            the property typeId is used to get that particular type based on
-	 *            this id.
+	 *            the property typeId is used to get that particular type based
+	 *            on this id.
 	 * @return the Object Type
 	 */
 	public static ObjectType getType(String typeId) {
@@ -306,13 +310,14 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return TagObject is adds metadata to a single tag that is used by the
-	 *         Operation Object. It is not mandatory to have a Tag Object per tag
-	 *         defined in the Operation Object instances. List of tags used by the
-	 *         specification with additional metadata. The order of the tags can be
-	 *         used to reflect on their order by the parsing tools. Not all tags
-	 *         that are used by the Operation Object must be declared. The tags that
-	 *         are not declared MAY be organized randomly or based on the tools'
-	 *         logic. Each tag name in the list MUST be unique.
+	 *         Operation Object. It is not mandatory to have a Tag Object per
+	 *         tag defined in the Operation Object instances. List of tags used
+	 *         by the specification with additional metadata. The order of the
+	 *         tags can be used to reflect on their order by the parsing tools.
+	 *         Not all tags that are used by the Operation Object must be
+	 *         declared. The tags that are not declared MAY be organized
+	 *         randomly or based on the tools' logic. Each tag name in the list
+	 *         MUST be unique.
 	 */
 	public static List<TagObject> generateTagsForAllTypes() {
 		List<TagObject> tagsList = new ArrayList<TagObject>();
@@ -336,10 +341,11 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return it will returns Map<String, SecurityDefinitionObject> defines a
-	 *         security scheme that can be used by the operations. Supported schemes
-	 *         are HTTP authentication, an API key (either as a header or as a query
-	 *         parameter), OAuth2's common flows (implicit, password, application
-	 *         and access code) as defined in RFC6749, and OpenID Connect Discovery
+	 *         security scheme that can be used by the operations. Supported
+	 *         schemes are HTTP authentication, an API key (either as a header
+	 *         or as a query parameter), OAuth2's common flows (implicit,
+	 *         password, application and access code) as defined in RFC6749, and
+	 *         OpenID Connect Discovery
 	 */
 	public static Map<String, SecurityDefinitionObject> getSecurityDefinitions() {
 		Map<String, SecurityDefinitionObject> security = new HashMap<String, SecurityDefinitionObject>();
@@ -352,8 +358,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return it will Map<String, DefinitionsObject> defines it will store each and
-	 *         every request schema definitions for all ObjectType data
+	 * @return it will Map<String, DefinitionsObject> defines it will store each
+	 *         and every request schema definitions for all ObjectType data
 	 */
 	public static Map<String, DefinitionsObject> getDefinitions() {
 		Map<String, DefinitionsObject> definitionsMap = new HashMap<String, DefinitionsObject>();
@@ -530,19 +536,20 @@ public class SwaggerHelpers {
 
 	/**
 	 * @return it will return Map<String, PathObject> that include
-	 *         ParameterObject,ResponseObject,PathCommonObject finally it will club
-	 *         into one object as PathObject and returns. ParameterObject describes
-	 *         a single operation parameter. A unique parameter is defined by a
-	 *         combination of a name and location. ResponseObject describes a single
-	 *         response from an API Operation, including design-time, static links
-	 *         to operations based on the response. PathCommonObject describes the
-	 *         operations available on a single path. A Path Item MAY be empty, due
-	 *         to ACL constraints. The path itself is still exposed to the
-	 *         documentation viewer but they will not know which operations and
-	 *         parameters are available. PathObject holds the relative paths to the
-	 *         individual end points and their operations. The path is appended to
-	 *         the URL from the Server Object in order to construct the full URL.
-	 *         The Paths MAY be empty, due to ACL constraints
+	 *         ParameterObject,ResponseObject,PathCommonObject finally it will
+	 *         club into one object as PathObject and returns. ParameterObject
+	 *         describes a single operation parameter. A unique parameter is
+	 *         defined by a combination of a name and location. ResponseObject
+	 *         describes a single response from an API Operation, including
+	 *         design-time, static links to operations based on the response.
+	 *         PathCommonObject describes the operations available on a single
+	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
+	 *         itself is still exposed to the documentation viewer but they will
+	 *         not know which operations and parameters are available.
+	 *         PathObject holds the relative paths to the individual end points
+	 *         and their operations. The path is appended to the URL from the
+	 *         Server Object in order to construct the full URL. The Paths MAY
+	 *         be empty, due to ACL constraints
 	 */
 	public static Map<String, PathObject> generatePathForAllTypes() {
 		Map<String, PathObject> pathMap = new HashMap<String, PathObject>();
@@ -749,12 +756,12 @@ public class SwaggerHelpers {
 	 *            the property pathMap is used to store pathMap.It will give
 	 *            Map<String, PathObject> pathMap.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations. The
-	 *         path is appended to the URL from the Server Object in order to
-	 *         construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations.
+	 *         The path is appended to the URL from the Server Object in order
+	 *         to construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> PostTypeDefinitionCreation(Map<String, PathObject> pathMap,
@@ -783,16 +790,17 @@ public class SwaggerHelpers {
 	 * @param schema
 	 *            the property schema is used to hold all swagger object.
 	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject. it
-	 *            describes a single response from an API Operation, including
-	 *            design-time, static links to operations based on the response.
+	 *            the property typeResponse it will give map of ResponseObject.
+	 *            it describes a single response from an API Operation,
+	 *            including design-time, static links to operations based on the
+	 *            response.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations. The
-	 *         path is appended to the URL from the Server Object in order to
-	 *         construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations.
+	 *         The path is appended to the URL from the Server Object in order
+	 *         to construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postCreateTypeDefinitionCreation(Map<String, PathObject> pathMap,
@@ -811,16 +819,16 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject. it
-	 *            describes a single operation parameter. A unique parameter is
-	 *            defined by a combination of a name and location.
-	 * @return PathCommonObject describes the operations available on a single path.
-	 *         A Path Item MAY be empty, due to ACL constraints. The path itself is
-	 *         still exposed to the documentation viewer but they will not know
-	 *         which operations and parameters are available
+	 *            the property typeParams is used to get that ParameterObject.
+	 *            it describes a single operation parameter. A unique parameter
+	 *            is defined by a combination of a name and location.
+	 * @return PathCommonObject describes the operations available on a single
+	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
+	 *         itself is still exposed to the documentation viewer but they will
+	 *         not know which operations and parameters are available
 	 */
 	private static PathCommonObject postGetTypeDefinitionCreation(List<Map<String, String[]>> security,
 			ParameterObject typeParams) {
@@ -843,20 +851,21 @@ public class SwaggerHelpers {
 	 * @param schema
 	 *            the property schema is used to hold all swagger object.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject. it
-	 *            describes a single operation parameter. A unique parameter is
-	 *            defined by a combination of a name and location.
+	 *            the property typeParams is used to get that ParameterObject.
+	 *            it describes a single operation parameter. A unique parameter
+	 *            is defined by a combination of a name and location.
 	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject. it
-	 *            describes a single response from an API Operation, including
-	 *            design-time, static links to operations based on the response.
-	 * @return PathCommonObject is used to do the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will not
-	 *         know which operations and parameters are available
+	 *            the property typeResponse it will give map of ResponseObject.
+	 *            it describes a single response from an API Operation,
+	 *            including design-time, static links to operations based on the
+	 *            response.
+	 * @return PathCommonObject is used to do the operations available on a
+	 *         single path. A Path Item MAY be empty, due to ACL constraints.
+	 *         The path itself is still exposed to the documentation viewer but
+	 *         they will not know which operations and parameters are available
 	 * 
 	 */
 	private static PathCommonObject postUpdateTypeDefinitionCreation(Map<String, String> schema,
@@ -874,16 +883,16 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject. it
-	 *            describes a single operation parameter. A unique parameter is
-	 *            defined by a combination of a name and location.
-	 * @return PathCommonObject is used to do the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will not
-	 *         know which operations and parameters are available
+	 *            the property typeParams is used to get that ParameterObject.
+	 *            it describes a single operation parameter. A unique parameter
+	 *            is defined by a combination of a name and location.
+	 * @return PathCommonObject is used to do the operations available on a
+	 *         single path. A Path Item MAY be empty, due to ACL constraints.
+	 *         The path itself is still exposed to the documentation viewer but
+	 *         they will not know which operations and parameters are available
 	 */
 	private static PathCommonObject postDeleteTypeDefinitionCreation(List<Map<String, String[]>> security,
 			ParameterObject typeParams) {
@@ -904,12 +913,12 @@ public class SwaggerHelpers {
 	 *            the property pathMap is used to store pathMap.It will give
 	 *            Map<String, PathObject> pathMap.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations. The
-	 *         path is appended to the URL from the Server Object in order to
-	 *         construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual endpoints and their operations.
+	 *         The path is appended to the URL from the Server Object in order
+	 *         to construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -935,16 +944,17 @@ public class SwaggerHelpers {
 	 * @param schemAcl
 	 *            the property schemAcl is used to hold all swagger object.
 	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject. it
-	 *            describes a single response from an API Operation, including
-	 *            design-time, static links to operations based on the response.
+	 *            the property aclResponses it will give map of ResponseObject.
+	 *            it describes a single response from an API Operation,
+	 *            including design-time, static links to operations based on the
+	 *            response.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations. The
-	 *         path is appended to the URL from the Server Object in order to
-	 *         construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual end points and their operations.
+	 *         The path is appended to the URL from the Server Object in order
+	 *         to construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postAddAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -968,16 +978,17 @@ public class SwaggerHelpers {
 	 * @param schemAcl
 	 *            the property schemAcl is used to hold all swagger object.
 	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject. it
-	 *            describes a single response from an API Operation, including
-	 *            design-time, static links to operations based on the response.
+	 *            the property aclResponses it will give map of ResponseObject.
+	 *            it describes a single response from an API Operation,
+	 *            including design-time, static links to operations based on the
+	 *            response.
 	 * @param security
-	 *            the property security is used to defines a security scheme that
-	 *            can be used by the operations.
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
 	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations. The
-	 *         path is appended to the URL from the Server Object in order to
-	 *         construct the full URL. The Paths MAY be empty, due to ACL
+	 *         relative paths to the individual end points and their operations.
+	 *         The path is appended to the URL from the Server Object in order
+	 *         to construct the full URL. The Paths MAY be empty, due to ACL
 	 *         constraints
 	 */
 	private static Map<String, PathObject> postRemoveAclDefinitionCreation(Map<String, PathObject> pathMap,
@@ -997,8 +1008,9 @@ public class SwaggerHelpers {
 	/**
 	 * @param type
 	 *            the property type is used to get that ObjectType.
-	 * @return list of parameterObject is used to do a single operation parameter. A
-	 *         unique parameter is defined by a combination of a name and location
+	 * @return list of parameterObject is used to do a single operation
+	 *         parameter. A unique parameter is defined by a combination of a
+	 *         name and location
 	 */
 	private static List<ParameterObject> getFormDataObjects(ObjectType type) {
 		List<ParameterObject> list = new ArrayList<>();
@@ -1082,8 +1094,7 @@ public class SwaggerHelpers {
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 				if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-						? propertiesValues.getValue().getLocalName().equals("primaryKey")
-						: false) {
+						? propertiesValues.getValue().getLocalName().equals("primaryKey") : false) {
 					objectIdName = propertiesValues.getKey();
 					return objectIdName;
 				}
@@ -1103,9 +1114,9 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return InfoObject used provides metadata about the API. The metadata MAY be
-	 *         used by the clients if needed, and MAY be presented in editing or
-	 *         documentation generation tools for convenience
+	 * @return InfoObject used provides metadata about the API. The metadata MAY
+	 *         be used by the clients if needed, and MAY be presented in editing
+	 *         or documentation generation tools for convenience
 	 */
 	public static InfoObject generateInfoObject() {
 		return infoObj;
@@ -1121,16 +1132,17 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param description
-	 *            A short description of the application. CommonMark syntax MAY be
-	 *            used for rich text representation.
+	 *            A short description of the application. CommonMark syntax MAY
+	 *            be used for rich text representation.
 	 * @param version
-	 *            The version of the OpenAPI document (which is distinct from the
-	 *            OpenAPI Specification version or the API implementation version).
+	 *            The version of the OpenAPI document (which is distinct from
+	 *            the OpenAPI Specification version or the API implementation
+	 *            version).
 	 * @param title
 	 *            The title of the application.
 	 * @param termsOfService
-	 *            A URL to the Terms of Service for the API. MUST be in the format
-	 *            of a URL.
+	 *            A URL to the Terms of Service for the API. MUST be in the
+	 *            format of a URL.
 	 * @param contact
 	 *            The contact information for the exposed API.
 	 * @param license
@@ -1148,11 +1160,11 @@ public class SwaggerHelpers {
 
 	/**
 	 * @param description
-	 *            A short description of the target documentation. CommonMark syntax
-	 *            MAY be used for rich text representation.
+	 *            A short description of the target documentation. CommonMark
+	 *            syntax MAY be used for rich text representation.
 	 * @param url
-	 *            The URL for the target documentation. Value MUST be in the format
-	 *            of a URL.
+	 *            The URL for the target documentation. Value MUST be in the
+	 *            format of a URL.
 	 */
 	public static void setExternalDocsObject(String description, String url) {
 		externalDocsObject.setDescription(description);
@@ -1245,8 +1257,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return true means type have custom folder,false means type does not have any
-	 *         custom folder
+	 * @return true means type have custom folder,false means type does not have
+	 *         any custom folder
 	 */
 	public static boolean customTypeHasFolder() {
 		final String value = System.getenv("CUSTOM_TYPE_HAS_FOLDER");
@@ -1358,6 +1370,48 @@ public class SwaggerHelpers {
 	}
 
 	@SuppressWarnings("unchecked")
+	public static Map<String, Object> formRelationDataForCrud(Session session, ArrayList<Object> relationData) {
+		Map<String, Object> relMap = new LinkedHashMap<String, Object>();
+		if (relationData != null) {
+			relationData.forEach(relObj -> {
+				JSONObject jsonSub = new JSONObject();
+				LinkedHashMap<Object, Object> relationObjectCrudMap = (LinkedHashMap<Object, Object>) relObj;
+				LinkedHashMap<Object, Object> getRelationshipCrudData = (LinkedHashMap<Object, Object>) relationObjectCrudMap
+						.get("object");
+				LinkedHashMap<Object, Object> getRelationshipObjectCrudData = (LinkedHashMap<Object, Object>) getRelationshipCrudData
+						.get("object");
+				Map<String, Object> succintProps = (Map<String, Object>) getRelationshipObjectCrudData
+						.get("succinctProperties");
+				JSONObject objmainProps = new JSONObject();
+
+				String relType = succintProps.get(PropertyIds.NAME).toString();
+				if (relType.contains(",")) {
+
+					relType = succintProps.get(PropertyIds.NAME).toString()
+							.substring(succintProps.get(PropertyIds.NAME).toString().lastIndexOf(",") + 1);
+					succintProps.put(PropertyIds.NAME,
+							succintProps.get(PropertyIds.NAME).toString().substring(0,
+									succintProps.get(PropertyIds.NAME).toString().lastIndexOf(",") == -1
+											? succintProps.get(PropertyIds.NAME).toString().length()
+											: succintProps.get(PropertyIds.NAME).toString().lastIndexOf(",")));
+				}
+
+				objmainProps.putAll(succintProps);
+				ArrayList<JSONObject> list = relMap.get(relType) != null ? (ArrayList<JSONObject>) relMap.get(relType)
+						: new ArrayList<>();
+				jsonSub.putAll(objmainProps);
+				ArrayList<Object> childrenRelationDataCrud = (ArrayList<Object>) relationObjectCrudMap.get("children");
+				if (childrenRelationDataCrud != null) {
+					jsonSub.putAll(formRelationDataForCrud(session, childrenRelationDataCrud));
+				}
+				list.add(jsonSub);
+				relMap.put(relType, list);
+			});
+		}
+		return relMap;
+	}
+
+	@SuppressWarnings("unchecked")
 	private static void getMapValue(Map<String, Object> props, Map<String, List<Map<String, Object>>> relatedMap) {
 		Pattern p = Pattern.compile("[a-zA-Z]_[a-zA-Z]");
 		List<String> id = new ArrayList<>();
@@ -1417,19 +1471,19 @@ public class SwaggerHelpers {
 		if (relationData != null) {
 			relationData.forEach(relObj -> {
 				LinkedHashMap<Object, Object> relObjMap = (LinkedHashMap<Object, Object>) relObj;
-				LinkedHashMap<Object, Object> object1 = (LinkedHashMap<Object, Object>) relObjMap.get("object");
-				LinkedHashMap<Object, Object> object2 = (LinkedHashMap<Object, Object>) object1.get("object");
-				LinkedHashMap<Object, Object> succintProps = (LinkedHashMap<Object, Object>) object2
+				LinkedHashMap<Object, Object> object = (LinkedHashMap<Object, Object>) relObjMap.get("object");
+				LinkedHashMap<Object, Object> getObject = (LinkedHashMap<Object, Object>) object.get("object");
+				LinkedHashMap<Object, Object> succintProps = (LinkedHashMap<Object, Object>) getObject
 						.get("succinctProperties");
-				LinkedHashMap<Object, Object> aclProps = (LinkedHashMap<Object, Object>) object2.get("acl");
+				LinkedHashMap<Object, Object> aclProps = (LinkedHashMap<Object, Object>) getObject.get("acl");
 				JSONObject objmainProps = formProperties(session, succintProps, false, true, true, aclProps);
 				String relType = succintProps.get(PropertyIds.OBJECT_ID).toString();
 				List<Map<String, Object>> resultesMap = new ArrayList<>();
 				resultesMap.add(objmainProps);
 				relatedMap.put(relType, resultesMap);
-				ArrayList<Object> children1 = (ArrayList<Object>) relObjMap.get("children");
-				if (children1 != null) {
-					formChildData(children1, relatedMap);
+				ArrayList<Object> children = (ArrayList<Object>) relObjMap.get("children");
+				if (children != null) {
+					formChildData(children, relatedMap);
 				}
 			});
 		}
@@ -1444,9 +1498,9 @@ public class SwaggerHelpers {
 			relationData.forEach(relObj -> {
 
 				LinkedHashMap<Object, Object> relObjMap = (LinkedHashMap<Object, Object>) relObj;
-				LinkedHashMap<Object, Object> object1 = (LinkedHashMap<Object, Object>) relObjMap.get("object");
-				LinkedHashMap<Object, Object> object2 = (LinkedHashMap<Object, Object>) object1.get("object");
-				LinkedHashMap<Object, Object> succintProps = (LinkedHashMap<Object, Object>) object2
+				LinkedHashMap<Object, Object> childObject = (LinkedHashMap<Object, Object>) relObjMap.get("object");
+				LinkedHashMap<Object, Object> getChildObj = (LinkedHashMap<Object, Object>) childObject.get("object");
+				LinkedHashMap<Object, Object> succintProps = (LinkedHashMap<Object, Object>) getChildObj
 						.get("succinctProperties");
 				JSONObject objmainProps = null;
 				String relType = succintProps.get(PropertyIds.NAME).toString();
@@ -1464,9 +1518,9 @@ public class SwaggerHelpers {
 					listPrvs = new ArrayList<>();
 				}
 				listPrvs.addAll(resultesMap);
-				ArrayList<Object> children1 = (ArrayList<Object>) relObjMap.get("children");
-				if (children1 != null) {
-					formChildData(children1, relatedMap);
+				ArrayList<Object> childrenMap = (ArrayList<Object>) relObjMap.get("children");
+				if (childrenMap != null) {
+					formChildData(childrenMap, relatedMap);
 				}
 				relatedMap.put(relType, listPrvs);
 			});
@@ -1615,12 +1669,10 @@ public class SwaggerHelpers {
 		jsonObject.entrySet().stream().forEach(k -> {
 			if (k.getValue() != null && !k.getValue().isEmpty()) {
 				k.getValue().stream().forEach(obj -> {
-					List<String> ids = new ArrayList<String>();
-					ids.add(0, "");
-
-					if (!deletedIds.contains(obj.get("id").toString())) {
-						deleteObject(session, obj, ids, null, deletedIds, false);
-						deletedIds.add(obj.get("id").toString());
+					String objectId = obj.get("id").toString();
+					if (!deletedIds.contains(objectId)) {
+						deleteObject(session, objectId, deletedIds);
+						deletedIds.add(objectId);
 					}
 				});
 			}
@@ -1628,31 +1680,58 @@ public class SwaggerHelpers {
 
 	}
 
+	public static List<String> deleteRelationObjects(Session session, String id, List<String> deletedIds) {
+
+		ItemIterable<Relationship> source = session.getRelationships(new ObjectIdImpl(id), true,
+				RelationshipDirection.SOURCE, null, new OperationContextImpl());
+		List<String> targetObjectId = new ArrayList<>();
+		source.forEach(relId -> {
+			CmisObject targetObject = relId.getTarget();
+			targetObjectId.add(targetObject.getId());
+			deletedIds.add(targetObject.getId());
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Deleting relation object: {}", relId.getId());
+			}
+			relId.delete();
+		});
+		ItemIterable<Relationship> target = session.getRelationships(new ObjectIdImpl(id), true,
+				RelationshipDirection.TARGET, null, new OperationContextImpl());
+		target.forEach(relId -> {
+			session.delete(new ObjectIdImpl(relId.getId()));
+		});
+		if (targetObjectId.size() > 0) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Deleting target objects: {}", targetObjectId);
+			}
+			for (String deletedId : targetObjectId) {
+				deleteRelationObjects(session, deletedId, deletedIds);
+				session.delete(new ObjectIdImpl(deletedId));
+			}
+		}
+		return deletedIds;
+	}
+
 	private static void relationFlow(Session session, Map<String, List<Map<String, Object>>> jsonObject,
 			RelationType type, List<Ace> aceList) {
 		Map<String, Map<String, Object>> relationShip = new LinkedHashMap<>();
-		Map<String, Map<String, Object>> conflictRelationShips = new LinkedHashMap<>();
 		jsonObject.entrySet().stream().forEach(k -> {
 			String relType = k.getKey();
+
 			CmisObject relTypeItem = session.getObjectByPath("/cmis_ext:relationmd/" + relType);
 			String targetType = relTypeItem.getPropertyValue("target_table");
 			Map<String, Object> foreignKey = new HashMap<>();
-			// TODO later using
-			// if (relTypeItem.getPropertyValue("target_column") != null) {
-			// foreignKey.put(relTypeItem.getPropertyValue("target_column"),
-			// outerObj.getPropertyValue(relTypeItem.getPropertyValue("target_column")));
-			// }
+
 			if (k.getValue() != null && !k.getValue().isEmpty()) {
 				k.getValue().stream().forEach(obj -> {
 					Map<String, Object> sectionMap = (Map<String, Object>) obj;
 					TypeDefinition targetTypeDef = session.getTypeDefinition(targetType);
-					Map<String, Object> deprops = compileProperties(session, sectionMap, targetTypeDef, null, null);
+					Map<String, Object> deProps = compileCrudProperties(session, sectionMap, targetTypeDef);
 					if (type.equals(RelationType.CREATED)) {
-						createNewObject(session, deprops, targetTypeDef, foreignKey, aceList,
+						createNewObject(session, deProps, targetTypeDef, foreignKey, aceList,
 								obj.get("sourceParentId").toString(), relType, relationShip);
 					} else if (type.equals(RelationType.UPDATED)) {
-						updateRelationObject(session, deprops, sectionMap, targetTypeDef, aceList,
-								obj.get("sourceParentId").toString(), relType, conflictRelationShips);
+						updateRelationObject(session, deProps, sectionMap, targetTypeDef, aceList,
+								obj.get("sourceParentId").toString(), relType);
 					}
 				});
 			}
@@ -1660,17 +1739,14 @@ public class SwaggerHelpers {
 		if (!relationShip.isEmpty() && relationShip.size() > 0) {
 			createNewRelationShipsObject(session, relationShip, aceList);
 		}
-
 	}
 
-	private static void createNewObject(Session session, Map<String, Object> deprops, TypeDefinition targetTypeDef,
-			Map<String, Object> foreignKey, List<Ace> aceList, String parentId, String relName,
-			Map<String, Map<String, Object>> relationShip) {
+	private static Map<String, Object> createNewObject(Session session, Map<String, Object> deProps,
+			TypeDefinition targetTypeDef, Map<String, Object> foreignKey, List<Ace> aceList, String parentId,
+			String relName, Map<String, Map<String, Object>> relationShip) {
 		try {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("Creating new Relation Object with properties: {}", deprops);
-			}
-			CmisObject innerObject = createForMainObject(session, deprops, targetTypeDef, foreignKey, aceList);
+			LOG.info("Creating new Relation Object with properties: {}", deProps);
+			CmisObject innerObject = createForMainObject(session, deProps, targetTypeDef, foreignKey, aceList);
 			Map<String, Object> relationShipObjects = new HashMap<>();
 			relationShipObjects.put("sourceId", parentId);
 			relationShipObjects.put("targetId", innerObject.getId());
@@ -1678,9 +1754,9 @@ public class SwaggerHelpers {
 			relationShip.put(innerObject.getId(), relationShipObjects);
 		} catch (Exception ex) {
 			LOG.error("Error while creating new Relation Object, id: {}, Exception: {}",
-					deprops.get(PropertyIds.OBJECT_ID), ex);
+					deProps.get(PropertyIds.OBJECT_ID), ex);
 		}
-
+		return deProps;
 	}
 
 	private static void createNewRelationShipsObject(Session session, Map<String, Map<String, Object>> relationShip,
@@ -1693,102 +1769,26 @@ public class SwaggerHelpers {
 				}
 			});
 		} catch (Exception ex) {
-			LOG.error("BulkDocs Error while creating relationships, Exception: {}", ex);
+			LOG.error("Error while creating relationships, Exception: {}", ex);
 		}
 	}
 
 	private static void updateRelationObject(Session session, Map<String, Object> deprops,
 			Map<String, Object> sectionMap, TypeDefinition targetTypeDef, List<Ace> aceList, String sourceId,
-			String relName, Map<String, Map<String, Object>> conflictRelationShips) {
+			String relName) {
 		try {
 			CmisObject updateObj = session.getObject(deprops.get(PropertyIds.OBJECT_ID).toString());
-			if (deprops.get("lastModifiedDate") != null && updateObj.getPropertyValue("lastModifiedDate") != null) {
-				long lastModifiedDate = ((BigInteger) updateObj.getPropertyValue("lastModifiedDate")).longValue();
-				BigInteger lmd = (BigInteger) deprops.get("lastModifiedDate");
-				long latestModifiedDate = lmd.longValue();
-				if (latestModifiedDate > lastModifiedDate) {
-					updateObject(session, updateObj, targetTypeDef.getBaseTypeId().value(), deprops, null, aceList);
-				}
-			} else {
-				LOG.info("UpdateRelationObject lastModifiedDate is null for this object: {}", updateObj.getId());
-			}
+			updateObject(session, updateObj, targetTypeDef.getBaseTypeId().value(), deprops, null, aceList);
 		} catch (Exception ex) {
 			LOG.error("Error in updateRelationObject for id: {}, Cause: {}", deprops.get(PropertyIds.OBJECT_ID), ex);
 		}
 	}
 
-	private static Map<String, Object> compileProperties(Session session, Map<String, Object> jsonObject,
-			TypeDefinition typeDef, Map<String, Object> foreignKey, Boolean hasAttachments) {
-		try {
-			// filter out all keys which have "parent_child" type format in
-			// them,
-			// and add as main objects
-			Pattern p = Pattern.compile("[a-zA-Z]_[a-zA-Z]");
-			Map<String, Object> props = jsonObject.entrySet().stream()
-					.filter(a -> a.getValue() != null && !(p.matcher(a.getKey()).find()))
-					.collect(Collectors.toMap(a -> a.getKey(), b -> b.getValue()));
-
-			Object id = props.get("_id") != null ? props.get("_id")
-					: props.get(PropertyIds.OBJECT_ID) != null ? (String) props.get(PropertyIds.OBJECT_ID)
-							: props.get("id") != null ? props.get("id") : UUID.randomUUID().toString();
-			if (id != null && typeDef != null) {
-
-				Map<String, Object> propMapForMainObj = new HashMap<String, Object>();
-				typeDef.getPropertyDefinitions().entrySet().stream()
-						.filter(map -> (!(map.getKey().equalsIgnoreCase("cmis:name")
-								|| map.getKey().equalsIgnoreCase("cmis:objectTypeId")
-								|| map.getKey().equalsIgnoreCase("cmis:objectId"))))
-						.forEach(a -> {
-							if (props.get(a.getKey()) != null) {
-								propMapForMainObj.put(a.getKey(), props.get(a.getKey()));
-							}
-						});
-				propMapForMainObj.put(PropertyIds.OBJECT_TYPE_ID, typeDef.getId());
-
-				propMapForMainObj.putAll(props.entrySet().stream()
-						.filter(obj -> (obj.getKey().equals(PropertyIds.OBJECT_ID) || obj.getKey().equals("id")
-								|| obj.getKey().equals("_id")))
-						.collect(Collectors.toMap(a -> PropertyIds.OBJECT_ID, b -> String.valueOf(b.getValue()),
-								(p1, p2) -> p2)));
-
-				String name = props.get(PropertyIds.NAME) != null ? (String) props.get(PropertyIds.NAME)
-						: propMapForMainObj.get(PropertyIds.OBJECT_ID) != null
-								? (String) propMapForMainObj.get(PropertyIds.OBJECT_ID)
-								: (String) id;
-
-				propMapForMainObj.put(PropertyIds.NAME, name);
-
-				// add foreignKey for relationships
-				if (foreignKey != null) {
-					propMapForMainObj.putAll(foreignKey);
-				}
-
-				// add secondaryTypeIds
-
-				// check for attachments
-				if (hasAttachments != null) {
-					propMapForMainObj.put("hasAttachments", hasAttachments);
-				}
-
-				Map<String, Object> deprops = deserializeInput(propMapForMainObj, (ObjectType) typeDef, session);
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("CompileProperties: {}", deprops);
-				}
-				return deprops;
-			} else {
-				// throw new Exception("Id should not be null");
-			}
-		} catch (Exception ex) {
-			LOG.error("BulkDocs Error in compiling properties, Exception: {}", ex);
-		}
-		return null;
-	}
-
 	private static CmisObject updateObject(Session tokenSession, CmisObject obj, String type,
 			Map<String, Object> properties, Map<String, Object> attachmentProps, List<Ace> aceList) throws Exception {
 
-		LOG.info("Updating object: {}", obj.getId());
-		properties.remove(PropertyIds.NAME);
+		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerHelpers", "updateObject-CRUD operation",
+				obj.getId());
 		properties.remove(PropertyIds.OBJECT_ID);
 		properties.remove(PropertyIds.OBJECT_TYPE_ID);
 		obj.updateProperties(properties);
@@ -1805,8 +1805,13 @@ public class SwaggerHelpers {
 
 	}
 
-	private static void deleteObject(Session tokenSession, Map<String, Object> obj, List<String> ids,
-			Map<String, Object> properties, List<String> deletedIds, boolean forMainObject) {
+	private static void deleteObject(Session tokenSession, String objectToBeDeleted, List<String> deletedIds) {
+
+		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerHelpers", "deleteObject-CRUD operation",
+				objectToBeDeleted);
+		deleteAttachments(tokenSession, objectToBeDeleted);
+		deleteRelationObjects(tokenSession, objectToBeDeleted, deletedIds);
+		tokenSession.delete(new ObjectIdImpl(objectToBeDeleted));
 
 	}
 
@@ -1822,18 +1827,17 @@ public class SwaggerHelpers {
 		relProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis_ext:relationship");
 		relProps.put("relation_name", objectTypeId);
 		relProps.put(PropertyIds.NAME, sourceId + "_" + targetId);
-
 		session.createRelationship(relProps, null, aceList, null);
 	}
 
-	private static CmisObject createForMainObject(Session session, Map<String, Object> deprops, TypeDefinition typeDef,
+	private static CmisObject createForMainObject(Session session, Map<String, Object> deProps, TypeDefinition typeDef,
 			Map<String, Object> foreignKey, List<Ace> aceList) throws Exception {
 
-		String parentId = deprops.get("parentId") == null ? null : deprops.get("parentId").toString();
+		String parentId = deProps.get("parentId") == null ? null : deProps.get("parentId").toString();
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Creating new Object with properties: {}", deprops);
+			LOG.debug("Creating new Object with properties: {}", deProps);
 		}
-		CmisObject mainObj = createForBaseTypes(session, typeDef.getBaseTypeId(), parentId, deprops, null, aceList);
+		CmisObject mainObj = createForBaseTypes(session, typeDef.getBaseTypeId(), parentId, deProps, null, aceList);
 		return mainObj;
 	}
 
@@ -1861,6 +1865,7 @@ public class SwaggerHelpers {
 					aprops.put(PropertyIds.NAME, filename);
 
 					try {
+						@SuppressWarnings("unused")
 						CmisObject attachmentObj = createForBaseTypes(tokenSession, BaseTypeId.CMIS_DOCUMENT,
 								attachFolder.getId(), aprops, stream, aceList);
 					} catch (Exception ex) {
@@ -1884,9 +1889,9 @@ public class SwaggerHelpers {
 
 	}
 
-	private static void deleteAttachments(Session tokenSession, String id) {
+	private static void deleteAttachments(Session tokenSession, String string) {
 		try {
-			Folder folderAttachment = (Folder) tokenSession.getObjectByPath("/" + id + "_attachments");
+			Folder folderAttachment = (Folder) tokenSession.getObjectByPath("/" + string + "_attachments");
 			tokenSession.deleteTree(new ObjectIdImpl(folderAttachment.getId()), true, null, true);
 		} catch (Exception ex) {
 			// folder doesnt exist, do nothing
@@ -1896,7 +1901,6 @@ public class SwaggerHelpers {
 	public static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
 			Map<String, Object> input, ContentStream stream, List<Ace> aceList) throws Exception {
 		try {
-			LOG.info("BaseTypeID:{}", baseTypeId.value());
 			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
 				CmisObject fol = null;
 				if (parentId != null) {
@@ -2063,13 +2067,12 @@ public class SwaggerHelpers {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void crudOperation(Session session, String repositoryId, ObjectType typeDef, String input,
-			String userName, String password) throws JSONParseException {
+	public static Map<String, Object> crudOperation(Session session, String repositoryId, ObjectType typeDef,
+			String input, String userName, String password) throws JSONParseException {
 		try {
 			JSONParser parser = new JSONParser();
 			Object obj = parser.parse(input);
 			JSONArray repoArray = (JSONArray) obj;
-			System.out.println(repoArray);
 			for (Object object : repoArray) {
 				Map<String, Object> props = (Map<String, Object>) object;
 				Map<String, List<Map<String, Object>>> relatedMap = new LinkedHashMap<>();
@@ -2096,6 +2099,8 @@ public class SwaggerHelpers {
 
 				String id = isDeleted == true ? (String) props.get("_id")
 						: (String) properties.get(PropertyIds.OBJECT_ID);
+				LOG.info("className: {}, methodName: {}, repoId: {}, ObjectId: {}", "SwaggerHelpers", "crudOperation",
+						repositoryId, id);
 
 				try {
 					ArrayList<Object> relationData = getDescendantsForRelationObjects(userName, password, repositoryId,
@@ -2107,9 +2112,7 @@ public class SwaggerHelpers {
 						if (isDeleted) {
 							if (resultedObject.get(id) != null && resultedObject.get(id).size() > 0) {
 								Map<String, Object> resultObjectProps = resultedObject.get(id).get(0);
-								// deleteObject(tokenSession, resultObjectProps, ids, conflictRevIds,
-								// properties,
-								// new ArrayList<>(), true, revisionId);
+								deleteObject(session, resultObjectProps.get("id").toString(), new ArrayList<>());
 							}
 						} else {
 							// acl compare
@@ -2149,14 +2152,23 @@ public class SwaggerHelpers {
 							}
 						}
 					}
-
+					ArrayList<Object> returnRelationData = getDescendantsForRelationObjects(userName, password,
+							repositoryId, id);
+					if (returnRelationData != null) {
+						Map<String, Object> resultObject = formRelationDataForCrud(session, returnRelationData);
+						return ((ArrayList<JSONObject>) resultObject.entrySet().iterator().next().getValue()).get(0);
+					} else {
+						return new HashMap<>();
+					}
 				} catch (Exception ex) {
-					LOG.error("BulkDocs Error in repoId: {}, Exception: {}", repositoryId, ex);
+					LOG.error("Error in getDescendantsForRelationObjects for repoId: {}, Exception: {}", repositoryId,
+							ex);
 				}
 			}
 		} catch (Exception e) {
-			System.out.println(e);
+			LOG.error("Exception in compiling properties or type doesn't exist, crudOperation Error: {}", e);
 		}
+		return null;
 
 	}
 
@@ -2169,7 +2181,7 @@ public class SwaggerHelpers {
 			Pattern p = Pattern.compile("[a-zA-Z]_[a-zA-Z]");
 			Map<String, Object> props = jsonObject.entrySet().stream()
 					.filter(a -> a.getValue() != null && !(p.matcher(a.getKey()).find()))
-					.collect(Collectors.toMap(a -> a.getKey(), b -> b.getValue()));
+					.collect(Collectors.toMap(a -> getQueryName(a.getKey()), b -> b.getValue()));
 
 			Object id = props.get("_id") != null ? props.get("_id")
 					: props.get(PropertyIds.OBJECT_ID) != null ? (String) props.get(PropertyIds.OBJECT_ID)
@@ -2196,8 +2208,7 @@ public class SwaggerHelpers {
 
 				String name = props.get(PropertyIds.NAME) != null ? (String) props.get(PropertyIds.NAME)
 						: propMapForMainObj.get(PropertyIds.OBJECT_ID) != null
-								? (String) propMapForMainObj.get(PropertyIds.OBJECT_ID)
-								: (String) id;
+								? (String) propMapForMainObj.get(PropertyIds.OBJECT_ID) : (String) id;
 
 				propMapForMainObj.put(PropertyIds.NAME, name);
 
@@ -2210,9 +2221,46 @@ public class SwaggerHelpers {
 				// throw new Exception("Id should not be null");
 			}
 		} catch (Exception ex) {
-			LOG.error("BulkDocs Error in compiling properties, Exception: {}", ex);
+			LOG.error("Error in compileCrudProperties, Exception: {}", ex);
 		}
 		return null;
+	}
+
+	public static String getQueryName(String name) {
+		if (name.equalsIgnoreCase("path") || name.equalsIgnoreCase("description") || name.equalsIgnoreCase("parentId")
+				|| name.equalsIgnoreCase("contentStreamLength") || name.equalsIgnoreCase("contentStreamFileName")
+				|| name.equalsIgnoreCase("contentStreamMimeType") || name.equalsIgnoreCase("checkinComment")
+				|| name.equalsIgnoreCase("versionLabel") || name.equalsIgnoreCase("isMajorVersion")
+				|| name.equalsIgnoreCase("isLatestVersion") || name.equalsIgnoreCase("isLatestMajorVersion")
+				|| name.equalsIgnoreCase("name") || name.equalsIgnoreCase("isPrivateWorkingCopy")
+				|| name.equalsIgnoreCase("createdBy") || name.equalsIgnoreCase("contentStreamId")
+				|| name.equalsIgnoreCase("versionSeriesCheckedOutId") || name.equalsIgnoreCase("versionSeriesId")
+				|| name.equalsIgnoreCase("isVersionSeriesCheckedOut") || name.equalsIgnoreCase("isImmutable")
+				|| name.equalsIgnoreCase("modifiedBy") || name.equalsIgnoreCase("versionSeriesCheckedOutBy")) {
+			return getFieldName(name);
+		} else if (name.equalsIgnoreCase("id")) {
+			return "cmis:objectId";
+		} else if (name.equalsIgnoreCase("typeId")) {
+			return "cmis:objectTypeId";
+		} else if (name.equalsIgnoreCase("modifiedBy")) {
+			return "cmis:lastModifiedBy";
+		} else if (name.equalsIgnoreCase("createdAt")) {
+			return "cmis:creationDate";
+		} else if (name.equalsIgnoreCase("token")) {
+			return "cmis:changeToken";
+		} else if (name.equalsIgnoreCase("modifiedAt")) {
+			return "cmis:lastModificationDate";
+		} else if (name.equalsIgnoreCase("baseId")) {
+			return "cmis:baseTypeId";
+		} else {
+			return name;
+		}
+	}
+
+	private static String getFieldName(Object value) {
+		String valueString = value.toString();
+		String stringValue = "cmis:" + valueString;
+		return stringValue;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2289,9 +2337,6 @@ public class SwaggerHelpers {
 		});
 		Set<String> RelationName = deletedData.keySet();
 		List<String> deletedObjects = new ArrayList<>();
-		// RelationName.forEach(t -> {
-		// removeChild(t, deletedData, deletedObjects);
-		// });
 		if (deletedObjects.size() > 0) {
 			deletedObjects.forEach(t -> {
 				if (deletedData.containsKey(t)) {
