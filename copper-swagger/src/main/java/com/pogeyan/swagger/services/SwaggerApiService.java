@@ -37,7 +37,6 @@ import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectFactory;
-import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
@@ -64,7 +63,6 @@ import com.google.common.io.Files;
 import com.pogeyan.swagger.api.utils.MimeUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 import com.pogeyan.swagger.factory.SwaggerApiServiceFactory;
-import com.pogeyan.swagger.pojos.ErrorResponse;
 
 /**
  * SwaggerApiService Operations
@@ -105,11 +103,16 @@ public class SwaggerApiService {
 	 * @throws Exception
 	 */
 	public static Map<String, Object> invokePostMethod(String repositoryId, String typeId, String parentId,
-			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart)
-			throws Exception {
+			Map<String, Object> input, String userName, String password, String[] pathFragments, Part filePart,
+			Boolean includeCrud, String inputString) throws Exception {
 		CmisObject cmisObj = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeObj = SwaggerHelpers.getType(typeId);
+		if (typeObj == null) {
+			SwaggerHelpers.getAllTypes(session);
+			typeObj = SwaggerHelpers.getType(typeId);
+		}
+
 		if (pathFragments.length > 2 && pathFragments[2] != null) {
 			String idName = SwaggerHelpers.getIdName(typeObj);
 			String customId = null;
@@ -126,22 +129,30 @@ public class SwaggerApiService {
 			if (updateProperties != null) {
 				CmisObject newObj = doc.updateProperties(updateProperties);
 			}
-			Map<String, Object> propMap = compileProperties(doc, session);
-			LOG.info("customId:{} properties:{}", customId, propMap);
+			Map<String, Object> propMap = SwaggerHelpers.compileProperties(doc, session);
+			LOG.info("customId: {} properties: {}", customId, propMap);
 			return propMap;
 		} else {
 			ContentStream setContentStream = getContentStream(filePart);
 			// baseType
 			if (typeObj != null) {
-				Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
-				BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
-						: typeObj.getBaseType().getBaseTypeId();
-				Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
-						serializeMap);
-				cmisObj = createForBaseTypes(session, baseTypeId, parentId, properties, setContentStream);
-				Map<String, Object> propMap = compileProperties(cmisObj, session);
-				LOG.info("objectType:{} properties:{}", typeObj.getId(), propMap);
-				return propMap;
+				if (includeCrud) {
+					Map<String, Object> resultPropMap = SwaggerHelpers.crudOperation(session, repositoryId, typeObj,
+							inputString, userName, password);
+					return resultPropMap;
+				} else {
+					Map<String, Object> serializeMap = deserializeInput(input, typeObj, session);
+					BaseTypeId baseTypeId = typeObj.isBaseType() ? typeObj.getBaseTypeId()
+							: typeObj.getBaseType().getBaseTypeId();
+					Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
+							serializeMap);
+					cmisObj = SwaggerHelpers.createForBaseTypes(session, baseTypeId, parentId, properties,
+							setContentStream, null);
+					Map<String, Object> propMap = SwaggerHelpers.compileProperties(cmisObj, session);
+					LOG.info("objectType: {} properties: {}", typeObj.getId(), propMap);
+					return propMap;
+				}
+
 			}
 		}
 		return null;
@@ -150,7 +161,7 @@ public class SwaggerApiService {
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType obj, Session session)
 			throws Exception {
-		LOG.info("deSerializing Input:{}", input);
+		LOG.info("deSerializing Input: {}", input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
 		Map<String, PropertyDefinition<?>> dataPropDef = obj.getPropertyDefinitions();
 		for (String var : input.keySet()) {
@@ -179,19 +190,19 @@ public class SwaggerApiService {
 
 				if (reqPropType.equals(PropertyType.INTEGER)) {
 					if (valueOfType instanceof Integer) {
-						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
+						Integer valueBigInteger = SwaggerHelpers.convertInstanceOfObject(valueOfType, Integer.class);
 						serializeMap.put(var, valueBigInteger);
 					} else if (valueOfType instanceof List<?>) {
-						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
+						List<BigInteger> value = SwaggerHelpers.convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
 					}
 
 				} else if (reqPropType.equals(PropertyType.BOOLEAN)) {
 					if (valueOfType instanceof Boolean) {
-						Boolean booleanValue = convertInstanceOfObject(valueOfType, Boolean.class);
+						Boolean booleanValue = SwaggerHelpers.convertInstanceOfObject(valueOfType, Boolean.class);
 						serializeMap.put(var, booleanValue);
 					} else if (valueOfType instanceof List<?>) {
-						List<Boolean> booleanValue = convertInstanceOfObject(valueOfType, List.class);
+						List<Boolean> booleanValue = SwaggerHelpers.convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, booleanValue);
 					}
 
@@ -201,12 +212,12 @@ public class SwaggerApiService {
 					// HH:mm:ss Z yyyy", Locale.US);
 
 					if (valueOfType instanceof GregorianCalendar) {
-						Long value = convertInstanceOfObject(valueOfType, Long.class);
+						Long value = SwaggerHelpers.convertInstanceOfObject(valueOfType, Long.class);
 						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
 						lastModifiedCalender.setTimeInMillis(value);
 						serializeMap.put(var, lastModifiedCalender);
 					} else if (valueOfType instanceof List<?>) {
-						List<Long> value = convertInstanceOfObject(valueOfType, List.class);
+						List<Long> value = SwaggerHelpers.convertInstanceOfObject(valueOfType, List.class);
 						List<GregorianCalendar> calenderList = new ArrayList<>();
 						value.forEach(v -> {
 							GregorianCalendar lastModifiedCalender = new GregorianCalendar();
@@ -218,19 +229,19 @@ public class SwaggerApiService {
 
 				} else if (reqPropType.equals(PropertyType.DECIMAL)) {
 					if (valueOfType instanceof Double) {
-						Double value = convertInstanceOfObject(valueOfType, Double.class);
+						Double value = SwaggerHelpers.convertInstanceOfObject(valueOfType, Double.class);
 						serializeMap.put(var, value);
 					} else if (valueOfType instanceof List<?>) {
-						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
+						List<BigDecimal> value = SwaggerHelpers.convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
 					}
 				} else {
 					// string type
 					if (valueOfType instanceof String) {
-						String value = convertInstanceOfObject(valueOfType, String.class);
+						String value = SwaggerHelpers.convertInstanceOfObject(valueOfType, String.class);
 						serializeMap.put(var, value);
 					} else if (valueOfType instanceof List<?>) {
-						List<String> value = convertInstanceOfObject(valueOfType, List.class);
+						List<String> value = SwaggerHelpers.convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
 					}
 				}
@@ -240,175 +251,6 @@ public class SwaggerApiService {
 		}
 		LOG.info("serializedMap:{}", serializeMap);
 		return serializeMap;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Map<String, Object> deserializeInputForResponse(Map<String, Object> input, ObjectType obj,
-			Session session) throws Exception {
-		LOG.info("deSerializing Input:{}", input);
-		Map<String, Object> serializeMap = new HashMap<String, Object>();
-		Map<String, PropertyDefinition<?>> dataPropDef = obj.getPropertyDefinitions();
-		for (String var : input.keySet()) {
-			List<?> valueOfType = (List<?>) input.get(var);
-
-			if (var.equals("parentId")) {
-				continue;
-			}
-			if (valueOfType != null) {
-				PropertyType reqPropType = null;
-				PropertyDefinition<?> defObj = dataPropDef.get(var);
-				if (defObj == null) {
-
-					List<?> secondaryValues = (List<?>) input.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
-					for (Object stype : secondaryValues) {
-						TypeDefinition type = session.getTypeDefinition((String) stype);
-						for (Entry<String, PropertyDefinition<?>> t : type.getPropertyDefinitions().entrySet()) {
-							if (t.getValue().getId().equals(var)) {
-								reqPropType = t.getValue().getPropertyType();
-							}
-						}
-					}
-
-				} else {
-					reqPropType = defObj.getPropertyType();
-				}
-
-				if (reqPropType.equals(PropertyType.INTEGER)) {
-					if (valueOfType.size() == 1) {
-						Integer valueBigInteger = convertInstanceOfObject(valueOfType.get(0), Integer.class);
-						serializeMap.put(var, valueBigInteger);
-					} else {
-						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
-						serializeMap.put(var, value);
-					}
-
-				} else if (reqPropType.equals(PropertyType.BOOLEAN)) {
-					if (valueOfType.size() == 1) {
-						Boolean booleanValue = convertInstanceOfObject(valueOfType.get(0), Boolean.class);
-						serializeMap.put(var, booleanValue);
-					} else {
-						List<Boolean> booleanValue = convertInstanceOfObject(valueOfType, List.class);
-						serializeMap.put(var, booleanValue);
-					}
-
-				} else if (reqPropType.equals(PropertyType.DATETIME)) {
-
-					// SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd
-					// HH:mm:ss Z yyyy", Locale.US);
-
-					if (valueOfType.size() == 1) {
-						GregorianCalendar lastModifiedCalender = (GregorianCalendar) valueOfType.get(0);
-						serializeMap.put(var, lastModifiedCalender.getTimeInMillis());
-					} else {
-						List<GregorianCalendar> value = convertInstanceOfObject(valueOfType, List.class);
-						List<Long> calenderList = new ArrayList<>();
-						value.forEach(v -> {
-							calenderList.add(v.getTimeInMillis());
-						});
-						serializeMap.put(var, calenderList);
-					}
-
-				} else if (reqPropType.equals(PropertyType.DECIMAL)) {
-					if (valueOfType.size() == 1) {
-						Double value = convertInstanceOfObject(valueOfType.get(0), Double.class);
-						serializeMap.put(var, value);
-					} else {
-						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
-						serializeMap.put(var, value);
-					}
-				} else {
-					// string type
-					if (valueOfType.size() == 1) {
-						String value = convertInstanceOfObject(valueOfType.get(0), String.class);
-						serializeMap.put(var, value);
-					} else {
-						List<String> value = convertInstanceOfObject(valueOfType, List.class);
-						serializeMap.put(var, value);
-					}
-				}
-			} else {
-				continue;
-			}
-		}
-		LOG.info("serializedMap:{}", serializeMap);
-		return serializeMap;
-	}
-
-	private static Map<String, Object> compileProperties(CmisObject cmisObj, Session session) throws Exception {
-		Map<String, Object> propMap = new HashMap<String, Object>();
-		cmisObj.getProperties().stream().forEach(a -> {
-			propMap.put(a.getDefinition().getId(), a.getValues());
-		});
-		Map<String, Object> outputMap = deserializeInputForResponse(propMap, cmisObj.getType(), session);
-
-		return outputMap;
-	}
-
-	private static <T> T convertInstanceOfObject(Object o, Class<T> clazz) {
-		try {
-			return clazz.cast(o);
-		} catch (ClassCastException e) {
-			return null;
-		}
-	}
-
-	private static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
-			Map<String, Object> input, ContentStream stream) throws Exception {
-		try {
-			LOG.info("BaseTypeID:{}", baseTypeId.value());
-			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
-				CmisObject fol = null;
-				if (parentId != null) {
-					fol = ((Folder) session.getObject(parentId)).createFolder(input);
-					return fol;
-				} else {
-					ObjectId id = session.getRootFolder().createFolder(input);
-					fol = session.getObject(id);
-					return fol;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_DOCUMENT)) {
-				CmisObject doc = null;
-				if (parentId != null) {
-					doc = ((Folder) session.getObject(parentId)).createDocument(input, stream != null ? stream : null,
-							null);
-					return doc;
-				} else {
-					ObjectId id = session.createDocument(input, null, stream != null ? stream : null, null);
-					doc = session.getObject(id);
-					return doc;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_ITEM)) {
-				CmisObject item = null;
-				if (parentId != null) {
-					item = ((Folder) session.getObject(parentId)).createItem(input);
-					return item;
-				} else {
-					ObjectId id = session.createItem(input, null);
-					item = session.getObject(id);
-					return item;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_RELATIONSHIP)) {
-				ObjectId id = session.createRelationship(input);
-				CmisObject rel = session.getObject(id);
-				return rel;
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_POLICY)) {
-				CmisObject policy = null;
-				if (parentId != null) {
-					policy = ((Folder) session.getObject(parentId)).createPolicy(input);
-					return policy;
-				} else {
-					ObjectId polId = session.createPolicy(input, null);
-					policy = session.getObject(polId);
-					return policy;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_SECONDARY)) {
-				return null;
-			}
-		} catch (Exception e) {
-			ErrorResponse resp = SwaggerHelpers.handleException(e);
-			throw new ErrorResponse(resp);
-		}
-		return null;
 	}
 
 	/**
@@ -454,7 +296,7 @@ public class SwaggerApiService {
 		CmisObject obj = session.getObject(customId, context);
 		LOG.info("TypeId:{},id:{},Object:{}", typeId, customId, obj);
 		if (obj != null && typeobj.getId().equals(obj.getType().getId())) {
-			Map<String, Object> propMap = compileProperties(obj, session);
+			Map<String, Object> propMap = SwaggerHelpers.compileProperties(obj, session);
 			return propMap;
 		} else {
 			throw new Exception("Type Missmatch");
@@ -542,7 +384,7 @@ public class SwaggerApiService {
 					serializeMap, obj.getPropertyValue("revisionId"));
 			if (updateProperties != null) {
 				CmisObject newObj = obj.updateProperties(updateProperties);
-				Map<String, Object> propMap = compileProperties(newObj, session);
+				Map<String, Object> propMap = SwaggerHelpers.compileProperties(newObj, session);
 				return propMap;
 			}
 			return null;
@@ -864,7 +706,7 @@ public class SwaggerApiService {
 		if (relationType != null) {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
-				Map<String, Object> propmap = compileProperties(types, session);
+				Map<String, Object> propmap = SwaggerHelpers.compileProperties(types, session);
 				TypeDefinition typedef = SwaggerHelpers.getType(propmap.get("target_table").toString());
 				JSONObject obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
 				ItemIterable<CmisObject> relationInnerChildType = SwaggerHelpers.getRelationshipType(session,

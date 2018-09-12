@@ -71,6 +71,7 @@ public class ApiDocsServlet extends HttpServlet {
 			boolean skip = false;
 			Map<String, Object> input = null;
 			Part filePart = null;
+			String jsonString = null;
 			String method = request.getMethod();
 			String auth = request.getHeader("Authorization");
 			String credentials[] = HttpUtils.getCredentials(auth);
@@ -87,22 +88,20 @@ public class ApiDocsServlet extends HttpServlet {
 				} else if (pathFragments[1].equals("_metadata")) {
 					skip = true;
 				} else {
-					String jsonString = IOUtils.toString(request.getInputStream());
-					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
-					});
+					jsonString = IOUtils.toString(request.getInputStream());
 				}
 			}
 			if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
 				if (pathFragments[1].equals("_metadata")) {
 					skip = true;
 				} else {
-					String jsonString = IOUtils.toString(request.getInputStream());
+					jsonString = IOUtils.toString(request.getInputStream());
 					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
 					});
 				}
 			}
 			if (METHOD_POST.equals(method)) {
-				doPost(request, response, credentials, pathFragments, input, filePart);
+				doPost(request, response, credentials, pathFragments, input, filePart, jsonString);
 			} else if (METHOD_GET.equals(method)) {
 				doGet(request, response, credentials, pathFragments);
 			} else if (METHOD_PUT.equals(method)) {
@@ -123,7 +122,7 @@ public class ApiDocsServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response, String[] credentials,
 			String[] pathFragments) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			Map<String, Object> propMap = null;
 			JSONObject obj = null;
 			ContentStream stream = null;
@@ -188,19 +187,31 @@ public class ApiDocsServlet extends HttpServlet {
 	}
 
 	/**
+	 * @param input
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
-			String pathFragments[], Map<String, Object> input, Part filePart) throws Exception {
+			String pathFragments[], Map<String, Object> input, Part filePart, String inputString) throws Exception {
 		try {
-			LOG.info("method:{} repositoryId:{} type:{}", request.getMethod(), pathFragments[0], pathFragments[1]);
+			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
 			JSONObject obj = null;
 			Acl acl = null;
 			Map<String, Object> propMap = null;
 			String repositoryId = pathFragments[0];
 			String typeId = pathFragments[1];
 			String parentId = request.getParameter("parentId");
+			boolean crudOpreation = false;
+			if (request.getQueryString() != null) {
+				crudOpreation = request.getParameter("includeRelation") != null
+						? Boolean.parseBoolean(request.getParameter("includeRelation")) : false;
+			}
+
+			if (!crudOpreation && inputString != null) {
+				input = mapper.readValue(inputString, new TypeReference<Map<String, String>>() {
+				});
+			}
+
 			if (pathFragments.length > 2 && pathFragments[2].equals("type")) {
 				TypeDefinition typedef = SwaggerApiService.invokePostTypeDefMethod(repositoryId, credentials[0],
 						credentials[1], request.getInputStream());
@@ -210,7 +221,7 @@ public class ApiDocsServlet extends HttpServlet {
 						credentials[1]);
 			} else {
 				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, credentials[0],
-						credentials[1], pathFragments, filePart);
+						credentials[1], pathFragments, filePart, crudOpreation, inputString);
 			}
 			if (propMap != null) {
 				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
