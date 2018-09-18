@@ -120,7 +120,7 @@ import com.pogeyan.swagger.pojos.TagObject;
  */
 public class SwaggerHelpers {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerHelpers.class);
-	private static Cache<String, ObjectType> typeCacheMap;
+	public static Cache<String, ObjectType> typeCacheMap;
 	private static Cache<String, Session> sessionMap;
 	public static final int InvalidArgumentExceptionCode = 400;
 	public static final int ConstraintExceptionCode = 409;
