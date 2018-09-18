@@ -474,8 +474,11 @@ public class SwaggerApiService {
 			HashMap<String, Object> properties = new HashMap<String, Object>();
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
 					properties);
-			CmisObject newObj = obj.updateProperties(updateProperties);
+			if(updateProperties != null && !updateProperties.isEmpty()){
+				CmisObject newObj = obj.updateProperties(updateProperties);
+			}
 		}
+		SwaggerHelpers.typeCacheMap.put(returnedType.getId().toString(), (ObjectType) returnedType);
 		return returnedType;
 	}
 
