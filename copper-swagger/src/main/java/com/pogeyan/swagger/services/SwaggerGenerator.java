@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
 import com.pogeyan.swagger.pojos.DefinitionsObject;
 import com.pogeyan.swagger.pojos.InfoObject;
 import com.pogeyan.swagger.pojos.PathObject;
@@ -33,21 +33,21 @@ import com.pogeyan.swagger.pojos.TagObject;
 public class SwaggerGenerator {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerGenerator.class);
 
-	public String generateSwagger(String repoId) {
-		ObjectMapper mp = new ObjectMapper();
+	public String generateSwagger(String repositoryId) {
+		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = null;
 		try {
-			LOG.info("Generating Swagger Json for repository:{}", repoId);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerGenerator", "generateSwagger", repositoryId);
 
-			InfoObject infoObj = SwaggerHelpers.generateInfoObject();
-			List<TagObject> tags = SwaggerHelpers.generateTagsForAllTypes();
-			Map<String, SecurityDefinitionObject> securityDef = SwaggerHelpers.getSecurityDefinitions();
-			Map<String, DefinitionsObject> definitions = SwaggerHelpers.getDefinitions();
-			Map<String, PathObject> paths = SwaggerHelpers.generatePathForAllTypes();
-			SwaggerJsonObject swaggerObj = new SwaggerJsonObject(SwaggerHelpers.generateInfoObject().getVersion(),
-					SwaggerHelpers.getHostSwaggerUrl(), repoId, new String[] { "http" }, infoObj,
-					SwaggerHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
-			jsonString = mp.writeValueAsString(swaggerObj);
+			InfoObject infoObj = SwaggerUIDefnHelpers.generateInfoObject();
+			List<TagObject> tags = SwaggerUIDefnHelpers.generateTagsForAllTypes();
+			Map<String, SecurityDefinitionObject> securityDef = SwaggerUIDefnHelpers.getSecurityDefinitions();
+			Map<String, DefinitionsObject> definitions = SwaggerUIDefnHelpers.getDefinitions();
+			Map<String, PathObject> paths = SwaggerUIDefnHelpers.generatePathForAllTypes();
+			SwaggerJsonObject swaggerObject = new SwaggerJsonObject(SwaggerUIDefnHelpers.generateInfoObject().getVersion(),
+					SwaggerUIDefnHelpers.getHostSwaggerUrl(), repositoryId, new String[] { "http" }, infoObj,
+					SwaggerUIDefnHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
+			jsonString = mapper.writeValueAsString(swaggerObject);
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOG.error("Json generation exception: {}", e.getMessage());

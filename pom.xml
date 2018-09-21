@@ -130,5 +130,6 @@
 		<module>copper-swagger-api</module>
 		<module>external</module>
 		<module>copper-swagger</module>
+		<module>copper-swagger-impl</module>
 	</modules>
 </project>

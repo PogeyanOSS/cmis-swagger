@@ -15,6 +15,11 @@
       <param-name>cors.exposed.headers</param-name>
       <param-value>Content-Disposition</param-value>
     </init-param>
+    <init-param>
+      <description>A comma separated list of allowed methods when making a non simple CORS request.</description>
+      <param-name>cors.allowed.methods</param-name>
+      <param-value>GET,POST,HEAD,OPTIONS,PUT,DELETE</param-value>
+    </init-param>
   </filter>
   <filter-mapping>
     <filter-name>CORS Filter</filter-name>

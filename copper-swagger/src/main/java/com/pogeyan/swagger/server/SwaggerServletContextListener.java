@@ -33,7 +33,7 @@ import org.apache.chemistry.opencmis.commons.impl.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
 import com.pogeyan.swagger.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.impl.factory.IObjectFacade;
 
@@ -184,9 +184,9 @@ public class SwaggerServletContextListener implements ServletContextListener {
 		contact.put("email", serverEmail);
 		license.put("name", serverName);
 		license.put("url", serverUrl);
-		SwaggerHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
+		SwaggerUIDefnHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
 				license);
-		SwaggerHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
+		SwaggerUIDefnHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
 		return true;
 
 	}
@@ -194,7 +194,7 @@ public class SwaggerServletContextListener implements ServletContextListener {
 	private boolean initializeSwaggerApiService(String swaggerApiClass) {
 
 		try {
-			LOG.info("Initialized Swagger Api Services Class: {}", swaggerApiClass);
+			LOG.info("class name: {}, method name: {}", "SwaggerServletContextListener", "initializeSwaggerApiService");
 			Class<?> swaggerApiServiceClass = Class.forName(swaggerApiClass);
 			IObjectFacade apiService = (IObjectFacade) swaggerApiServiceClass.newInstance();
 			SwaggerApiServiceFactory.add(apiService);

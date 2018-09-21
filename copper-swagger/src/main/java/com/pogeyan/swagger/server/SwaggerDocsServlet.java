@@ -27,7 +27,7 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
 import com.pogeyan.swagger.services.SwaggerGenerator;
 import com.pogeyan.swagger.utils.HttpUtils;
 
@@ -54,12 +54,12 @@ public class SwaggerDocsServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		String pathFragments[] = HttpUtils.splitPath(request);
-		String repoId = pathFragments[0];
-		LOG.info("Swagger Docs for repository:{}", repoId);
-		if (repoId != null) {
-			SwaggerHelpers.setHostSwaggerUrl(request.getServerName() + ":" + request.getServerPort() + "/api/");
-			SwaggerGenerator sg = new SwaggerGenerator();
-			String content = sg.generateSwagger(repoId);
+		String repositoryId = pathFragments[0];
+		LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerDocsServlet", "doGet", repositoryId);
+		if (repositoryId != null) {
+			SwaggerUIDefnHelpers.setHostSwaggerUrl(request.getServerName() + ":" + request.getServerPort() + "/api/");
+			SwaggerGenerator swaggerGenerator = new SwaggerGenerator();
+			String content = swaggerGenerator.generateSwagger(repositoryId);
 			response.getWriter().write(content);
 		} else {
 			throw new CmisObjectNotFoundException("Repo Id is null or invalid");

@@ -60,10 +60,10 @@ public class BasiAuthFilter implements Filter {
 							String username = credentials.substring(0, p).trim();
 							String password = credentials.substring(p + 1).trim();
 							String pathFragments[] = HttpUtils.splitPath(request);
-							String repoId = pathFragments[0];
+							String repositoryId = pathFragments[0];
 							Session session;
 							try {
-								session = SwaggerHelpers.createSession(repoId, username, password);
+								session = SwaggerHelpers.createSession(repositoryId, username, password);
 								SwaggerHelpers.getAllTypes(session);
 
 								if (session != null) {

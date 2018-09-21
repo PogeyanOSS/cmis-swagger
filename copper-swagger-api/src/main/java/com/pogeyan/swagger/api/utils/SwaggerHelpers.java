@@ -16,24 +16,32 @@
 package com.pogeyan.swagger.api.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URLDecoder;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+//import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Folder;
 import org.apache.chemistry.opencmis.client.api.ItemIterable;
+import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
@@ -43,8 +51,9 @@ import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
-import org.apache.chemistry.opencmis.commons.definitions.TypeMutability;
+import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
@@ -63,9 +72,9 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStreamNotSupportedEx
 import org.apache.chemistry.opencmis.commons.exceptions.CmisTooManyRequestsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUpdateConflictException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.AbstractPropertyDefinition;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.AbstractTypeDefinition;
+import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
+import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -73,29 +82,28 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.pogeyan.swagger.pojos.DefinitionsObject;
+import com.pogeyan.swagger.apis.IRequest;
+import com.pogeyan.swagger.apis.SRequestMessage;
 import com.pogeyan.swagger.pojos.ErrorResponse;
 import com.pogeyan.swagger.pojos.ExternalDocs;
 import com.pogeyan.swagger.pojos.InfoObject;
-import com.pogeyan.swagger.pojos.ParameterObject;
-import com.pogeyan.swagger.pojos.PathCommonObject;
-import com.pogeyan.swagger.pojos.PathObject;
-import com.pogeyan.swagger.pojos.ResponseObject;
-import com.pogeyan.swagger.pojos.SecurityDefinitionObject;
-import com.pogeyan.swagger.pojos.TagObject;
 
 /**
  * SwaggerHelpers operations.
+ * 
+ * @param <Irequest>
  */
-public class SwaggerHelpers {
+public class SwaggerHelpers<Irequest> {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerHelpers.class);
-	private static Cache<String, ObjectType> typeCacheMap;
+	public static Cache<String, ObjectType> typeCacheMap;
 	private static Cache<String, Session> sessionMap;
 	public static final int InvalidArgumentExceptionCode = 400;
 	public static final int ConstraintExceptionCode = 409;
@@ -113,11 +121,18 @@ public class SwaggerHelpers {
 	public static final int CmisVersioningExceptionCode = 409;
 	public static final int CmisTooManyRequestsExceptionCode = 429;
 	public static final int CmisServiceUnavailableExceptionCode = 503;
+	public static final String METHOD_GET = "GET";
+	public static final String METHOD_POST = "POST";
+	public static final String METHOD_PUT = "PUT";
+	public static final String METHOD_DELETE = "DELETE";
+	private static final IRequest sRequestMessage = null;
 	public static InfoObject infoObj = new InfoObject();
 	public static ExternalDocs externalDocsObject = new ExternalDocs();
 	public static String hostSwaggerUrl;
+	public static ObjectMapper mapper = new ObjectMapper();
+
 	static {
-		typeCacheMap = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
+		setTypeCacheMap(CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build());
 		sessionMap = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 	}
 
@@ -221,7 +236,7 @@ public class SwaggerHelpers {
 		List<String> list = getBaseTypeList();
 		for (String type : list) {
 			ObjectType baseType = session.getTypeDefinition(type);
-			typeCacheMap.put(baseType.getId().toString(), baseType);
+			getTypeCacheMap().put(baseType.getId().toString(), baseType);
 			List<Tree<ObjectType>> allTypes = session.getTypeDescendants(type, -1, true);
 			for (Tree<ObjectType> object : allTypes) {
 				getChildTypes(object);
@@ -231,7 +246,7 @@ public class SwaggerHelpers {
 	}
 
 	public static Boolean getTypeIsPresents() {
-		if (typeCacheMap.size() > 0) {
+		if (getTypeCacheMap().size() > 0) {
 			return true;
 		}
 		return false;
@@ -247,7 +262,7 @@ public class SwaggerHelpers {
 	 * @return the Object Type
 	 */
 	public static ObjectType getType(String typeId) {
-		return typeCacheMap.getIfPresent(typeId);
+		return ((Cache<String, ObjectType>) getTypeCacheMap()).getIfPresent(typeId);
 	}
 
 	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
@@ -274,786 +289,14 @@ public class SwaggerHelpers {
 		List<Tree<ObjectType>> getChildren = typeChildren.getChildren();
 		if (getChildren.size() > 0) {
 			// this will add the higher level item
-			typeCacheMap.put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
+			getTypeCacheMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
 			for (Tree<ObjectType> object : getChildren) {
 				getChildTypes(object);
 			}
 		} else {
 			// this will add all children
-			typeCacheMap.put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
+			getTypeCacheMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
 		}
-	}
-
-	/**
-	 * @return TagObject is adds metadata to a single tag that is used by the
-	 *         Operation Object. It is not mandatory to have a Tag Object per
-	 *         tag defined in the Operation Object instances. List of tags used
-	 *         by the specification with additional metadata. The order of the
-	 *         tags can be used to reflect on their order by the parsing tools.
-	 *         Not all tags that are used by the Operation Object must be
-	 *         declared. The tags that are not declared MAY be organized
-	 *         randomly or based on the tools' logic. Each tag name in the list
-	 *         MUST be unique.
-	 */
-	public static List<TagObject> generateTagsForAllTypes() {
-		List<TagObject> tagsList = new ArrayList<TagObject>();
-		for (ObjectType type : typeCacheMap.asMap().values()) {
-			String name = getDefinitionName(type);
-			TagObject tag = new TagObject(name, type.getDescription() + " Tag", externalDocsObject);
-			tagsList.add(tag);
-		}
-
-		// add Type TagObject
-		TagObject tagType = new TagObject("Types", "MetaData Type " + " Tag", externalDocsObject);
-		tagsList.add(tagType);
-
-		// add Acl TagObject
-		TagObject aclType = new TagObject("Acl", "Acl Tag", externalDocsObject);
-		tagsList.add(aclType);
-		tagsList.sort((TagObject a, TagObject b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
-		LOG.debug("Tags:{}", tagsList.toString());
-		return tagsList;
-	}
-
-	/**
-	 * @return it will returns Map<String, SecurityDefinitionObject> defines a
-	 *         security scheme that can be used by the operations. Supported
-	 *         schemes are HTTP authentication, an API key (either as a header
-	 *         or as a query parameter), OAuth2's common flows (implicit,
-	 *         password, application and access code) as defined in RFC6749, and
-	 *         OpenID Connect Discovery
-	 */
-	public static Map<String, SecurityDefinitionObject> getSecurityDefinitions() {
-		Map<String, SecurityDefinitionObject> security = new HashMap<String, SecurityDefinitionObject>();
-
-		SecurityDefinitionObject basicAuth = new SecurityDefinitionObject("basic", null, null, null, null, null);
-		security.put("BasicAuth", basicAuth);
-		LOG.debug("security:{}", security.toString());
-		return security;
-
-	}
-
-	/**
-	 * @return it will Map<String, DefinitionsObject> defines it will store each
-	 *         and every request schema definitions for all ObjectType data
-	 */
-	public static Map<String, DefinitionsObject> getDefinitions() {
-		Map<String, DefinitionsObject> definitionsMap = new HashMap<String, DefinitionsObject>();
-		for (ObjectType type : typeCacheMap.asMap().values()) {
-
-			ArrayList<String> required = new ArrayList<String>();
-			required.add("cmis:objectTypeId");
-			required.add("cmis:name");
-
-			String defName = getDefinitionName(type);
-			Map<String, String> xml = new HashMap<String, String>();
-			xml.put("name", type.getDescription());
-
-			Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
-			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
-
-			if (type.isBaseType()) {
-				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
-					HashMap<String, String> propObjBase = new HashMap<String, String>();
-					if (propertiesValues.getKey().equals("cmis:objectTypeId")
-							|| propertiesValues.getKey().equals("cmis:name")
-							|| propertiesValues.getKey().equals("cmis:description")
-							|| propertiesValues.getKey().equals("cmis:sourceId")
-							|| propertiesValues.getKey().equals("cmis:targetId")
-							|| propertiesValues.getKey().equals("cmis:policyText")) {
-						propObjBase.put("type", PropertyType.STRING.toString().toLowerCase());
-						if (propertiesValues.getKey().equals("cmis:objectTypeId")) {
-							propObjBase.put("example", type.getQueryName());
-						}
-					} else {
-						continue;
-					}
-					properties.put(propertiesValues.getKey(), propObjBase);
-				}
-
-			} else {
-				// custom type
-				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
-					HashMap<String, String> propObj = new HashMap<String, String>();
-					if (propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamLength")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:objectId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamFileName")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamMimeType")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:checkinComment")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionLabel")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isMajorVersion")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isLatestVersion")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isLatestMajorVersion")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isPrivateWorkingCopy")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:createdBy")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isVersionSeriesCheckedOut")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:isImmutable")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:modifiedBy")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:previousVersionObjectId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:lastModificationDate")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:lastModifiedBy")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:baseTypeId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutBy")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:baseTypeId")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:creationDate")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:secondaryObjectTypeIds")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:changeToken")
-							|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutBy")) {
-
-						continue;
-
-					} else {
-						SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd HH:mm:ss Z yyyy", Locale.US);
-						if (propertiesValues.getValue().getPropertyType().equals(PropertyType.INTEGER)) {
-							propObj.put("type", propertiesValues.getValue().getPropertyType().name().toLowerCase());
-							propObj.put("format", "int64");
-						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DATETIME)) {
-							propObj.put("type", "string");
-							propObj.put("format", "data-time");
-							propObj.put("example", sdf.format(new Date(System.currentTimeMillis())));
-						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
-							propObj.put("type", "number");
-							propObj.put("format", "double");
-						} else {
-							propObj.put("type", "string");
-						}
-						if (propertiesValues.getKey().equals("cmis:objectTypeId")) {
-							propObj.put("example", type.getQueryName());
-						}
-						properties.put(propertiesValues.getKey(), propObj);
-					}
-				}
-			}
-
-			DefinitionsObject definitions = new DefinitionsObject("object", required, xml, properties);
-			definitionsMap.put(defName, definitions);
-		}
-
-		Map<String, String> xmlType = new HashMap<String, String>();
-		xmlType.put("name", "Type");
-		Map<String, Map<String, String>> propertiesForType = new HashMap<String, Map<String, String>>();
-		Field[] fieldsType = AbstractTypeDefinition.class.getDeclaredFields();
-		for (Field f : fieldsType) {// java.util.Map
-			HashMap<String, String> propObj = new HashMap<String, String>();
-			if (f.getType().equals(Integer.class)) {
-				propObj.put("type", "integer");
-				propObj.put("format", "int64");
-			} else if (f.getType().equals(Boolean.class)) {
-				propObj.put("type", "boolean");
-			} else if (f.getType().equals(TypeMutability.class)) {
-				propObj.put("$ref", "#/definitions/TypeMutability");
-			} else if (f.getName().equals("propertyDefinitions")) {
-				propObj.put("$ref", "#/definitions/PropertyDefinitions");
-			} else {
-				propObj.put("type", "string");
-			}
-			propertiesForType.put(f.getName(), propObj);
-		}
-
-		DefinitionsObject definitionsType = new DefinitionsObject("object", null, xmlType, propertiesForType);
-		definitionsMap.put("Types", definitionsType);
-
-		Map<String, String> xmlMut = new HashMap<String, String>();
-		xmlMut.put("name", "TypeMutability");
-		Map<String, Map<String, String>> propertiesForTypeMut = new HashMap<String, Map<String, String>>();
-		Field[] fieldsMut = TypeMutability.class.getDeclaredFields();
-		for (Field f : fieldsMut) {
-			HashMap<String, String> propObj = new HashMap<String, String>();
-			if (f.getType().equals(Boolean.class)) {
-				propObj.put("type", "boolean");
-			} else {
-				propObj.put("type", "string");
-			}
-			propertiesForTypeMut.put(f.getName(), propObj);
-		}
-
-		DefinitionsObject definitionsTypeMut = new DefinitionsObject("object", null, xmlMut, propertiesForTypeMut);
-		definitionsMap.put("TypeMutability", definitionsTypeMut);
-
-		Map<String, String> xmlPropDef = new HashMap<String, String>();
-		xmlPropDef.put("name", "PropertyDefinitions");
-		Map<String, Map<String, String>> propertiesForPropDef = new HashMap<String, Map<String, String>>();
-		Field[] fieldsPropDef = AbstractPropertyDefinition.class.getDeclaredFields();
-		for (Field f : fieldsPropDef) {
-			HashMap<String, String> propObj = new HashMap<String, String>();
-			if (f.getType().equals(Integer.class)) {
-				propObj.put("type", "integer");
-				propObj.put("format", "int64");
-			} else if (f.getType().equals(Boolean.class)) {
-				propObj.put("type", "boolean");
-			} else {
-				propObj.put("type", "string");
-			}
-			propertiesForPropDef.put(f.getName(), propObj);
-		}
-
-		DefinitionsObject definitionsPropDef = new DefinitionsObject("object", null, xmlPropDef, propertiesForPropDef);
-		definitionsMap.put("PropertyDefinitions", definitionsPropDef);
-
-		Map<String, String> xmlAcl = new HashMap<String, String>();
-		xmlPropDef.put("name", "Acl");
-		Map<String, Map<String, String>> propertiesForAcl = new HashMap<String, Map<String, String>>();
-		HashMap<String, String> princObj = new HashMap<String, String>();
-		princObj.put("type", "string");
-		propertiesForAcl.put("objectId", princObj);
-		propertiesForAcl.put("principalId", princObj);
-		propertiesForAcl.put("permission", princObj);
-
-		DefinitionsObject definitionsAcl = new DefinitionsObject("object", null, xmlAcl, propertiesForAcl);
-		definitionsMap.put("Acl", definitionsAcl);
-
-		LOG.debug("definitions:{}", definitionsMap.toString());
-		return definitionsMap;
-
-	}
-
-	/**
-	 * @return it will return Map<String, PathObject> that include
-	 *         ParameterObject,ResponseObject,PathCommonObject finally it will
-	 *         club into one object as PathObject and returns. ParameterObject
-	 *         describes a single operation parameter. A unique parameter is
-	 *         defined by a combination of a name and location. ResponseObject
-	 *         describes a single response from an API Operation, including
-	 *         design-time, static links to operations based on the response.
-	 *         PathCommonObject describes the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will
-	 *         not know which operations and parameters are available.
-	 *         PathObject holds the relative paths to the individual end points
-	 *         and their operations. The path is appended to the URL from the
-	 *         Server Object in order to construct the full URL. The Paths MAY
-	 *         be empty, due to ACL constraints
-	 */
-	public static Map<String, PathObject> generatePathForAllTypes() {
-		Map<String, PathObject> pathMap = new HashMap<String, PathObject>();
-		String basicAuth[] = new String[] {};
-		Map<String, String[]> api = new HashMap<String, String[]>();
-		api.put("BasicAuth", basicAuth);
-		List<Map<String, String[]>> security = new ArrayList<Map<String, String[]>>();
-		security.add(api);
-
-		for (ObjectType type : typeCacheMap.asMap().values()) {
-
-			String[] consumes = new String[] { "application/json" };
-			String[] produces = new String[] { "application/json" };
-			Map<String, String> schema = new HashMap<String, String>();
-			String defName = getDefinitionName(type);
-			schema.put("$ref", "#/definitions/" + defName);
-			String id = getIdName(type);
-			// GET METHODS
-			// get all folders /folder GET skipCount and maxItems in query
-			if (type.getBaseTypeId().equals(BaseTypeId.CMIS_FOLDER)
-					|| type.getBaseTypeId().equals(BaseTypeId.CMIS_DOCUMENT)) {
-				ParameterObject skipCount = new ParameterObject("query", "skipcount", null, false, null, "integer",
-						null, null, null, null);
-				ParameterObject maxItems = new ParameterObject("query", "maxitems", null, false, null, "integer", null,
-						null, null, null);
-				Map<String, ResponseObject> getAllresponses = new HashMap<String, ResponseObject>();
-				ResponseObject obj3 = new ResponseObject("Successful Operation", null);
-				getAllresponses.put("200", obj3);
-				PathCommonObject getAllObj = new PathCommonObject(new String[] { defName },
-						"Get All " + defName + " Objects", null, "getAll" + defName, null, produces,
-						new ParameterObject[] { skipCount, maxItems }, getAllresponses, security);
-
-				PathObject pathGetAllObj = new PathObject(null, getAllObj, null, null);
-				pathMap.put("/" + defName + "/getAll", pathGetAllObj);
-			}
-			// get folder /folder/{folderId} GET
-			Map<String, ResponseObject> getResponsesMap = new HashMap<String, ResponseObject>();
-			ResponseObject respObj1 = new ResponseObject(type.getDescription() + " not found", null);
-			ResponseObject respObj2 = new ResponseObject("Invalid ID supplied", null);
-			ResponseObject respObj3 = new ResponseObject("successful operation", schema);
-			getResponsesMap.put("404", respObj1);
-			getResponsesMap.put("400", respObj2);
-			getResponsesMap.put("200", respObj3);
-
-			ParameterObject getParams = new ParameterObject("path", id, "ID of " + type.getDescription() + " to return",
-					true, null, "string", null, null, "int64", null);
-			PathCommonObject getCommonObject = new PathCommonObject(new String[] { defName },
-					"Get " + defName + " by Id", null, "get" + defName + "ById", null, produces,
-					id != null ? new ParameterObject[] { getParams } : null, getResponsesMap, security);
-
-			// DELETE METHOD
-			// delete folder /folder/{folderId} DELETE
-			Map<String, ResponseObject> delResponses = new HashMap<String, ResponseObject>();
-			ResponseObject obj4 = new ResponseObject(type.getDescription() + " not found", null);
-			ResponseObject obj5 = new ResponseObject("Invalid ID supplied", null);
-			ResponseObject obj61 = new ResponseObject("CmisNotSupportedException", null);
-
-			delResponses.put("404", obj4);
-			delResponses.put("405", obj61);
-			delResponses.put("400", obj5);
-
-			PathCommonObject deleteCommonObject = new PathCommonObject(new String[] { defName },
-					"Deletes a  " + defName + " Object", null, "delete" + defName, null, produces,
-					id != null ? new ParameterObject[] { getParams } : null, delResponses, security);
-
-			// UPDATE METHOD
-			// update folder /folder/{folderId} PUT
-			Map<String, ResponseObject> putResponses = new HashMap<String, ResponseObject>();
-			ResponseObject obj6 = new ResponseObject(type.getDescription() + " not found", null);
-			ResponseObject obj7 = new ResponseObject("Invalid ID supplied", null);
-			ResponseObject err11 = new ResponseObject("InvalidArgumentException", null);
-			ResponseObject err21 = new ResponseObject("CmisContentAlreadyExistsException", null);
-			ResponseObject err31 = new ResponseObject("CmisRuntimeException", null);
-			ResponseObject err41 = new ResponseObject("CmisStreamNotSupportedException", null);
-			ResponseObject err51 = new ResponseObject("CmisServiceUnavailableException", null);
-			ResponseObject err61 = new ResponseObject("CmisNotSupportedException", null);
-			ResponseObject obj31 = new ResponseObject("Successful Operation", null);
-			putResponses.put("200", obj31);
-			putResponses.put("400", err11);
-			putResponses.put("409", err21);
-			putResponses.put("500", err31);
-			putResponses.put("403", err41);
-			putResponses.put("503", err51);
-			putResponses.put("404", obj6);
-			putResponses.put("405", err61);
-			putResponses.put("400", obj7);
-			ParameterObject putParamsBody = new ParameterObject("body", "body",
-					type.getDescription() + " Object that needs to be updated in the repository", true, schema, null,
-					null, null, null, null);
-			ParameterObject putParamsPath = new ParameterObject("path", id,
-					"ID of " + type.getDescription() + " to return", true, null, "string", null, null, null, null);
-			PathCommonObject putCommonObject = new PathCommonObject(new String[] { defName },
-					"Update " + defName + " Object", null, "update" + defName, consumes, produces,
-					id != null ? new ParameterObject[] { putParamsPath, putParamsBody }
-							: new ParameterObject[] { putParamsBody },
-					putResponses, security);
-
-			PathObject pObj2 = new PathObject(null, getCommonObject, putCommonObject, deleteCommonObject);
-			pathMap.put(id != null ? "/" + defName + "/{" + id + "}" : "/" + defName, pObj2);
-
-			// POST METHODS
-			if (type.getBaseTypeId().equals(BaseTypeId.CMIS_DOCUMENT)) {
-
-				// post /doc/{docId}/uploadFile
-
-				Map<String, ResponseObject> uploadResponses = new HashMap<String, ResponseObject>();
-				ResponseObject uploadResp = new ResponseObject("Successful Operation", null);
-				ResponseObject createdResp = new ResponseObject("Created", null);
-				ResponseObject err1 = new ResponseObject("InvalidArgumentException", null);
-				ResponseObject err2 = new ResponseObject("CmisContentAlreadyExistsException", null);
-				ResponseObject err3 = new ResponseObject("CmisRuntimeException", null);
-				ResponseObject err4 = new ResponseObject("CmisStreamNotSupportedException", null);
-				ResponseObject err5 = new ResponseObject("CmisServiceUnavailableException", null);
-				ResponseObject err6 = new ResponseObject("CmisNotSupportedException", null);
-
-				uploadResponses.put("400", err1);
-				uploadResponses.put("409", err2);
-				uploadResponses.put("500", err3);
-				uploadResponses.put("403", err4);
-				uploadResponses.put("503", err5);
-				uploadResponses.put("201", createdResp);
-				uploadResponses.put("200", uploadResp);
-				uploadResponses.put("405", err6);
-
-				ParameterObject uploadPostParams = new ParameterObject("path", id, "ID of " + type.getDescription(),
-						true, null, "string", null, null, "int64", null);
-				ParameterObject uploadFileParams = new ParameterObject("formData", "file", "Document to upload", true,
-						null, "file", null, null, null, null);
-				PathCommonObject uploadPostObj = new PathCommonObject(new String[] { defName }, "Uploads a document",
-						null, "uploadDoc" + defName, new String[] { "multipart/form-data" }, null,
-						new ParameterObject[] { uploadPostParams, uploadFileParams }, uploadResponses, security);
-				PathObject uploadPathObj = new PathObject(uploadPostObj, null, null, null);
-				pathMap.put("/" + defName + "/{" + id + "}" + "/uploadDocument", uploadPathObj);
-
-				// get for download media /document/media/{id}
-				Map<String, ResponseObject> getMediaResponses = new HashMap<String, ResponseObject>();
-				Map<String, String> mediaSchema = new HashMap<String, String>();
-				mediaSchema.put("type", "file");
-				ResponseObject mediaResp = new ResponseObject("Successful Operation", mediaSchema);
-				ResponseObject err42 = new ResponseObject("CmisStreamNotSupportedException", null);
-				getMediaResponses.put("403", err42);
-				getMediaResponses.put("200", mediaResp);
-				ParameterObject getParamsObject = new ParameterObject("path", id, "ID of " + type.getDescription(),
-						true, null, "string", null, null, "int64", null);
-				PathCommonObject getObj = new PathCommonObject(new String[] { defName }, "Downloads a file", null,
-						"downloadDoc" + defName, null, new String[] { "application/*" },
-						new ParameterObject[] { getParamsObject }, getMediaResponses, security);
-				PathObject pObject = new PathObject(null, getObj, null, null);
-				pathMap.put("/" + defName + "/media/{" + id + "}", pObject);
-			}
-			// formdata of post
-			Map<String, ResponseObject> postFormResponses = new HashMap<String, ResponseObject>();
-			ResponseObject respObj11 = new ResponseObject("CmisNotSupportedException", null);
-			ResponseObject respObj21 = new ResponseObject("Successful Operation", null);
-			ResponseObject createdResp = new ResponseObject("Created", null);
-			ResponseObject err1 = new ResponseObject("InvalidArgumentException", null);
-			ResponseObject err2 = new ResponseObject("CmisContentAlreadyExistsException", null);
-			ResponseObject err3 = new ResponseObject("CmisRuntimeException", null);
-			ResponseObject err4 = new ResponseObject("CmisStreamNotSupportedException", null);
-			ResponseObject err5 = new ResponseObject("CmisServiceUnavailableException", null);
-			postFormResponses.put("400", err1);
-			postFormResponses.put("409", err2);
-			postFormResponses.put("500", err3);
-			postFormResponses.put("403", err4);
-			postFormResponses.put("503", err5);
-			postFormResponses.put("201", createdResp);
-			postFormResponses.put("405", respObj11);
-			postFormResponses.put("400", err1);
-			postFormResponses.put("200", respObj21);
-
-			ParameterObject postPathParams1 = new ParameterObject("query", "parentId",
-					"Parent ID of " + type.getDescription(), false, null, "string", null, null, null, null);
-			// get array of parameter objects
-			ParameterObject uploadFormFileParams = new ParameterObject("formData", "file", "Document to upload", false,
-					null, "file", null, null, null, null);
-			List<ParameterObject> paramList = getFormDataObjects(type);
-
-			paramList.add(postPathParams1);
-
-			if (type.getBaseTypeId().equals(BaseTypeId.CMIS_DOCUMENT)) {
-				paramList.add(uploadFormFileParams);
-			}
-			PathCommonObject postObj = new PathCommonObject(new String[] { defName },
-					"Add a new " + defName + " Object", null, "add" + defName + "formData",
-					type.getBaseTypeId().equals(BaseTypeId.CMIS_DOCUMENT) ? new String[] { "multipart/form-data" }
-							: new String[] { "application/x-www-form-urlencoded" },
-					produces, paramList.toArray(new ParameterObject[paramList.size()]), postFormResponses, security);
-
-			PathObject pathObj = new PathObject(postObj, null, null, null);
-			pathMap.put("/" + defName, pathObj);
-		}
-
-		// generate path for Types
-		pathMap = PostTypeDefinitionCreation(pathMap, security);
-		// generate path for ACL
-		pathMap = postAclDefinitionCreation(pathMap, security);
-
-		LOG.debug("path:{}", pathMap.toString());
-		return pathMap;
-	}
-
-	/**
-	 * @param pathMap
-	 *            the property pathMap is used to store pathMap.It will give
-	 *            Map<String, PathObject> pathMap.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
-	 *         constraints
-	 */
-	private static Map<String, PathObject> PostTypeDefinitionCreation(Map<String, PathObject> pathMap,
-			List<Map<String, String[]>> security) {
-		Map<String, String> schema = new HashMap<String, String>();
-		schema.put("$ref", "#/definitions/Types");
-		Map<String, ResponseObject> typeResponses = new HashMap<String, ResponseObject>();
-		ResponseObject typeResp = new ResponseObject("Successful Operation", null);
-		typeResponses.put("200", typeResp);
-		ParameterObject typeParams = new ParameterObject("path", "typeId", "TypeId to return", true, null, "string",
-				null, null, null, null);
-		pathMap = postCreateTypeDefinitionCreation(pathMap, schema, typeResponses, security);
-		PathCommonObject getTypeObject = postGetTypeDefinitionCreation(security, typeParams);
-		PathCommonObject putTypeObject = postUpdateTypeDefinitionCreation(schema, security, typeParams, typeResponses);
-		PathCommonObject deleteTypeObject = postDeleteTypeDefinitionCreation(security, typeParams);
-		PathObject getTypePathObj = new PathObject(null, getTypeObject, putTypeObject, deleteTypeObject);
-		pathMap.put("/_metadata/type/{typeId}", getTypePathObj);
-		return pathMap;
-
-	}
-
-	/**
-	 * @param pathMap
-	 *            the property pathMap is used to store pathMap.It will give
-	 *            Map<String, PathObject> pathMap.
-	 * @param schema
-	 *            the property schema is used to hold all swagger object.
-	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
-	 *         constraints
-	 */
-	private static Map<String, PathObject> postCreateTypeDefinitionCreation(Map<String, PathObject> pathMap,
-			Map<String, String> schema, Map<String, ResponseObject> typeResponses,
-			List<Map<String, String[]>> security) {
-		ParameterObject typeFileParams = new ParameterObject("body", "body", "To create new Types", true, schema, null,
-				null, null, null, null);
-		PathCommonObject typePostObj = new PathCommonObject(new String[] { "Types" }, "Creates a new Type", null,
-				"createType", new String[] { "application/json" }, null, new ParameterObject[] { typeFileParams },
-				typeResponses, security);
-		PathObject typePathObj = new PathObject(typePostObj, null, null, null);
-		pathMap.put("/_metadata/type", typePathObj);
-		return pathMap;
-
-	}
-
-	/**
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
-	 * @return PathCommonObject describes the operations available on a single
-	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
-	 *         itself is still exposed to the documentation viewer but they will
-	 *         not know which operations and parameters are available
-	 */
-	private static PathCommonObject postGetTypeDefinitionCreation(List<Map<String, String[]>> security,
-			ParameterObject typeParams) {
-		Map<String, ResponseObject> getResponsesMap = new HashMap<String, ResponseObject>();
-		ResponseObject respObj1 = new ResponseObject("Type not found", null);
-		ResponseObject respObj2 = new ResponseObject("Invalid ID supplied", null);
-		ResponseObject respObj3 = new ResponseObject("successful operation", null);
-		getResponsesMap.put("404", respObj1);
-		getResponsesMap.put("400", respObj2);
-		getResponsesMap.put("200", respObj3);
-
-		PathCommonObject getTypeObject = new PathCommonObject(new String[] { "Types" }, "Get Type by Id", null,
-				"getTypeById", null, new String[] { "application/json" }, new ParameterObject[] { typeParams },
-				getResponsesMap, security);
-		return getTypeObject;
-
-	}
-
-	/**
-	 * @param schema
-	 *            the property schema is used to hold all swagger object.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
-	 * @param typeResponses
-	 *            the property typeResponse it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
-	 * @return PathCommonObject is used to do the operations available on a
-	 *         single path. A Path Item MAY be empty, due to ACL constraints.
-	 *         The path itself is still exposed to the documentation viewer but
-	 *         they will not know which operations and parameters are available
-	 * 
-	 */
-	private static PathCommonObject postUpdateTypeDefinitionCreation(Map<String, String> schema,
-			List<Map<String, String[]>> security, ParameterObject typeParams,
-			Map<String, ResponseObject> typeResponses) {
-		ParameterObject updateTypeFileParams = new ParameterObject("body", "body", "To update a Type", true, schema,
-				null, null, null, null, null);
-		PathCommonObject typePutObj = new PathCommonObject(new String[] { "Types" }, "Update a Type", null,
-				"updateType", new String[] { "application/json" }, null,
-				new ParameterObject[] { updateTypeFileParams, typeParams }, typeResponses, security);
-
-		return typePutObj;
-
-	}
-
-	/**
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @param typeParams
-	 *            the property typeParams is used to get that ParameterObject.
-	 *            it describes a single operation parameter. A unique parameter
-	 *            is defined by a combination of a name and location.
-	 * @return PathCommonObject is used to do the operations available on a
-	 *         single path. A Path Item MAY be empty, due to ACL constraints.
-	 *         The path itself is still exposed to the documentation viewer but
-	 *         they will not know which operations and parameters are available
-	 */
-	private static PathCommonObject postDeleteTypeDefinitionCreation(List<Map<String, String[]>> security,
-			ParameterObject typeParams) {
-		Map<String, ResponseObject> delTypeResponses = new HashMap<String, ResponseObject>();
-		ResponseObject obj1 = new ResponseObject("Type not found", null);
-		ResponseObject obj2 = new ResponseObject("Invalid ID supplied", null);
-		delTypeResponses.put("404", obj1);
-		delTypeResponses.put("400", obj2);
-		PathCommonObject deleteTypeObject = new PathCommonObject(new String[] { "Types" }, "Deletes a Type", null,
-				"deleteType", null, new String[] { "application/json" }, new ParameterObject[] { typeParams },
-				delTypeResponses, security);
-		return deleteTypeObject;
-
-	}
-
-	/**
-	 * @param pathMap
-	 *            the property pathMap is used to store pathMap.It will give
-	 *            Map<String, PathObject> pathMap.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual endpoints and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
-	 *         constraints
-	 */
-	private static Map<String, PathObject> postAclDefinitionCreation(Map<String, PathObject> pathMap,
-			List<Map<String, String[]>> security) {
-		Map<String, String> schemAcl = new HashMap<String, String>();
-		schemAcl.put("$ref", "#/definitions/Acl");
-		Map<String, ResponseObject> aclResponses = new HashMap<String, ResponseObject>();
-		ResponseObject aclResp = new ResponseObject("Successful Operation", null);
-		aclResponses.put("200", aclResp);
-
-		pathMap = postAddAclDefinitionCreation(pathMap, schemAcl, aclResponses, security);
-
-		pathMap = postRemoveAclDefinitionCreation(pathMap, schemAcl, aclResponses, security);
-
-		return pathMap;
-
-	}
-
-	/**
-	 * @param pathMap
-	 *            the property pathMap is used to store pathMap.It will give
-	 *            Map<String, PathObject> pathMap.
-	 * @param schemAcl
-	 *            the property schemAcl is used to hold all swagger object.
-	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
-	 *         constraints
-	 */
-	private static Map<String, PathObject> postAddAclDefinitionCreation(Map<String, PathObject> pathMap,
-			Map<String, String> schemAcl, Map<String, ResponseObject> aclResponses,
-			List<Map<String, String[]>> security) {
-		ParameterObject postAddAclParams = new ParameterObject("body", "body", "Add Acl", true, schemAcl, null, null,
-				null, null, null);
-		PathCommonObject aclAddPostObj = new PathCommonObject(new String[] { "Acl" }, "Adds a new Acl", null, "addAcl",
-				new String[] { "application/json" }, null, new ParameterObject[] { postAddAclParams }, aclResponses,
-				security);
-		PathObject aclAddPathObj = new PathObject(aclAddPostObj, null, null, null);
-		pathMap.put("/Acl/addAcl", aclAddPathObj);
-		return pathMap;
-
-	}
-
-	/**
-	 * @param pathMap
-	 *            the property pathMap is used to store pathMap.It will give
-	 *            Map<String, PathObject> pathMap.
-	 * @param schemAcl
-	 *            the property schemAcl is used to hold all swagger object.
-	 * @param aclResponses
-	 *            the property aclResponses it will give map of ResponseObject.
-	 *            it describes a single response from an API Operation,
-	 *            including design-time, static links to operations based on the
-	 *            response.
-	 * @param security
-	 *            the property security is used to defines a security scheme
-	 *            that can be used by the operations.
-	 * @return it will return Map<String, PathObject> PathObject it holds the
-	 *         relative paths to the individual end points and their operations.
-	 *         The path is appended to the URL from the Server Object in order
-	 *         to construct the full URL. The Paths MAY be empty, due to ACL
-	 *         constraints
-	 */
-	private static Map<String, PathObject> postRemoveAclDefinitionCreation(Map<String, PathObject> pathMap,
-			Map<String, String> schemAcl, Map<String, ResponseObject> aclResponses,
-			List<Map<String, String[]>> security) {
-		ParameterObject delAclParams = new ParameterObject("body", "body", "Remove Acl", true, schemAcl, null, null,
-				null, null, null);
-		PathCommonObject aclRemObj = new PathCommonObject(new String[] { "Acl" }, "Removes an Acl", null, "removeAcl",
-				new String[] { "application/json" }, null, new ParameterObject[] { delAclParams }, aclResponses,
-				security);
-		PathObject aclRemPathObj = new PathObject(aclRemObj, null, null, null);
-		pathMap.put("/Acl/removeAcl", aclRemPathObj);
-		return pathMap;
-
-	}
-
-	/**
-	 * @param type
-	 *            the property type is used to get that ObjectType.
-	 * @return list of parameterObject is used to do a single operation
-	 *         parameter. A unique parameter is defined by a combination of a
-	 *         name and location
-	 */
-	private static List<ParameterObject> getFormDataObjects(ObjectType type) {
-		List<ParameterObject> list = new ArrayList<>();
-
-		Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
-		for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
-			if (propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamLength")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:path")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:allowedChildObjectTypeIds")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:parentId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamFileName")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamMimeType")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:checkinComment")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionLabel")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isMajorVersion")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isLatestVersion")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isLatestMajorVersion")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isPrivateWorkingCopy")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:createdBy")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:contentStreamId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isVersionSeriesCheckedOut")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:isImmutable")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:modifiedBy")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:previousVersionObjectId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:lastModificationDate")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:lastModifiedBy")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:baseTypeId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutBy")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:baseTypeId")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:creationDate")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:secondaryObjectTypeIds")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:changeToken")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:versionSeriesCheckedOutBy")) {
-				continue;
-			}
-
-			boolean required = false;
-			String paramType = null;
-			String format = null;
-			if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-					&& propertiesValues.getValue().getLocalName().equals("primaryKey")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:name")
-					|| propertiesValues.getKey().equalsIgnoreCase("cmis:objectTypeId")) {
-				required = true;
-			}
-
-			if (propertiesValues.getValue().getPropertyType().equals(PropertyType.INTEGER)) {
-				paramType = propertiesValues.getValue().getPropertyType().name().toLowerCase();
-				format = "int32";
-			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DATETIME)) {
-				paramType = "string";
-				format = "data-time";
-			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
-				paramType = "number";
-				format = "double";
-			} else {
-				paramType = "string";
-			}
-
-			ParameterObject obj = new ParameterObject("formData", propertiesValues.getKey(),
-					propertiesValues.getValue().getDescription(), required, null, paramType, null, null, format,
-					propertiesValues.getKey().equalsIgnoreCase("cmis:objectTypeId") ? type.getId() : null);
-			list.add(obj);
-		}
-		return list;
 	}
 
 	/**
@@ -1081,73 +324,6 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @param type
-	 *            the property type is used to get the ObjectType.
-	 * @return typeId used to get the particular object in data
-	 */
-	private static String getDefinitionName(ObjectType type) {
-		return type.getId();
-	}
-
-	/**
-	 * @return InfoObject used provides metadata about the API. The metadata MAY
-	 *         be used by the clients if needed, and MAY be presented in editing
-	 *         or documentation generation tools for convenience
-	 */
-	public static InfoObject generateInfoObject() {
-		return infoObj;
-	}
-
-	/**
-	 * @return ExternalDocs allows referencing an external resource for extended
-	 *         documentation
-	 */
-	public static ExternalDocs generateExternalDocsObject() {
-		return externalDocsObject;
-	}
-
-	/**
-	 * @param description
-	 *            A short description of the application. CommonMark syntax MAY
-	 *            be used for rich text representation.
-	 * @param version
-	 *            The version of the OpenAPI document (which is distinct from
-	 *            the OpenAPI Specification version or the API implementation
-	 *            version).
-	 * @param title
-	 *            The title of the application.
-	 * @param termsOfService
-	 *            A URL to the Terms of Service for the API. MUST be in the
-	 *            format of a URL.
-	 * @param contact
-	 *            The contact information for the exposed API.
-	 * @param license
-	 *            The license information for the exposed API.
-	 */
-	public static void setInfoObject(String description, String version, String title, String termsOfService,
-			Map<String, String> contact, Map<String, String> license) {
-		infoObj.setDescription(description);
-		infoObj.setTitle(title);
-		infoObj.setVersion(version);
-		infoObj.setTermsOfService(termsOfService);
-		infoObj.setContact(contact);
-		infoObj.setLicense(license);
-	}
-
-	/**
-	 * @param description
-	 *            A short description of the target documentation. CommonMark
-	 *            syntax MAY be used for rich text representation.
-	 * @param url
-	 *            The URL for the target documentation. Value MUST be in the
-	 *            format of a URL.
-	 */
-	public static void setExternalDocsObject(String description, String url) {
-		externalDocsObject.setDescription(description);
-		externalDocsObject.setUrl(url);
-	}
-
-	/**
 	 * @return it will give all base type id's
 	 */
 	public static List<String> getBaseTypeList() {
@@ -1163,6 +339,7 @@ public class SwaggerHelpers {
 		return list;
 	}
 
+	//
 	/**
 	 * @param ex
 	 *            the property ex is used to catch various exception in server.
@@ -1232,6 +409,7 @@ public class SwaggerHelpers {
 		return new ErrorResponse(errorMessage, code);
 	}
 
+	//
 	/**
 	 * @return true means type have custom folder,false means type does not have
 	 *         any custom folder
@@ -1242,15 +420,6 @@ public class SwaggerHelpers {
 			return value.equalsIgnoreCase("1");
 		}
 		return false;
-	}
-
-	public static void setHostSwaggerUrl(String swaggerServerUrl) {
-		hostSwaggerUrl = swaggerServerUrl;
-	}
-
-	public static String getHostSwaggerUrl() {
-		return hostSwaggerUrl;
-
 	}
 
 	/**
@@ -1323,6 +492,7 @@ public class SwaggerHelpers {
 		if (relationData != null) {
 			relationData.forEach(relationObj -> {
 				JSONObject childJson = new JSONObject();
+
 				LinkedHashMap<Object, Object> relationObjectMap = (LinkedHashMap<Object, Object>) relationObj;
 				LinkedHashMap<Object, Object> getRelationshipData = (LinkedHashMap<Object, Object>) relationObjectMap
 						.get("object");
@@ -1343,5 +513,394 @@ public class SwaggerHelpers {
 			});
 		}
 		return relMap;
+	}
+
+	public static Cache<String, ObjectType> getTypeCacheMap() {
+		return typeCacheMap;
+	}
+
+	public static void setTypeCacheMap(Cache<String, ObjectType> typeCacheMap) {
+		SwaggerHelpers.typeCacheMap = typeCacheMap;
+	}
+
+	public static Map<String, Object> compileProperties(CmisObject cmisObject, Session session) throws Exception {
+		Map<String, Object> propMap = new HashMap<String, Object>();
+		cmisObject.getProperties().stream().forEach(a -> {
+			propMap.put(a.getDefinition().getId(), a.getValues());
+		});
+		Map<String, Object> outputMap = deserializeInputForResponse(propMap, cmisObject.getType(), session);
+
+		return outputMap;
+	}
+
+	private static <T> T convertInstanceOfObject(Object o, Class<T> clazz) {
+		try {
+			return clazz.cast(o);
+		} catch (ClassCastException e) {
+			return null;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> deserializeInputForResponse(Map<String, Object> input, ObjectType object,
+			Session session) throws Exception {
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, deSerializing Input:{}", "SwaggerApiService",
+				"deserializeInputForResponse", session.getRepositoryInfo().getId(), input);
+		Map<String, Object> serializeMap = new HashMap<String, Object>();
+		Map<String, PropertyDefinition<?>> dataPropDef = object.getPropertyDefinitions();
+		for (String var : input.keySet()) {
+			List<?> valueOfType = (List<?>) input.get(var);
+
+			if (var.equals("parentId")) {
+				continue;
+			}
+			if (valueOfType != null) {
+				PropertyType reqPropType = null;
+				PropertyDefinition<?> definitionObject = dataPropDef.get(var);
+				if (definitionObject == null) {
+
+					List<?> secondaryValues = (List<?>) input.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
+					for (Object stringtype : secondaryValues) {
+						TypeDefinition type = session.getTypeDefinition((String) stringtype);
+						for (Entry<String, PropertyDefinition<?>> t : type.getPropertyDefinitions().entrySet()) {
+							if (t.getValue().getId().equals(var)) {
+								reqPropType = t.getValue().getPropertyType();
+							}
+						}
+					}
+
+				} else {
+					reqPropType = definitionObject.getPropertyType();
+				}
+
+				if (reqPropType.equals(PropertyType.INTEGER)) {
+					if (valueOfType.size() == 1) {
+						Integer valueBigInteger = convertInstanceOfObject(valueOfType.get(0), Integer.class);
+						serializeMap.put(var, valueBigInteger);
+					} else {
+						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+
+				} else if (reqPropType.equals(PropertyType.BOOLEAN)) {
+					if (valueOfType.size() == 1) {
+						Boolean booleanValue = convertInstanceOfObject(valueOfType.get(0), Boolean.class);
+						serializeMap.put(var, booleanValue);
+					} else {
+						List<Boolean> booleanValue = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, booleanValue);
+					}
+
+				} else if (reqPropType.equals(PropertyType.DATETIME)) {
+
+					// SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd
+					// HH:mm:ss Z yyyy", Locale.US);
+
+					if (valueOfType.size() == 1) {
+						GregorianCalendar lastModifiedCalender = (GregorianCalendar) valueOfType.get(0);
+						serializeMap.put(var, lastModifiedCalender.getTimeInMillis());
+					} else {
+						List<GregorianCalendar> value = convertInstanceOfObject(valueOfType, List.class);
+						List<Long> calenderList = new ArrayList<>();
+						value.forEach(v -> {
+							calenderList.add(v.getTimeInMillis());
+						});
+						serializeMap.put(var, calenderList);
+					}
+
+				} else if (reqPropType.equals(PropertyType.DECIMAL)) {
+					if (valueOfType.size() == 1) {
+						Double value = convertInstanceOfObject(valueOfType.get(0), Double.class);
+						serializeMap.put(var, value);
+					} else {
+						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+				} else {
+					// string type
+					if (valueOfType.size() == 1) {
+						String value = convertInstanceOfObject(valueOfType.get(0), String.class);
+						serializeMap.put(var, value);
+					} else {
+						List<String> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+				}
+			} else {
+				continue;
+			}
+		}
+		LOG.info("serializedMap:{}", serializeMap);
+		return serializeMap;
+	}
+
+	public static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
+			Map<String, Object> input, ContentStream stream) throws Exception {
+		try {
+			// LOG.info("BaseTypeID:{}", baseTypeId.value());
+			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID:{}", "SwaggerApiService",
+					"createForBaseTypes", session.getRepositoryInfo().getId(), baseTypeId.value());
+			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
+				CmisObject folder = null;
+				if (parentId != null) {
+					folder = ((Folder) session.getObject(parentId)).createFolder(input);
+					return folder;
+				} else {
+					ObjectId id = session.getRootFolder().createFolder(input);
+					folder = session.getObject(id);
+					return folder;
+				}
+			} else if (baseTypeId.equals(BaseTypeId.CMIS_DOCUMENT)) {
+				CmisObject document = null;
+				if (parentId != null) {
+					document = ((Folder) session.getObject(parentId)).createDocument(input,
+							stream != null ? stream : null, null);
+					return document;
+				} else {
+					ObjectId id = session.createDocument(input, null, stream != null ? stream : null, null);
+					document = session.getObject(id);
+					return document;
+				}
+			} else if (baseTypeId.equals(BaseTypeId.CMIS_ITEM)) {
+				CmisObject item = null;
+				if (parentId != null) {
+					item = ((Folder) session.getObject(parentId)).createItem(input);
+					return item;
+				} else {
+					ObjectId id = session.createItem(input, null);
+					item = session.getObject(id);
+					return item;
+				}
+			} else if (baseTypeId.equals(BaseTypeId.CMIS_RELATIONSHIP)) {
+				ObjectId id = session.createRelationship(input);
+				CmisObject relationship = session.getObject(id);
+				return relationship;
+			} else if (baseTypeId.equals(BaseTypeId.CMIS_POLICY)) {
+				CmisObject policy = null;
+				if (parentId != null) {
+					policy = ((Folder) session.getObject(parentId)).createPolicy(input);
+					return policy;
+				} else {
+					ObjectId polId = session.createPolicy(input, null);
+					policy = session.getObject(polId);
+					return policy;
+				}
+			} else if (baseTypeId.equals(BaseTypeId.CMIS_SECONDARY)) {
+				return null;
+			}
+		} catch (Exception e) {
+			ErrorResponse resp = SwaggerHelpers.handleException(e);
+			throw new ErrorResponse(resp);
+		}
+		return null;
+	}
+
+	public static ContentStream getContentStream(Part filePart) throws IOException {
+		ContentStream setContentStream = null;
+		if (filePart != null) {
+			String file = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+			String extension = Files.getFileExtension(file);
+			String name = Files.getNameWithoutExtension(file);
+			InputStream fileContent = filePart.getInputStream();
+			BigInteger size = BigInteger.valueOf(filePart.getSize());
+			// LOG.info( "filName:{},extension:{},size:{}", name, extension,
+			// size);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerApiService", "getContentStream");
+			setContentStream = new ContentStreamImpl(name, size, MimeUtils.guessMimeTypeFromExtension(extension),
+					fileContent);
+			return setContentStream;
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType object, Session session)
+			throws Exception {
+		LOG.info("class name: {}, method name: {}, type: {}", "SwaggerApiService", "deserializeInput", input);
+		Map<String, Object> serializeMap = new HashMap<String, Object>();
+		Map<String, PropertyDefinition<?>> dataPropertyDefinition = object.getPropertyDefinitions();
+		for (String var : input.keySet()) {
+			Object valueOfType = input.get(var);
+			if (var.equals("parentId")) {
+				continue;
+			}
+			if (valueOfType != null) {
+				PropertyType reqPropertyType = null;
+				PropertyDefinition<?> definitionObject = dataPropertyDefinition.get(var);
+				if (definitionObject == null) {
+					List<?> secondaryValues = (List<?>) input.get(PropertyIds.SECONDARY_OBJECT_TYPE_IDS);
+					for (Object stype : secondaryValues) {
+						TypeDefinition type = session.getTypeDefinition((String) stype);
+						for (Entry<String, PropertyDefinition<?>> t : type.getPropertyDefinitions().entrySet()) {
+							if (t.getValue().getId().equals(var)) {
+								reqPropertyType = t.getValue().getPropertyType();
+							}
+						}
+					}
+
+				} else {
+					reqPropertyType = definitionObject.getPropertyType();
+				}
+
+				if (reqPropertyType.equals(PropertyType.INTEGER)) {
+					if (valueOfType instanceof Integer) {
+						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
+						serializeMap.put(var, valueBigInteger);
+					} else if (valueOfType instanceof List<?>) {
+						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+
+				} else if (reqPropertyType.equals(PropertyType.BOOLEAN)) {
+					if (valueOfType instanceof Boolean) {
+						Boolean booleanValue = convertInstanceOfObject(valueOfType, Boolean.class);
+						serializeMap.put(var, booleanValue);
+					} else if (valueOfType instanceof List<?>) {
+						List<Boolean> booleanValue = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, booleanValue);
+					}
+
+				} else if (reqPropertyType.equals(PropertyType.DATETIME)) {
+
+					// SimpleDateFormat sdf = new SimpleDateFormat("E MMM dd
+					// HH:mm:ss Z yyyy", Locale.US);
+
+					if (valueOfType instanceof GregorianCalendar) {
+						Long value = convertInstanceOfObject(valueOfType, Long.class);
+						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
+						lastModifiedCalender.setTimeInMillis(value);
+						serializeMap.put(var, lastModifiedCalender);
+					} else if (valueOfType instanceof List<?>) {
+						List<Long> value = convertInstanceOfObject(valueOfType, List.class);
+						List<GregorianCalendar> calenderList = new ArrayList<>();
+						value.forEach(v -> {
+							GregorianCalendar lastModifiedCalender = new GregorianCalendar();
+							lastModifiedCalender.setTimeInMillis(v);
+							calenderList.add(lastModifiedCalender);
+						});
+						serializeMap.put(var, calenderList);
+					}
+
+				} else if (reqPropertyType.equals(PropertyType.DECIMAL)) {
+					if (valueOfType instanceof Double) {
+						Double value = convertInstanceOfObject(valueOfType, Double.class);
+						serializeMap.put(var, value);
+					} else if (valueOfType instanceof List<?>) {
+						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+				} else {
+					// string type
+					if (valueOfType instanceof String) {
+						String value = convertInstanceOfObject(valueOfType, String.class);
+						serializeMap.put(var, value);
+					} else if (valueOfType instanceof List<?>) {
+						List<String> value = convertInstanceOfObject(valueOfType, List.class);
+						serializeMap.put(var, value);
+					}
+				}
+			} else {
+				continue;
+			}
+		}
+		LOG.info("serializedMap:{}", serializeMap);
+		return serializeMap;
+	}
+
+	@SuppressWarnings("unused")
+	public static IRequest getImplClient(HttpServletRequest request) throws Exception {
+
+		String authorization = request.getHeader("Authorization");
+		String credentials[] = HttpUtils.getCredentials(authorization);
+		String pathFragments[] = HttpUtils.splitPath(request);
+		String method = request.getMethod();
+
+		Map<String, Object> inputMap = new HashMap<String, Object>();
+		Map<String, Object> requestBaggage = new HashMap<String, Object>();
+		Part filePart = null;
+		String jsonString = null;
+
+		SRequestMessage sRequestMessage = new SRequestMessage(credentials, pathFragments);
+
+		// can be inputType like getAll or
+		// it passes objectId
+		// sRequestMessage.setInputType(inputType);
+
+		if (METHOD_POST.equals(method)) {
+			if (request.getContentType().contains("multipart/form-data")) {
+				inputMap = request.getParameterMap().entrySet().stream()
+						.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
+				filePart = request.getPart("file") != null ? request.getPart("file") : null;
+			} else if (request.getContentType().equals("application/x-www-form-urlencoded")) {
+				inputMap = request.getParameterMap().entrySet().stream()
+						.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
+			} else if (sRequestMessage.getType().equals("_metadata")) {
+			} else {
+				jsonString = IOUtils.toString(request.getInputStream());
+			}
+		} else if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
+			if (sRequestMessage.getType().equals("_metadata")) {
+				sRequestMessage.setInputStream(request.getInputStream());
+			} else {
+				jsonString = IOUtils.toString(request.getInputStream());
+				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+				});
+			}
+			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
+			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
+		} else if (METHOD_GET.equals(method)) {
+			String select = null;
+			String filter = null;
+			String order = null;
+			if (request.getQueryString() != null) {
+				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
+						: null;
+				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
+						: null;
+				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
+						: null;
+			}
+
+			if (select != null && filter != null) {
+				select = select + "," + URLDecoder.decode(filter, "UTF-8");
+			} else if (select == null && filter != null) {
+				select = "*," + filter;
+
+				requestBaggage.put("select", select);
+				requestBaggage.put("orderby", select);
+
+				String skipCount = request.getParameter("skipcount");
+				String maxItems = request.getParameter("maxitems");
+				String parentId = request.getParameter("parentId");
+				String includeRelationshipString = request.getParameter("includeRelationship");
+				boolean includeRelationship = includeRelationshipString != null
+						? Boolean.parseBoolean(includeRelationshipString) : false;
+
+				requestBaggage.put("skipcount", skipCount);
+				requestBaggage.put("maxitems", maxItems);
+				requestBaggage.put("parentId", parentId);
+				requestBaggage.put("includeRelationship", includeRelationship);
+
+				String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3]
+						: null;
+
+				sRequestMessage.setObjectIdForMedia(objectIdForMedia);
+
+			}
+
+		} else if (METHOD_DELETE.equals(method)) {
+
+			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
+			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
+
+		}
+
+		sRequestMessage.setInputMap(inputMap);
+		sRequestMessage.setFilePart(filePart);
+		sRequestMessage.setJsonString(jsonString);
+		sRequestMessage.setRequestBaggage(requestBaggage);
+		IRequest reqObj = sRequestMessage;
+		return reqObj;
+
 	}
 }

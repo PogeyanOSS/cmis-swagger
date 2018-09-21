@@ -1,0 +1,140 @@
+package com.pogeyan.swagger.apis;
+
+import java.io.InputStream;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.Part;
+
+@SuppressWarnings("unused")
+public class SRequestMessage implements IRequest {
+	private String[] credentials;
+	private String[] pathFragments;
+	private String repositoryId;
+	private String userName;
+	private String password;
+	private Map<String, Object> requestBaggage;
+	private Map<String, Object> inputMap;
+	private String jsonString;
+	private Part filePart;
+	private String type;
+	private InputStream inputStream;
+	
+	private String objectIdForMedia;
+	private String inputType;
+	
+	public SRequestMessage() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public SRequestMessage(String[] credentials, String[] pathFragments) {
+		super();
+		this.credentials = credentials;
+		this.pathFragments = pathFragments;
+		this.repositoryId = pathFragments[0];
+		this.type = pathFragments[1];
+		this. inputType = pathFragments[2];
+		this.userName = credentials[0];
+		this.password = credentials[1];
+	}
+	
+	@Override
+	public String getRepositoryId() {
+		return repositoryId;
+	}
+
+	public void setRepositoryId(String repositoryId) {
+		this.repositoryId = repositoryId;
+	}
+
+	@Override
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	@Override
+	public Map<String, Object> getRequestBaggage() {
+		return requestBaggage;
+	}
+
+	public void setRequestBaggage(Map<String, Object> requestBaggage) {
+		this.requestBaggage = requestBaggage;
+	}
+
+	@Override
+	public Map<String, Object> getInputMap() {
+		return inputMap;
+	}
+
+	public void setInputMap(Map<String, Object> inputMap) {
+		this.inputMap = inputMap;
+	}
+
+	@Override
+	public String getJsonString() {
+		return jsonString;
+	}
+
+	public void setJsonString(String jsonString) {
+		this.jsonString = jsonString;
+	}
+
+	@Override
+	public Part getFilePart() {
+		return filePart;
+	}
+
+	public void setFilePart(Part filePart) {
+		this.filePart = filePart;
+	}
+
+	@Override
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	@Override
+	public String getObjectIdForMedia() {
+		return objectIdForMedia;
+	}
+
+	public void setObjectIdForMedia(String objectIdForMedia) {
+		this.objectIdForMedia = objectIdForMedia;
+	}
+
+	@Override
+	public String getInputType() {
+		return inputType;
+	}
+
+	public void setInputType(String inputType) {
+		this.inputType = inputType;
+	}
+	@Override
+	public InputStream getInputStream() {
+		return inputStream;
+	}
+
+	public void setInputStream(InputStream inputStream) {
+		this.inputStream = inputStream;
+	}
+}
