@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.apis.IRequest;
 import com.pogeyan.swagger.apis.SwaggerDeleteDAO;
-import com.pogeyan.swagger.helpers.SwaggerDELETEHelpers;
+import com.pogeyan.swagger.helpers.SwaggerDeleteHelpers;
 
 public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerDeleteDAOImpl.class);
@@ -18,7 +18,7 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {} object: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteTypeDefMethod", obj.getRepositoryId(), obj.getType(), obj.getObjectIdForMedia());
 			// here obj.getObjectIdForMedia() id the type to be deleted
-			del = SwaggerDELETEHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
+			del = SwaggerDeleteHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
 					obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
 			LOG.error("deleting objects in repoId: {}, Cause: ", obj.getRepositoryId(), e);
@@ -35,7 +35,7 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteMethod", obj.getRepositoryId(), obj.getType(), obj.getInputType());
-			delete = SwaggerDELETEHelpers.invokeDeleteMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
+			delete = SwaggerDeleteHelpers.invokeDeleteMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
 					obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
 			LOG.error("deleting objects in repoId: {}, Cause: ", obj.getRepositoryId(), e);

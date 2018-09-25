@@ -62,7 +62,7 @@ public class SwaggerUIDefnHelpers {
 		tagsList.add(tagType);
 
 		// add Acl TagObject
-		TagObject aclType = new TagObject("Acl", "Acl Tag", externalDocsObject);
+		TagObject aclType = new TagObject("acl", "acl Tag", externalDocsObject);
 		tagsList.add(aclType);
 		tagsList.sort((TagObject a, TagObject b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
 		LOG.debug("Tags:{}", tagsList.toString());

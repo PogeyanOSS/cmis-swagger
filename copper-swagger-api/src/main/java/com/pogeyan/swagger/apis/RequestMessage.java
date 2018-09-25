@@ -8,7 +8,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Part;
 
 @SuppressWarnings("unused")
-public class SRequestMessage implements IRequest {
+public class RequestMessage implements IRequest {
 	private String[] credentials;
 	private String[] pathFragments;
 	private String repositoryId;
@@ -20,26 +20,53 @@ public class SRequestMessage implements IRequest {
 	private Part filePart;
 	private String type;
 	private InputStream inputStream;
-	
+	private String aclParam;
 	private String objectIdForMedia;
 	private String inputType;
+	public String parentId;
 	
-	public SRequestMessage() {
+	public boolean includeCurd;
+	
+	public boolean isIncludeCurd() {
+		return includeCurd;
+	}
+
+	public void setIncludeCurd(boolean includeCurd) {
+		this.includeCurd = includeCurd;
+	}
+
+	public String getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
+	}
+
+	public RequestMessage() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-	public SRequestMessage(String[] credentials, String[] pathFragments) {
+	public RequestMessage(String[] credentials, String[] pathFragments) {
 		super();
 		this.credentials = credentials;
 		this.pathFragments = pathFragments;
 		this.repositoryId = pathFragments[0];
 		this.type = pathFragments[1];
-		this. inputType = pathFragments[2];
+		this.inputType = pathFragments[2];
 		this.userName = credentials[0];
 		this.password = credentials[1];
 	}
 	
+	public String getAclParam() {
+		return aclParam;
+	}
+
+	public void setAclParam(String aclParam) {
+		this.aclParam = aclParam;
+	}
+
 	@Override
 	public String getRepositoryId() {
 		return repositoryId;
@@ -137,4 +164,30 @@ public class SRequestMessage implements IRequest {
 	public void setInputStream(InputStream inputStream) {
 		this.inputStream = inputStream;
 	}
+
+	@Override
+	public String getparentId() {
+		
+		return parentId;
+	}
+
+	@Override
+	public String getaclParam() {
+		
+		return aclParam;
+	}
+
+	@Override
+	public boolean getincludeCurd() {
+		
+		return includeCurd;
+	}
+
+	@Override
+	public InputStream getinput() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+
 }

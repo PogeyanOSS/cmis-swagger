@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
-public class SwaggerPUTHelpers {
-	private static final Logger LOG = LoggerFactory.getLogger(SwaggerPUTHelpers.class);
+public class SwaggerPutHelpers {
+	private static final Logger LOG = LoggerFactory.getLogger(SwaggerPutHelpers.class);
 
 	/**
 	 * @param repositoryId

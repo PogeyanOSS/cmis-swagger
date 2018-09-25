@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.apis.IRequest;
 import com.pogeyan.swagger.apis.SwaggerPutDAO;
-import com.pogeyan.swagger.helpers.SwaggerPUTHelpers;
+import com.pogeyan.swagger.helpers.SwaggerPutHelpers;
 
 public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerPutDAOImpl.class);
@@ -20,7 +20,7 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object :{}", "SwaggerPutDAOImpl",
 					"invokePutTypeDefMethod", obj.getRepositoryId(), obj.getType());
-			typeDef = SwaggerPUTHelpers.invokePutTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
+			typeDef = SwaggerPutHelpers.invokePutTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
 					obj.getInputStream(), obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
 			LOG.error("updating objects in repoId: {}, for type: {}, Cause: ", obj.getRepositoryId(),
@@ -37,7 +37,7 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutDAOImpl",
 					"invokePutMethod", obj.getRepositoryId(), obj.getType(), obj.getInputType());
-			objectMap = SwaggerPUTHelpers.invokePutMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
+			objectMap = SwaggerPutHelpers.invokePutMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
 					obj.getInputMap(), obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
 			LOG.error("updating objects in repoId: {}, fotr type: {}, Cause: ", obj.getRepositoryId(),

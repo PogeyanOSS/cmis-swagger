@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.chemistry.opencmis.client.api.Session;
 
+import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
-import com.pogeyan.swagger.utils.HttpUtils;
 
 @WebFilter("/docs/*")
 public class BasiAuthFilter implements Filter {

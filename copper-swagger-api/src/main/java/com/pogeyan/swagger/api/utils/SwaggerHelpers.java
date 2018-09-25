@@ -16,17 +16,13 @@
 package com.pogeyan.swagger.api.utils;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLDecoder;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,22 +35,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
-import org.apache.chemistry.opencmis.client.api.Folder;
-import org.apache.chemistry.opencmis.client.api.ItemIterable;
-import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
-import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.SessionFactory;
 import org.apache.chemistry.opencmis.client.api.Tree;
-import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
-import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
-import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
@@ -72,8 +61,6 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisStreamNotSupportedEx
 import org.apache.chemistry.opencmis.commons.exceptions.CmisTooManyRequestsException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisUpdateConflictException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisVersioningException;
-import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
-import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.apache.cxf.helpers.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -88,20 +75,17 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.io.Files;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.SRequestMessage;
+import com.pogeyan.swagger.apis.RequestMessage;
 import com.pogeyan.swagger.pojos.ErrorResponse;
-import com.pogeyan.swagger.pojos.ExternalDocs;
-import com.pogeyan.swagger.pojos.InfoObject;
 
 /**
  * SwaggerHelpers operations.
  * 
  * @param <Irequest>
  */
-public class SwaggerHelpers<Irequest> {
+public class SwaggerHelpers {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerHelpers.class);
 	public static Cache<String, ObjectType> typeCacheMap;
 	private static Cache<String, Session> sessionMap;
@@ -125,10 +109,7 @@ public class SwaggerHelpers<Irequest> {
 	public static final String METHOD_POST = "POST";
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
-	private static final IRequest sRequestMessage = null;
-	public static InfoObject infoObj = new InfoObject();
-	public static ExternalDocs externalDocsObject = new ExternalDocs();
-	public static String hostSwaggerUrl;
+
 	public static ObjectMapper mapper = new ObjectMapper();
 
 	static {
@@ -265,21 +246,6 @@ public class SwaggerHelpers<Irequest> {
 		return ((Cache<String, ObjectType>) getTypeCacheMap()).getIfPresent(typeId);
 	}
 
-	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
-		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
-		if (relationshipType != null) {
-			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
-			if (relationObject != null) {
-				OperationContext context = new OperationContextImpl();
-				context.setFilterString("target_table,source_table eq " + typeId);
-				ItemIterable<CmisObject> relationDescendants = relationObject.getChildren(context);
-				return relationDescendants;
-			}
-		}
-		return null;
-
-	}
-
 	/**
 	 * @param typeChildren
 	 *            the property typeChildren it will give children's of one
@@ -409,7 +375,6 @@ public class SwaggerHelpers<Irequest> {
 		return new ErrorResponse(errorMessage, code);
 	}
 
-	//
 	/**
 	 * @return true means type have custom folder,false means type does not have
 	 *         any custom folder
@@ -420,99 +385,6 @@ public class SwaggerHelpers<Irequest> {
 			return value.equalsIgnoreCase("1");
 		}
 		return false;
-	}
-
-	/**
-	 * 
-	 * @param httpRequest
-	 * @return username and password from the request
-	 * @throws UnsupportedEncodingException
-	 */
-
-	private static String getB64Auth(String username, String password) {
-		String source = username + ":" + password;
-		String encoding = "Basic " + Base64.getEncoder().encodeToString(source.getBytes());
-
-		return encoding;
-	}
-
-	/**
-	 * 
-	 * @param httpRequest
-	 * @param repoId
-	 *            repository Id
-	 * @param objectId
-	 *            objectId for which the relation data needs to be fetched
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public static ArrayList<Object> getDescendantsForRelationObjects(String username, String password, String repoId,
-			String objectId) {
-		// TODO Auto-generated method stub
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		CloseableHttpResponse httpResponse = null;
-		try {
-			String connectionString = System.getenv("SWAGGER_CMIS_SESSION_CONNECTION_URL") + repoId;
-			String reqUrl = connectionString + "?objectId=" + objectId
-					+ "&cmisselector=descendants&depth=-1&includeAllowableActions=true&includeRelationships=none&renditionFilter=cmis%3Anone&includePathSegment=true&succinct=true&includeACL=true";
-			HttpGet getRequest = new HttpGet(reqUrl.trim());
-			getRequest.addHeader("Content-Type", "application/json");
-			getRequest.addHeader("Authorization", getB64Auth(username, password));
-			httpResponse = httpClient.execute(getRequest);
-			int resCode = httpResponse.getStatusLine().getStatusCode();
-			HttpEntity resEntity = httpResponse.getEntity();
-			if (resEntity != null) {
-				String resBody = EntityUtils.toString(resEntity);
-				ArrayList<Object> json = new ObjectMapper().readValue(resBody, ArrayList.class);
-				return json;
-			} else {
-				LOG.error("class name: {}, method name: {}, repositoryId: {},Empty ResponseEntity with resCode: {}",
-						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, resCode);
-				throw new Exception("resCode:" + resCode);
-			}
-		} catch (Exception e) {
-			LOG.info(
-					"class name: {}, method name: {}, repositoryId: {}, Error in building an HTTP Request or Descendants are null!",
-					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, e);
-		} finally {
-			try {
-				httpClient.close();
-			} catch (IOException ex) {
-				LOG.error(
-						"class name: {}, method name: {}, repositoryId: {}, Execption in closing httpClient stream: {}",
-						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, ex);
-			}
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static Map<String, Object> formRelationData(Session session, ArrayList<Object> relationData) {
-		Map<String, Object> relMap = new LinkedHashMap<String, Object>();
-		if (relationData != null) {
-			relationData.forEach(relationObj -> {
-				JSONObject childJson = new JSONObject();
-
-				LinkedHashMap<Object, Object> relationObjectMap = (LinkedHashMap<Object, Object>) relationObj;
-				LinkedHashMap<Object, Object> getRelationshipData = (LinkedHashMap<Object, Object>) relationObjectMap
-						.get("object");
-				LinkedHashMap<Object, Object> getRelationshipObjectData = (LinkedHashMap<Object, Object>) getRelationshipData
-						.get("object");
-				Map<String, Object> succintProps = (Map<String, Object>) getRelationshipObjectData
-						.get("succinctProperties");
-				childJson.putAll(succintProps);
-				String relId = succintProps.get(PropertyIds.OBJECT_ID).toString();
-				ArrayList<JSONObject> list = relMap.get(relId) != null ? (ArrayList<JSONObject>) relMap.get(relId)
-						: new ArrayList<>();
-				ArrayList<Object> childrenRelationData = (ArrayList<Object>) relationObjectMap.get("children");
-				if (childrenRelationData != null) {
-					childJson.put("relation", formRelationData(session, childrenRelationData));
-				}
-				list.add(childJson);
-				relMap.put(relId, list);
-			});
-		}
-		return relMap;
 	}
 
 	public static Cache<String, ObjectType> getTypeCacheMap() {
@@ -634,85 +506,6 @@ public class SwaggerHelpers<Irequest> {
 		return serializeMap;
 	}
 
-	public static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
-			Map<String, Object> input, ContentStream stream) throws Exception {
-		try {
-			// LOG.info("BaseTypeID:{}", baseTypeId.value());
-			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID:{}", "SwaggerApiService",
-					"createForBaseTypes", session.getRepositoryInfo().getId(), baseTypeId.value());
-			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
-				CmisObject folder = null;
-				if (parentId != null) {
-					folder = ((Folder) session.getObject(parentId)).createFolder(input);
-					return folder;
-				} else {
-					ObjectId id = session.getRootFolder().createFolder(input);
-					folder = session.getObject(id);
-					return folder;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_DOCUMENT)) {
-				CmisObject document = null;
-				if (parentId != null) {
-					document = ((Folder) session.getObject(parentId)).createDocument(input,
-							stream != null ? stream : null, null);
-					return document;
-				} else {
-					ObjectId id = session.createDocument(input, null, stream != null ? stream : null, null);
-					document = session.getObject(id);
-					return document;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_ITEM)) {
-				CmisObject item = null;
-				if (parentId != null) {
-					item = ((Folder) session.getObject(parentId)).createItem(input);
-					return item;
-				} else {
-					ObjectId id = session.createItem(input, null);
-					item = session.getObject(id);
-					return item;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_RELATIONSHIP)) {
-				ObjectId id = session.createRelationship(input);
-				CmisObject relationship = session.getObject(id);
-				return relationship;
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_POLICY)) {
-				CmisObject policy = null;
-				if (parentId != null) {
-					policy = ((Folder) session.getObject(parentId)).createPolicy(input);
-					return policy;
-				} else {
-					ObjectId polId = session.createPolicy(input, null);
-					policy = session.getObject(polId);
-					return policy;
-				}
-			} else if (baseTypeId.equals(BaseTypeId.CMIS_SECONDARY)) {
-				return null;
-			}
-		} catch (Exception e) {
-			ErrorResponse resp = SwaggerHelpers.handleException(e);
-			throw new ErrorResponse(resp);
-		}
-		return null;
-	}
-
-	public static ContentStream getContentStream(Part filePart) throws IOException {
-		ContentStream setContentStream = null;
-		if (filePart != null) {
-			String file = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-			String extension = Files.getFileExtension(file);
-			String name = Files.getNameWithoutExtension(file);
-			InputStream fileContent = filePart.getInputStream();
-			BigInteger size = BigInteger.valueOf(filePart.getSize());
-			// LOG.info( "filName:{},extension:{},size:{}", name, extension,
-			// size);
-			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerApiService", "getContentStream");
-			setContentStream = new ContentStreamImpl(name, size, MimeUtils.guessMimeTypeFromExtension(extension),
-					fileContent);
-			return setContentStream;
-		}
-		return null;
-	}
-
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType object, Session session)
 			throws Exception {
@@ -807,6 +600,63 @@ public class SwaggerHelpers<Irequest> {
 		return serializeMap;
 	}
 
+	/**
+	 * 
+	 * @param httpRequest
+	 * @param repoId
+	 *            repository Id
+	 * @param objectId
+	 *            objectId for which the relation data needs to be fetched
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Object> getDescendantsForRelationObjects(String username, String password, String repoId,
+			String objectId) {
+		// TODO Auto-generated method stub
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = null;
+		try {
+			String connectionString = System.getenv("SWAGGER_CMIS_SESSION_CONNECTION_URL") + repoId;
+			String reqUrl = connectionString + "?objectId=" + objectId
+					+ "&cmisselector=descendants&depth=-1&includeAllowableActions=true&includeRelationships=none&renditionFilter=cmis%3Anone&includePathSegment=true&succinct=true&includeACL=true";
+			HttpGet getRequest = new HttpGet(reqUrl.trim());
+			getRequest.addHeader("Content-Type", "application/json");
+			getRequest.addHeader("Authorization", getB64Auth(username, password));
+			httpResponse = httpClient.execute(getRequest);
+			int resCode = httpResponse.getStatusLine().getStatusCode();
+			HttpEntity resEntity = httpResponse.getEntity();
+			if (resEntity != null) {
+				String resBody = EntityUtils.toString(resEntity);
+				ArrayList<Object> json = new ObjectMapper().readValue(resBody, ArrayList.class);
+				return json;
+			} else {
+				LOG.error("class name: {}, method name: {}, repositoryId: {},Empty ResponseEntity with resCode: {}",
+						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, resCode);
+				throw new Exception("resCode:" + resCode);
+			}
+		} catch (Exception e) {
+			LOG.info(
+					"class name: {}, method name: {}, repositoryId: {}, Error in building an HTTP Request or Descendants are null!",
+					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, e);
+		} finally {
+			try {
+				httpClient.close();
+			} catch (IOException ex) {
+				LOG.error(
+						"class name: {}, method name: {}, repositoryId: {}, Execption in closing httpClient stream: {}",
+						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, ex);
+			}
+		}
+		return null;
+	}
+
+	private static String getB64Auth(String username, String password) {
+		String source = username + ":" + password;
+		String encoding = "Basic " + Base64.getEncoder().encodeToString(source.getBytes());
+
+		return encoding;
+	}
+
 	@SuppressWarnings("unused")
 	public static IRequest getImplClient(HttpServletRequest request) throws Exception {
 
@@ -820,7 +670,7 @@ public class SwaggerHelpers<Irequest> {
 		Part filePart = null;
 		String jsonString = null;
 
-		SRequestMessage sRequestMessage = new SRequestMessage(credentials, pathFragments);
+		RequestMessage sRequestMessage = new RequestMessage(credentials, pathFragments);
 
 		// can be inputType like getAll or
 		// it passes objectId
@@ -837,7 +687,11 @@ public class SwaggerHelpers<Irequest> {
 			} else if (sRequestMessage.getType().equals("_metadata")) {
 			} else {
 				jsonString = IOUtils.toString(request.getInputStream());
+				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+				});
 			}
+			boolean InputStream = pathFragments.length > 2 && pathFragments[2].equals("type");
+			sRequestMessage.setInputStream(request.getInputStream());
 		} else if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
 			if (sRequestMessage.getType().equals("_metadata")) {
 				sRequestMessage.setInputStream(request.getInputStream());

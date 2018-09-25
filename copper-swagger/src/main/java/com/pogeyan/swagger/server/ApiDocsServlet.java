@@ -16,9 +16,6 @@
 
 package com.pogeyan.swagger.server;
 
-import java.io.InputStream;
-//import java.net.URLDecoder;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.annotation.MultipartConfig;
@@ -26,7 +23,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.commons.data.Acl;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
@@ -38,6 +34,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 import com.pogeyan.swagger.apis.IRequest;
 import com.pogeyan.swagger.apis.SwaggerDeleteDAO;
@@ -48,8 +45,6 @@ import com.pogeyan.swagger.apis.SwaggerPutDAO;
 //import com.pogeyan.swagger.apis.SwaggerPutDAO;
 import com.pogeyan.swagger.factory.SwaggerMethodFactory;
 import com.pogeyan.swagger.pojos.ErrorResponse;
-
-import com.pogeyan.swagger.utils.HttpUtils;
 
 /**
  * Servlet implementation class ApiDocsServlet
@@ -109,17 +104,17 @@ public class ApiDocsServlet extends HttpServlet {
 	 */
 
 	protected void doGet(SwaggerGetDAO getDao, IRequest reqObj, HttpServletResponse response) throws Exception {
-
 		try {
 			Map<String, Object> propMap = null;
 			JSONObject jsonObj = null;
 			ContentStream stream = null;
-			
-			
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doGet",
+					reqObj.getRepositoryId(), reqObj.getType());
+
 			if (reqObj.getInputType() != null && !reqObj.getInputType().equals("media")) {
 				if (reqObj.getInputType().equals("type")) {
 					jsonObj = getDao.invokeGetTypeDefMethod(reqObj);
-					
+
 				} else if (reqObj.getInputType().equals("getAll")) {
 					jsonObj = getDao.invokeGetAllMethod(reqObj);
 				} else {
@@ -127,7 +122,7 @@ public class ApiDocsServlet extends HttpServlet {
 				}
 			}
 
-			if (reqObj.getObjectIdForMedia()!=null && reqObj.getInputType().equals("media")) {
+			if (reqObj.getObjectIdForMedia() != null && reqObj.getInputType().equals("media")) {
 				stream = getDao.invokeDownloadMethod(reqObj);
 			}
 
@@ -152,59 +147,51 @@ public class ApiDocsServlet extends HttpServlet {
 	 *      response)
 	 */
 
-	protected void doPost(SwaggerPostDAO function, IRequest reqObj, HttpServletResponse response) throws Exception {
-//		JSONObject typedefinitonObject = null;
-//		Acl objectacl = null;
-//		Map<String, Object> propMap = new HashMap<>();
-//
-//		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServelet", "doPost",
-//				reqObj.getRepositoryId(), reqObj.getTypeId());
-//		if (reqObj.getinputId() != null) {
-//
-//			if (reqObj.getTypeId().equals("type")) {
-//
-//				TypeDefinition typedefiniton = function.invokePostTypeDefMethod(reqObj);
-//				typedefinitonObject = JSONConverter.convert(typedefiniton, DateTimeFormat.SIMPLE);
-//
-//			}
-//
-//			else if (reqObj.getTypeId().equals("Acl")) {
-//				objectacl = function.invokePostAcl(reqObj);
-//			} else {
-//				propMap = function.invokePostMethod(reqObj);
-//			}
-//		}
-//
-//		if (propMap != null) {
-//			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
-//		} else if (typedefinitonObject != null) {
-//			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, typedefinitonObject);
-//		} else if (objectacl != null) {
-//			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, objectacl);
-//		} else {
-//			// error
-//			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT,
-//					reqObj.getTypeId() + " not created.");
-//		}
+	protected void doPost(SwaggerPostDAO PostDao, IRequest reqObj, HttpServletResponse response) throws Exception {
+		JSONObject typedefinitonObject = null;
+		Acl objectacl = null;
+		Map<String, Object> propMap = null;
+
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServelet", "doPost",
+				reqObj.getRepositoryId(), reqObj.getInputType());
+		if (reqObj.getInputType() != null) {
+
+			if (reqObj.getInputType().equals("type")) {
+				TypeDefinition typedefiniton = PostDao.invokePostTypeDefMethod(reqObj);
+				typedefinitonObject = JSONConverter.convert(typedefiniton, DateTimeFormat.SIMPLE);
+				objectacl = PostDao.invokePostAcl(reqObj);
+			} else {
+				propMap = PostDao.invokePostMethod(reqObj);
+			}
+		}
+
+		if (propMap != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
+		} else if (typedefinitonObject != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, typedefinitonObject);
+		} else if (objectacl != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, objectacl);
+		} else {
+			// error
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT,
+					reqObj.getType() + " not created.");
+		}
 	}
 
 	protected void doPut(SwaggerPutDAO PutDao, IRequest reqObj, HttpServletResponse response) throws Exception {
-
 		JSONObject typedefinitionObject = new JSONObject();
 		Map<String, Object> propMap = null;
 		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doPut",
 				reqObj.getRepositoryId(), reqObj.getType());
-		
+
 		if (reqObj.getInputType() != null)
-			if(reqObj.getInputType().equals("type")) {
-			
-			TypeDefinition typedefinition = PutDao.invokePutTypeDefMethod(reqObj);
-			typedefinitionObject = JSONConverter.convert(typedefinition, DateTimeFormat.SIMPLE);
-		} else {
-			propMap = PutDao.invokePutMethod(reqObj);
-		}
-		
-		
+			if (reqObj.getInputType().equals("type")) {
+				TypeDefinition typedefinition = PutDao.invokePutTypeDefMethod(reqObj);
+				typedefinitionObject = JSONConverter.convert(typedefinition, DateTimeFormat.SIMPLE);
+			} else {
+				propMap = PutDao.invokePutMethod(reqObj);
+			}
+
 		if (propMap != null) {
 			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
 		} else if (typedefinitionObject != null) {
@@ -216,8 +203,8 @@ public class ApiDocsServlet extends HttpServlet {
 		}
 	}
 
-	protected void doDelete(SwaggerDeleteDAO deleteDAO, IRequest reqObj, HttpServletResponse response) throws Exception {
-
+	protected void doDelete(SwaggerDeleteDAO deleteDAO, IRequest reqObj, HttpServletResponse response)
+			throws Exception {
 		String statusMessage = null;
 		int code = HttpServletResponse.SC_NOT_FOUND;
 		boolean status = false;
@@ -229,12 +216,11 @@ public class ApiDocsServlet extends HttpServlet {
 			} else {
 				status = deleteDAO.invokeDeleteMethod(reqObj);
 			}
-		}
-		if (status) {
+		} else if (status) {
 			code = HttpServletResponse.SC_OK;
 			statusMessage = reqObj.getType() + " Deleted Successfully";
+		} else {
+			HttpUtils.invokeResponseWriter(response, code, statusMessage);
 		}
-	HttpUtils.invokeResponseWriter(response, code, statusMessage);
-
 	}
 }

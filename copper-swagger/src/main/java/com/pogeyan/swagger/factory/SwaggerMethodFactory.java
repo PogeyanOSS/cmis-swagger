@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
 
 import com.pogeyan.swagger.api.impl.SwaggerDeleteDAOImpl;
 import com.pogeyan.swagger.api.impl.SwaggerGetDAOImpl;
@@ -47,6 +46,7 @@ public class SwaggerMethodFactory {
 			return (T) new SwaggerPutDAOImpl();
 		} else if (className.equals(SwaggerMethodFactory.SDELETEDAOIMPL)) {
 			return (T) new SwaggerDeleteDAOImpl();
+		
 		}
 
 		return null;

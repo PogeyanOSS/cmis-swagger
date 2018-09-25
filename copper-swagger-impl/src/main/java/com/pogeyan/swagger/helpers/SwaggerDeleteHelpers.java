@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
-public class SwaggerDELETEHelpers {
-	private static final Logger LOG = LoggerFactory.getLogger(SwaggerDELETEHelpers.class);
+public class SwaggerDeleteHelpers {
+	private static final Logger LOG = LoggerFactory.getLogger(SwaggerDeleteHelpers.class);
 
 	/**
 	 * 

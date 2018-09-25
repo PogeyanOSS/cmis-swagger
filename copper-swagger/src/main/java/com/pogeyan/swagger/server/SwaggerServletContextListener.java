@@ -33,8 +33,8 @@ import org.apache.chemistry.opencmis.commons.impl.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
-import com.pogeyan.swagger.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.impl.factory.IObjectFacade;
 
 @WebListener

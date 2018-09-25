@@ -1,6 +1,7 @@
 package com.pogeyan.swagger.helpers;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -11,6 +12,7 @@ import org.apache.chemistry.opencmis.client.api.ObjectType;
 import org.apache.chemistry.opencmis.client.api.OperationContext;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.runtime.OperationContextImpl;
+import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
@@ -21,11 +23,13 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.cache.Cache;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
-public class SwaggerGETHelpers {
+public class SwaggerGetHelpers {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SwaggerGETHelpers.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SwaggerGetHelpers.class);
+	public static Cache<String, ObjectType> typeCacheMap;
 
 	@SuppressWarnings("unused")
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
@@ -39,7 +43,7 @@ public class SwaggerGETHelpers {
 		TypeDefinition typedefinition = SwaggerHelpers.getType(typeId);
 		JSONObject object = JSONConverter.convert(typedefinition, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
-			ItemIterable<CmisObject> relationType = SwaggerHelpers.getRelationshipType(session, typeId);
+			ItemIterable<CmisObject> relationType = getRelationshipType(session, typeId);
 			getRelationshipChild(session, relationType, object);
 		}
 		return object;
@@ -54,7 +58,7 @@ public class SwaggerGETHelpers {
 				Map<String, Object> propmap = SwaggerHelpers.compileProperties(types, session);
 				TypeDefinition typedef = SwaggerHelpers.getType(propmap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-				ItemIterable<CmisObject> relationInnerChildType = SwaggerHelpers.getRelationshipType(session,
+				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session,
 						typedef.getId());
 				if (relationInnerChildType != null) {
 					getRelationshipChild(session, relationInnerChildType, object);
@@ -168,7 +172,7 @@ public class SwaggerGETHelpers {
 			if (includeRelationship) {
 				ArrayList<Object> relationData = SwaggerHelpers.getDescendantsForRelationObjects(userName, password,
 						repositoryId, child.getId());
-				Map<String, Object> data = SwaggerHelpers.formRelationData(session, relationData);
+				Map<String, Object> data = SwaggerGetHelpers.formRelationData(session, relationData);
 				json.putAll(data);
 			} else {
 				Map<String, Object> propmap = SwaggerHelpers.compileProperties(child, session);
@@ -226,5 +230,49 @@ public class SwaggerGETHelpers {
 		} else {
 			throw new Exception("Type Missmatch");
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> formRelationData(Session session, ArrayList<Object> relationData) {
+		Map<String, Object> relMap = new LinkedHashMap<String, Object>();
+		if (relationData != null) {
+			relationData.forEach(relationObj -> {
+				JSONObject childJson = new JSONObject();
+
+				LinkedHashMap<Object, Object> relationObjectMap = (LinkedHashMap<Object, Object>) relationObj;
+				LinkedHashMap<Object, Object> getRelationshipData = (LinkedHashMap<Object, Object>) relationObjectMap
+						.get("object");
+				LinkedHashMap<Object, Object> getRelationshipObjectData = (LinkedHashMap<Object, Object>) getRelationshipData
+						.get("object");
+				Map<String, Object> succintProps = (Map<String, Object>) getRelationshipObjectData
+						.get("succinctProperties");
+				childJson.putAll(succintProps);
+				String relId = succintProps.get(PropertyIds.OBJECT_ID).toString();
+				ArrayList<JSONObject> list = relMap.get(relId) != null ? (ArrayList<JSONObject>) relMap.get(relId)
+						: new ArrayList<>();
+				ArrayList<Object> childrenRelationData = (ArrayList<Object>) relationObjectMap.get("children");
+				if (childrenRelationData != null) {
+					childJson.put("relation", formRelationData(session, childrenRelationData));
+				}
+				list.add(childJson);
+				relMap.put(relId, list);
+			});
+		}
+		return relMap;
+	}
+
+	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
+		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
+		if (relationshipType != null) {
+			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
+			if (relationObject != null) {
+				OperationContext context = new OperationContextImpl();
+				context.setFilterString("target_table,source_table eq " + typeId);
+				ItemIterable<CmisObject> relationDescendants = relationObject.getChildren(context);
+				return relationDescendants;
+			}
+		}
+		return null;
+
 	}
 }

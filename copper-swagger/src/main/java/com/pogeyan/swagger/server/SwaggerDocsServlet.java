@@ -27,9 +27,9 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
 import com.pogeyan.swagger.services.SwaggerGenerator;
-import com.pogeyan.swagger.utils.HttpUtils;
 
 /**
  * Servlet implementation class SwaggerDocsServlet

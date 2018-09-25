@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.apis.IRequest;
 import com.pogeyan.swagger.apis.SwaggerGetDAO;
-import com.pogeyan.swagger.helpers.SwaggerGETHelpers;
+import com.pogeyan.swagger.helpers.SwaggerGetHelpers;
 
 public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 
@@ -23,7 +23,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 					"invokeGetTypeDefMethod", obj.getRepositoryId(), obj.getType());
 
-			typeDefinition = SwaggerGETHelpers.invokeGetTypeDefMethod(obj.getRepositoryId(),
+			typeDefinition = SwaggerGetHelpers.invokeGetTypeDefMethod(obj.getRepositoryId(),
 					obj.getObjectIdForMedia() != null ? obj.getObjectIdForMedia() : obj.getType(), obj.getUserName(),
 					obj.getPassword(), (boolean) obj.getRequestBaggage().get("includeRelationship"));
 		} catch (Exception e) {
@@ -38,7 +38,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, objectId: {}", "SwaggerGetDAOImpl",
 					"invokeDownloadMethod", obj.getRepositoryId(), obj.getType(), obj.getObjectIdForMedia());
-			stream = SwaggerGETHelpers.invokeDownloadMethod(obj.getRepositoryId(), obj.getType(),
+			stream = SwaggerGetHelpers.invokeDownloadMethod(obj.getRepositoryId(), obj.getType(),
 					obj.getObjectIdForMedia(), obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
 			LOG.error("Fetching Content in repoId: {} for objectId: {}, Cause: ", obj.getRepositoryId(),
@@ -55,7 +55,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 					"invokeGetAllMethod", obj.getRepositoryId(), obj.getType());
-			jsontype = SwaggerGETHelpers.invokeGetAllMethod(obj.getRepositoryId(), obj.getType(),
+			jsontype = SwaggerGetHelpers.invokeGetAllMethod(obj.getRepositoryId(), obj.getType(),
 					(String) obj.getRequestBaggage().get("parentId"), (String) obj.getRequestBaggage().get("skipcount"),
 					(String) obj.getRequestBaggage().get("maxitems"), obj.getUserName(), obj.getPassword(),
 					(String) obj.getRequestBaggage().get("select"), (String) obj.getRequestBaggage().get("orderby"),
@@ -72,7 +72,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, ObjectId: {}", "SwaggerGetDAOImpl",
 					"invokeGetMethod", obj.getRepositoryId(), obj.getType(), obj.getInputType());
-			objectMap = SwaggerGETHelpers.invokeGetMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
+			objectMap = SwaggerGetHelpers.invokeGetMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
 					obj.getUserName(), obj.getPassword(), (String) obj.getRequestBaggage().get("select"));
 		} catch (Exception e) {
 			LOG.error("Error in Fetching object in repoId: {}, for objectId: {}, Cause: ", obj.getRepositoryId(),
