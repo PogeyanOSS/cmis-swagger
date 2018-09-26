@@ -46,6 +46,8 @@ public class SwaggerGetHelpers {
 			ItemIterable<CmisObject> relationType = getRelationshipType(session, typeId);
 			getRelationshipChild(session, relationType, object);
 		}
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, for type: {}",
+				"SwaggerGetHelpers", "invokeGetTypeDefMethod", repositoryId, typeId);
 		return object;
 	}
 
@@ -58,8 +60,7 @@ public class SwaggerGetHelpers {
 				Map<String, Object> propmap = SwaggerHelpers.compileProperties(types, session);
 				TypeDefinition typedef = SwaggerHelpers.getType(propmap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session,
-						typedef.getId());
+				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typedef.getId());
 				if (relationInnerChildType != null) {
 					getRelationshipChild(session, relationInnerChildType, object);
 				}
@@ -85,9 +86,8 @@ public class SwaggerGetHelpers {
 			customObjectId = objectId;
 		}
 
-		// LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId:
-		// {}, objectId: {}", "SwaggerApiService",
-		// "invokeDownloadMethod", repositoryId, typeId, customObjectId);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
+				"invokeDownloadMethod", repositoryId, typeId, customObjectId);
 		ContentStream stream = ((Document) session.getObject(customObjectId)).getContentStream(customObjectId);
 		return stream;
 	}
@@ -165,9 +165,8 @@ public class SwaggerGetHelpers {
 
 		}
 
-		// LOG.info("class name: {}, method name: {}, repositoryId: {}, Fetching
-		// RelationshipType for type: {}",
-		// "SwaggerapiService", "invokeGetAllMethod", repositoryId, type);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
+				"SwaggerGetHelpers", "invokeGetAllMethod", repositoryId, type);
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {
 				ArrayList<Object> relationData = SwaggerHelpers.getDescendantsForRelationObjects(userName, password,

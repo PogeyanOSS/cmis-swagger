@@ -247,7 +247,7 @@ public class SwaggerUIDefnHelpers {
 		definitionsMap.put("PropertyDefinitions", definitionsPropDef);
 
 		Map<String, String> xmlAcl = new HashMap<String, String>();
-		xmlPropDef.put("name", "Acl");
+		xmlPropDef.put("name", "acl");
 		Map<String, Map<String, String>> propertiesForAcl = new HashMap<String, Map<String, String>>();
 		HashMap<String, String> princObj = new HashMap<String, String>();
 		princObj.put("type", "string");
@@ -256,7 +256,7 @@ public class SwaggerUIDefnHelpers {
 		propertiesForAcl.put("permission", princObj);
 
 		DefinitionsObject definitionsAcl = new DefinitionsObject("object", null, xmlAcl, propertiesForAcl);
-		definitionsMap.put("Acl", definitionsAcl);
+		definitionsMap.put("acl", definitionsAcl);
 
 		LOG.debug("definitions:{}", definitionsMap.toString());
 		return definitionsMap;
@@ -652,7 +652,7 @@ public class SwaggerUIDefnHelpers {
 	private static Map<String, PathObject> postAclDefinitionCreation(Map<String, PathObject> pathMap,
 			List<Map<String, String[]>> security) {
 		Map<String, String> schemAcl = new HashMap<String, String>();
-		schemAcl.put("$ref", "#/definitions/Acl");
+		schemAcl.put("$ref", "#/definitions/acl");
 		Map<String, ResponseObject> aclResponses = new HashMap<String, ResponseObject>();
 		ResponseObject aclResp = new ResponseObject("Successful Operation", null);
 		aclResponses.put("200", aclResp);
@@ -688,13 +688,13 @@ public class SwaggerUIDefnHelpers {
 	private static Map<String, PathObject> postAddAclDefinitionCreation(Map<String, PathObject> pathMap,
 			Map<String, String> schemAcl, Map<String, ResponseObject> aclResponses,
 			List<Map<String, String[]>> security) {
-		ParameterObject postAddAclParams = new ParameterObject("body", "body", "Add Acl", true, schemAcl, null, null,
+		ParameterObject postAddAclParams = new ParameterObject("body", "body", "Add acl", true, schemAcl, null, null,
 				null, null, null);
-		PathCommonObject aclAddPostObj = new PathCommonObject(new String[] { "Acl" }, "Adds a new Acl", null, "addAcl",
+		PathCommonObject aclAddPostObj = new PathCommonObject(new String[] { "acl" }, "Adds a new Acl", null, "addAcl",
 				new String[] { "application/json" }, null, new ParameterObject[] { postAddAclParams }, aclResponses,
 				security);
 		PathObject aclAddPathObj = new PathObject(aclAddPostObj, null, null, null);
-		pathMap.put("/Acl/addAcl", aclAddPathObj);
+		pathMap.put("/acl/addAcl", aclAddPathObj);
 		return pathMap;
 
 	}
@@ -722,13 +722,13 @@ public class SwaggerUIDefnHelpers {
 	private static Map<String, PathObject> postRemoveAclDefinitionCreation(Map<String, PathObject> pathMap,
 			Map<String, String> schemAcl, Map<String, ResponseObject> aclResponses,
 			List<Map<String, String[]>> security) {
-		ParameterObject delAclParams = new ParameterObject("body", "body", "Remove Acl", true, schemAcl, null, null,
+		ParameterObject delAclParams = new ParameterObject("body", "body", "Remove acl", true, schemAcl, null, null,
 				null, null, null);
-		PathCommonObject aclRemObj = new PathCommonObject(new String[] { "Acl" }, "Removes an Acl", null, "removeAcl",
+		PathCommonObject aclRemObj = new PathCommonObject(new String[] { "acl" }, "Removes an Acl", null, "removeAcl",
 				new String[] { "application/json" }, null, new ParameterObject[] { delAclParams }, aclResponses,
 				security);
 		PathObject aclRemPathObj = new PathObject(aclRemObj, null, null, null);
-		pathMap.put("/Acl/removeAcl", aclRemPathObj);
+		pathMap.put("/acl/removeAcl", aclRemPathObj);
 		return pathMap;
 
 	}

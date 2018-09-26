@@ -42,6 +42,11 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 		} catch (Exception e) {
 			LOG.error("updating objects in repoId: {}, fotr type: {}, Cause: ", obj.getRepositoryId(),
 					obj.getInputType(), e);
+			try {
+				if (objectMap != null)
+					throw new Exception("Type Missmatch or object not found");
+			} catch (Exception e1) {
+			}
 
 		}
 		return objectMap;

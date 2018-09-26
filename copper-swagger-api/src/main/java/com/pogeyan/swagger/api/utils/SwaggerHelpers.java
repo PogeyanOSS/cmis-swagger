@@ -185,7 +185,7 @@ public class SwaggerHelpers {
 				connectionString = connectionUrl;
 			}
 
-			LOG.info("class name: {}, method name: {}, Creating session for repository: {}, connection URL: {}",
+			LOG.info("class name: {}, method name: {}, creating session for repository: {}, connection URL: {}",
 					"SwaggerHelpers", "createSession", repoId, connectionUrl);
 			SessionFactory factory = SessionFactoryImpl.newInstance();
 			Map<String, String> parameters = new HashMap<String, String>();

@@ -83,7 +83,7 @@ public class SwaggerPostHelpers {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		TypeDefinition typeDefinition = TypeUtils.readFromJSON(inputType);
 		TypeDefinition returnedType = session.createType(typeDefinition);
-		LOG.info("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggerApiService",
+		LOG.info("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
 				"invokePostTypeDefMethod", repositoryId, inputType);
 		if (SwaggerHelpers.customTypeHasFolder()) {
 			CmisObject object = session.getObjectByPath("/" + returnedType.getId());
@@ -136,7 +136,7 @@ public class SwaggerPostHelpers {
 		}
 		LOG.info(
 				"class name: {}, method name: {}, repositoryId: {} , aclParam: {}, Adding: {}, removing: {}, given ACEs",
-				"SwaggerApiService", "invokePostAcl", repositoryId, aclParam, addAces, removeAces);
+				"SwaggePostHelpers", "invokePostAcl", repositoryId, aclParam, addAces, removeAces);
 		Acl acl = session.applyAcl(object, addAces, removeAces, AclPropagation.OBJECTONLY);
 		HashMap<String, Object> properties = new HashMap<String, Object>();
 
@@ -236,9 +236,7 @@ public class SwaggerPostHelpers {
 			String name = Files.getNameWithoutExtension(file);
 			InputStream fileContent = filePart.getInputStream();
 			BigInteger size = BigInteger.valueOf(filePart.getSize());
-			// LOG.info( "filName:{},extension:{},size:{}", name, extension,
-			// size);
-			LOG.info("class name: {}, method name: {}", "SwaggerApiService", "ContentStream");
+			LOG.info("class name: {}, method name: {}", "SwaggerPostHelpers", "ContentStream");
 			setContentStream = new ContentStreamImpl(name, size, MimeUtils.guessMimeTypeFromExtension(extension),
 					fileContent);
 			return setContentStream;
@@ -279,8 +277,8 @@ public class SwaggerPostHelpers {
 
 				String id = isDeleted == true ? (String) props.get("_id")
 						: (String) properties.get(PropertyIds.OBJECT_ID);
-				LOG.info("className: {}, methodName: {}, repoId: {}, ObjectId: {}", "SwaggerHelpers", "crudOperation",
-						repositoryId, id);
+				LOG.info("className: {}, methodName: {}, repoId: {}, ObjectId: {}", "SwaggerPostHelpers",
+						"crudOperation", repositoryId, id);
 
 				try {
 					ArrayList<Object> relationData = SwaggerHelpers.getDescendantsForRelationObjects(userName, password,
@@ -527,7 +525,7 @@ public class SwaggerPostHelpers {
 	private static CmisObject updateObject(Session tokenSession, CmisObject obj, String type,
 			Map<String, Object> properties, Map<String, Object> attachmentProps, List<Ace> aceList) throws Exception {
 
-		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerHelpers", "updateObject-CRUD operation",
+		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "updateObject-CRUD operation",
 				obj.getId());
 		properties.remove(PropertyIds.OBJECT_ID);
 		properties.remove(PropertyIds.OBJECT_TYPE_ID);
@@ -547,7 +545,7 @@ public class SwaggerPostHelpers {
 
 	private static void deleteObject(Session tokenSession, String objectToBeDeleted, List<String> deletedIds) {
 
-		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerHelpers", "deleteObject-CRUD operation",
+		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "deleteObject-CRUD operation",
 				objectToBeDeleted);
 		deleteAttachments(tokenSession, objectToBeDeleted);
 		deleteRelationObjects(tokenSession, objectToBeDeleted, deletedIds);
@@ -985,7 +983,7 @@ public class SwaggerPostHelpers {
 			Map<String, Object> input, ContentStream stream) throws Exception {
 		try {
 			// LOG.info("BaseTypeID:{}", baseTypeId.value());
-			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID:{}", "SwaggerApiService",
+			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID: {}", "SwaggerPostHelpers",
 					"createForBaseTypes", session.getRepositoryInfo().getId(), baseTypeId.value());
 			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
 				CmisObject folder = null;

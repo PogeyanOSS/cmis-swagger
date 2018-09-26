@@ -33,7 +33,7 @@ public class SwaggerDeleteHelpers {
 			throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		TypeDefinition typeDefinition = session.getTypeDefinition(type);
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerApiService",
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerDeleteHelpers",
 				"invokeDeleteTypeDefMethod", repositoryId, type);
 		if (typeDefinition != null) {
 			session.deleteType(type);
@@ -71,9 +71,8 @@ public class SwaggerDeleteHelpers {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
-		// LOG.info("class name: {}, method name: {}, repositoryId: {}, type:
-		// {}, objectId: {}", "SwaggerApiService",
-		// "invokeDeleteMethod", repositoryId, typeId, objectId);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, objectId: {}", "SwaggerDeleteHelpers",
+				"invokeDeleteMethod", repositoryId, typeId, objectId);
 
 		if (object != null && typeobj.getId().equals(object.getType().getId())) {
 			boolean isdelete = SwaggerApiServiceFactory.getApiService().beforeDelete(session, object);

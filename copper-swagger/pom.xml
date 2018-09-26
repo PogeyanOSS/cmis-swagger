@@ -29,5 +29,10 @@
 			<artifactId>copper-swagger-api</artifactId>
 			<version>${app.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.pogeyan.cmis</groupId>
+			<artifactId>copper-swagger-impl</artifactId>
+			<version>${app.version}</version>
+		</dependency>
 	</dependencies>
 </project>

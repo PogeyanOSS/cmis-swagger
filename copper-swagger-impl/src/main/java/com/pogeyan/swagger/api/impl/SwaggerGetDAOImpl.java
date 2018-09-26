@@ -77,7 +77,14 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 		} catch (Exception e) {
 			LOG.error("Error in Fetching object in repoId: {}, for objectId: {}, Cause: ", obj.getRepositoryId(),
 					obj.getInputType(), e);
+			try {
+				if (objectMap != null)
+					throw new Exception("Type Missmatch or object not found");
+			} catch (Exception e1) {
+			}
+
 		}
+
 		return objectMap;
 
 	}

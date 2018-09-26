@@ -40,6 +40,13 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 		} catch (Exception e) {
 			LOG.error("deleting objects in repoId: {}, Cause: ", obj.getRepositoryId(), e);
 			e.printStackTrace();
+			if (!delete) {
+				try {
+					throw new Exception("Type Missmatch or object not found");
+				} catch (Exception e1) {
+				}
+
+			}
 		}
 		return delete;
 	}

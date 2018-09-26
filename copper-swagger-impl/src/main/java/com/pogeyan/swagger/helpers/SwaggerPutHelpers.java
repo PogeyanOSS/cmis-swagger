@@ -42,9 +42,8 @@ public class SwaggerPutHelpers {
 		if (typeDefinition != null) {
 			TypeDefinition typedefinition = TypeUtils.readFromJSON(string);
 			TypeDefinition returnedType = session.updateType(typedefinition);
-			// LOG.info("class name: {}, method name: {}, repositoryId: {},
-			// type: {}", "SwaggerApiService",
-			// "invokePutTypeDefMethod", repositoryId, typeId);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerPutHelpers",
+					"invokePutTypeDefMethod", repositoryId, typeId);
 			return returnedType;
 		}
 		return null;
@@ -81,9 +80,8 @@ public class SwaggerPutHelpers {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
-		// LOG.info("class name: {}, method name: {}, repositoryId: {}, type:
-		// {}, object: {}", "SwaggerApiService",
-		// "invokePutMethod", repositoryId, typeId, objectId);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutHelpers",
+				"invokePutMethod", repositoryId, typeId, objectId);
 		if (object != null && typdefinitionobj.getId().equals(object.getType().getId())) {
 			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typdefinitionobj, session);
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
