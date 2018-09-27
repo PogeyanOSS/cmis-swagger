@@ -7,12 +7,12 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 
 public interface SwaggerGetDAO {
 
-	public JSONObject invokeGetTypeDefMethod(IRequest obj);
+	public JSONObject invokeGetTypeDefMethod(IRequest obj) throws Exception;
 
-	public ContentStream invokeDownloadMethod(IRequest obj);
+	public ContentStream invokeDownloadMethod(IRequest obj) throws Exception;
 
-	public JSONObject invokeGetAllMethod(IRequest obj);
+	public JSONObject invokeGetAllMethod(IRequest obj) throws Exception;
 
-	public Map<String, Object> invokeGetMethod(IRequest obj);
+	public Map<String, Object> invokeGetMethod(IRequest obj) throws Exception;
 
 }

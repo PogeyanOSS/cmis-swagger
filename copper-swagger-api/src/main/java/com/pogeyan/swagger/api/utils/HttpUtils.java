@@ -113,7 +113,7 @@ public class HttpUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOG.error("Exception: {}", e.getMessage());
+			LOG.error("Exception in invokeResponseWriter: {}", e.getMessage());
 		}
 	}
 

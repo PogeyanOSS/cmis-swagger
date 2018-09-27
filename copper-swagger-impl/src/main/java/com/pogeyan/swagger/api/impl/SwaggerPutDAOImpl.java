@@ -14,25 +14,25 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerPutDAOImpl.class);
 
 	@Override
-	public TypeDefinition invokePutTypeDefMethod(IRequest obj) {
+	public TypeDefinition invokePutTypeDefMethod(IRequest obj) throws Exception {
 
 		TypeDefinition typeDef = null;
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object :{}", "SwaggerPutDAOImpl",
-					"invokePutTypeDefMethod", obj.getRepositoryId(), obj.getType());
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutDAOImpl",
+					"invokePutTypeDefMethod", obj.getRepositoryId(), obj.getInputType(), obj.getObjectIdForMedia());
 			typeDef = SwaggerPutHelpers.invokePutTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
 					obj.getInputStream(), obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
-			LOG.error("updating objects in repoId: {}, for type: {}, Cause: ", obj.getRepositoryId(),
-					obj.getObjectIdForMedia(), e);
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}", "SwaggerPutDAOImpl",
+					"invokePutTypeDefMethod", obj.getRepositoryId(), obj.getInputType(), e);
+			throw new Exception(e);
 
 		}
 		return typeDef;
 	}
 
 	@Override
-	public Map<String, Object> invokePutMethod(IRequest obj) {
-
+	public Map<String, Object> invokePutMethod(IRequest obj) throws Exception {
 		Map<String, Object> objectMap = null;
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutDAOImpl",
@@ -40,15 +40,11 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 			objectMap = SwaggerPutHelpers.invokePutMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
 					obj.getInputMap(), obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
-			LOG.error("updating objects in repoId: {}, fotr type: {}, Cause: ", obj.getRepositoryId(),
-					obj.getInputType(), e);
-			try {
-				if (objectMap != null)
-					throw new Exception("Type Missmatch or object not found");
-			} catch (Exception e1) {
-			}
-
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}", "SwaggerPutDAOImpl",
+					"invokePutMethod", obj.getRepositoryId(), obj.getType(), e);
+			throw new Exception(e);
 		}
+
 		return objectMap;
 
 	}

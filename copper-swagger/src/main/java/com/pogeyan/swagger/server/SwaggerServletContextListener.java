@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
-import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
 import com.pogeyan.swagger.impl.factory.IObjectFacade;
 
 @WebListener
@@ -184,9 +184,9 @@ public class SwaggerServletContextListener implements ServletContextListener {
 		contact.put("email", serverEmail);
 		license.put("name", serverName);
 		license.put("url", serverUrl);
-		SwaggerUIDefnHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
+		SwaggerUIHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
 				license);
-		SwaggerUIDefnHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
+		SwaggerUIHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
 		return true;
 
 	}

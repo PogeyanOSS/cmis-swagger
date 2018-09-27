@@ -32,8 +32,8 @@ import com.pogeyan.swagger.pojos.ResponseObject;
 import com.pogeyan.swagger.pojos.SecurityDefinitionObject;
 import com.pogeyan.swagger.pojos.TagObject;
 
-public class SwaggerUIDefnHelpers {
-	private static final Logger LOG = LoggerFactory.getLogger(SwaggerUIDefnHelpers.class);
+public class SwaggerUIHelpers {
+	private static final Logger LOG = LoggerFactory.getLogger(SwaggerUIHelpers.class);
 	public static InfoObject infoObj = new InfoObject();
 	public static ExternalDocs externalDocsObject = new ExternalDocs();
 	public static String hostSwaggerUrl;
@@ -65,7 +65,8 @@ public class SwaggerUIDefnHelpers {
 		TagObject aclType = new TagObject("acl", "acl Tag", externalDocsObject);
 		tagsList.add(aclType);
 		tagsList.sort((TagObject a, TagObject b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
-		LOG.debug("Tags:{}", tagsList.toString());
+		LOG.debug("class name: {}, method name: {}, Tags: {}", "SwaggerUIHelpers", "generateTagsForAllTypes",
+				tagsList.toString());
 		return tagsList;
 	}
 
@@ -82,7 +83,8 @@ public class SwaggerUIDefnHelpers {
 
 		SecurityDefinitionObject basicAuth = new SecurityDefinitionObject("basic", null, null, null, null, null);
 		security.put("BasicAuth", basicAuth);
-		LOG.debug("security:{}", security.toString());
+		LOG.debug("class name: {}, method name: {}, security: {}", "SwaggerUIHelpers", "getSecurityDefinitions",
+				security.toString());
 		return security;
 
 	}
@@ -258,7 +260,8 @@ public class SwaggerUIDefnHelpers {
 		DefinitionsObject definitionsAcl = new DefinitionsObject("object", null, xmlAcl, propertiesForAcl);
 		definitionsMap.put("acl", definitionsAcl);
 
-		LOG.debug("definitions:{}", definitionsMap.toString());
+		LOG.debug("class name: {}, method name: {}, definitions: {}", "SwaggerUIHelpers", "getDefinitions",
+				definitionsMap.toString());
 		return definitionsMap;
 	}
 
@@ -315,12 +318,12 @@ public class SwaggerUIDefnHelpers {
 			}
 			// get folder /folder/{folderId} GET
 			Map<String, ResponseObject> getResponsesMap = new HashMap<String, ResponseObject>();
-			ResponseObject respObject1 = new ResponseObject(type.getDescription() + " not found", null);
-			ResponseObject respObject2 = new ResponseObject("Invalid ID supplied", null);
-			ResponseObject respObject3 = new ResponseObject("successful operation", schema);
-			getResponsesMap.put("404", respObject1);
-			getResponsesMap.put("400", respObject2);
-			getResponsesMap.put("200", respObject3);
+			ResponseObject typeResponse = new ResponseObject(type.getDescription() + " not found", null);
+			ResponseObject idResponse = new ResponseObject("Invalid ID supplied", null);
+			ResponseObject sucessResponse = new ResponseObject("successful operation", schema);
+			getResponsesMap.put("404", typeResponse);
+			getResponsesMap.put("400", idResponse);
+			getResponsesMap.put("200", sucessResponse);
 
 			ParameterObject getParams = new ParameterObject("path", id, "ID of " + type.getDescription() + " to return",
 					true, null, "string", null, null, "int64", null);
@@ -475,7 +478,8 @@ public class SwaggerUIDefnHelpers {
 		// generate path for ACL
 		pathMap = postAclDefinitionCreation(pathMap, security);
 
-		LOG.debug("path:{}", pathMap.toString());
+		LOG.debug("class name: {}, method name: {}, path: {}", "SwaggerUIHelpers", "getDefinitions",
+				pathMap.toString());
 		return pathMap;
 	}
 

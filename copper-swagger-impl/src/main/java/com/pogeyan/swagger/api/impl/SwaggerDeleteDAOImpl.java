@@ -11,25 +11,27 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerDeleteDAOImpl.class);
 
 	@Override
-	public boolean invokeDeleteTypeDefMethod(IRequest obj) {
+	public boolean invokeDeleteTypeDefMethod(IRequest obj) throws Exception {
 
 		boolean del = false;
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {} object: {}", "SwaggerDeleteDAOImpl",
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteTypeDefMethod", obj.getRepositoryId(), obj.getType(), obj.getObjectIdForMedia());
 			// here obj.getObjectIdForMedia() id the type to be deleted
 			del = SwaggerDeleteHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
 					obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
-			LOG.error("deleting objects in repoId: {}, Cause: ", obj.getRepositoryId(), e);
-			e.printStackTrace();
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, object: {}, Cause: {}",
+					"SwaggerDeleteDAOImpl", "invokeDeleteTypeDefMethod", obj.getRepositoryId(),
+					obj.getObjectIdForMedia(), e);
+			throw new Exception(e);
 		}
 		return del;
 
 	}
 
 	@Override
-	public boolean invokeDeleteMethod(IRequest obj) {
+	public boolean invokeDeleteMethod(IRequest obj) throws Exception {
 
 		boolean delete = false;
 		try {
@@ -38,15 +40,10 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 			delete = SwaggerDeleteHelpers.invokeDeleteMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
 					obj.getUserName(), obj.getPassword());
 		} catch (Exception e) {
-			LOG.error("deleting objects in repoId: {}, Cause: ", obj.getRepositoryId(), e);
-			e.printStackTrace();
-			if (!delete) {
-				try {
-					throw new Exception("Type Missmatch or object not found");
-				} catch (Exception e1) {
-				}
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, type: {}, Cause: {}", "SwaggerDeleteDAOImpl",
+					"invokeDeleteMethod", obj.getRepositoryId(), obj.getInputType(), e);
+			throw new Exception(e);
 
-			}
 		}
 		return delete;
 	}

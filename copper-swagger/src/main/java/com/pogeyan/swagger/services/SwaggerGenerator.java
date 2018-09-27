@@ -22,7 +22,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
 import com.pogeyan.swagger.pojos.DefinitionsObject;
 import com.pogeyan.swagger.pojos.InfoObject;
 import com.pogeyan.swagger.pojos.PathObject;
@@ -39,14 +39,14 @@ public class SwaggerGenerator {
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerGenerator", "generateSwagger", repositoryId);
 
-			InfoObject infoObj = SwaggerUIDefnHelpers.generateInfoObject();
-			List<TagObject> tags = SwaggerUIDefnHelpers.generateTagsForAllTypes();
-			Map<String, SecurityDefinitionObject> securityDef = SwaggerUIDefnHelpers.getSecurityDefinitions();
-			Map<String, DefinitionsObject> definitions = SwaggerUIDefnHelpers.getDefinitions();
-			Map<String, PathObject> paths = SwaggerUIDefnHelpers.generatePathForAllTypes();
-			SwaggerJsonObject swaggerObject = new SwaggerJsonObject(SwaggerUIDefnHelpers.generateInfoObject().getVersion(),
-					SwaggerUIDefnHelpers.getHostSwaggerUrl(), repositoryId, new String[] { "http" }, infoObj,
-					SwaggerUIDefnHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
+			InfoObject infoObj = SwaggerUIHelpers.generateInfoObject();
+			List<TagObject> tags = SwaggerUIHelpers.generateTagsForAllTypes();
+			Map<String, SecurityDefinitionObject> securityDef = SwaggerUIHelpers.getSecurityDefinitions();
+			Map<String, DefinitionsObject> definitions = SwaggerUIHelpers.getDefinitions();
+			Map<String, PathObject> paths = SwaggerUIHelpers.generatePathForAllTypes();
+			SwaggerJsonObject swaggerObject = new SwaggerJsonObject(SwaggerUIHelpers.generateInfoObject().getVersion(),
+					SwaggerUIHelpers.getHostSwaggerUrl(), repositoryId, new String[] { "http" }, infoObj,
+					SwaggerUIHelpers.generateExternalDocsObject(), tags, securityDef, definitions, paths);
 			jsonString = mapper.writeValueAsString(swaggerObject);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
-//import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
@@ -185,8 +184,7 @@ public class SwaggerHelpers {
 				connectionString = connectionUrl;
 			}
 
-			LOG.info("class name: {}, method name: {}, creating session for repository: {}, connection URL: {}",
-					"SwaggerHelpers", "createSession", repoId, connectionUrl);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerHelpers", "createSession", repoId);
 			SessionFactory factory = SessionFactoryImpl.newInstance();
 			Map<String, String> parameters = new HashMap<String, String>();
 			// user credentials
@@ -199,7 +197,8 @@ public class SwaggerHelpers {
 			session.setDefaultContext(session.createOperationContext());
 			sessionMap.put(userName, session);
 		} catch (Exception e) {
-			LOG.error("Exception on createSession: {}", e.getMessage());
+			LOG.error("class name: {}, method name: {}, repositoryId: {} ,Exception on createSession: {}",
+					"SwaggerHelpers", "createSession", repoId, e.getMessage());
 			ErrorResponse response = SwaggerHelpers.handleException(e);
 			throw new ErrorResponse(response);
 		}
@@ -213,7 +212,8 @@ public class SwaggerHelpers {
 	 *            particular repository
 	 */
 	public static void getAllTypes(Session session) {
-		LOG.info("class name: {}, method name: {}, Getting all types in repository", "SwaggerHelpers", "getAllTypes");
+		LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerHelpers", "getAllTypes",
+				session.getRepositoryInfo().getId());
 		List<String> list = getBaseTypeList();
 		for (String type : list) {
 			ObjectType baseType = session.getTypeDefinition(type);
@@ -223,7 +223,8 @@ public class SwaggerHelpers {
 				getChildTypes(object);
 			}
 		}
-		LOG.debug("Types in repository:{}", typeCacheMap.toString());
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, Types in repository: {}", "SwaggerHelpers",
+				"getAllTypes", session.getRepositoryInfo().getId(), typeCacheMap.toString());
 	}
 
 	public static Boolean getTypeIsPresents() {
@@ -315,7 +316,8 @@ public class SwaggerHelpers {
 		String errorMessage;
 		int code;
 		// ex.printStackTrace();
-		LOG.error("CmisBaseResponse error: {}", ex.getMessage(), ex.getStackTrace());
+		LOG.error("class name: {}, method name: {}, repositoryId: {}, CmisBaseResponse error: {}", "SwaggerHelpers",
+				"handleException", ex.getMessage());
 
 		if (ex instanceof CmisInvalidArgumentException) {
 			errorMessage = ((CmisInvalidArgumentException) ex).getErrorContent();
@@ -416,7 +418,7 @@ public class SwaggerHelpers {
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> deserializeInputForResponse(Map<String, Object> input, ObjectType object,
 			Session session) throws Exception {
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, deSerializing Input:{}", "SwaggerApiService",
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, deSerializing input: {}", "SwaggerHelpers",
 				"deserializeInputForResponse", session.getRepositoryInfo().getId(), input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
 		Map<String, PropertyDefinition<?>> dataPropDef = object.getPropertyDefinitions();
@@ -502,14 +504,16 @@ public class SwaggerHelpers {
 				continue;
 			}
 		}
-		LOG.info("serializedMap:{}", serializeMap);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerHelpers", "serializedMap:{}",
+				session.getRepositoryInfo().getId(), input);
 		return serializeMap;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType object, Session session)
 			throws Exception {
-		LOG.info("class name: {}, method name: {}, type: {}", "SwaggerApiService", "deserializeInput", input);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerHelpers", "deserializeInput",
+				session.getRepositoryInfo().getId(), input);
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
 		Map<String, PropertyDefinition<?>> dataPropertyDefinition = object.getPropertyDefinitions();
 		for (String var : input.keySet()) {
@@ -596,7 +600,8 @@ public class SwaggerHelpers {
 				continue;
 			}
 		}
-		LOG.info("serializedMap:{}", serializeMap);
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, serializedMap: {}", "SwaggerHelpers",
+				"serializedMap:{}", session.getRepositoryInfo().getId(), input, serializeMap);
 		return serializeMap;
 	}
 
@@ -630,7 +635,7 @@ public class SwaggerHelpers {
 				ArrayList<Object> json = new ObjectMapper().readValue(resBody, ArrayList.class);
 				return json;
 			} else {
-				LOG.error("class name: {}, method name: {}, repositoryId: {},Empty ResponseEntity with resCode: {}",
+				LOG.error("class name: {}, method name: {}, repositoryId: {}, Empty ResponseEntity with resCode: {}",
 						"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, resCode);
 				throw new Exception("resCode:" + resCode);
 			}
@@ -719,28 +724,25 @@ public class SwaggerHelpers {
 				select = select + "," + URLDecoder.decode(filter, "UTF-8");
 			} else if (select == null && filter != null) {
 				select = "*," + filter;
-
-				requestBaggage.put("select", select);
-				requestBaggage.put("orderby", select);
-
-				String skipCount = request.getParameter("skipcount");
-				String maxItems = request.getParameter("maxitems");
-				String parentId = request.getParameter("parentId");
-				String includeRelationshipString = request.getParameter("includeRelationship");
-				boolean includeRelationship = includeRelationshipString != null
-						? Boolean.parseBoolean(includeRelationshipString) : false;
-
-				requestBaggage.put("skipcount", skipCount);
-				requestBaggage.put("maxitems", maxItems);
-				requestBaggage.put("parentId", parentId);
-				requestBaggage.put("includeRelationship", includeRelationship);
-
-				String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3]
-						: null;
-
-				sRequestMessage.setObjectIdForMedia(objectIdForMedia);
-
 			}
+			requestBaggage.put("select", select);
+			requestBaggage.put("orderby", select);
+
+			String skipCount = request.getParameter("skipcount");
+			String maxItems = request.getParameter("maxitems");
+			String parentId = request.getParameter("parentId");
+			String includeRelationshipString = request.getParameter("includeRelationship");
+			boolean includeRelationship = includeRelationshipString != null
+					? Boolean.parseBoolean(includeRelationshipString) : false;
+
+			requestBaggage.put("skipcount", skipCount);
+			requestBaggage.put("maxitems", maxItems);
+			requestBaggage.put("parentId", parentId);
+			requestBaggage.put("includeRelationship", includeRelationship);
+
+			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
+
+			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
 
 		} else if (METHOD_DELETE.equals(method)) {
 

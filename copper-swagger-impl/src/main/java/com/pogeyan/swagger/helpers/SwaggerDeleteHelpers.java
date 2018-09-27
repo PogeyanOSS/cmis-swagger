@@ -33,7 +33,7 @@ public class SwaggerDeleteHelpers {
 			throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		TypeDefinition typeDefinition = session.getTypeDefinition(type);
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerDeleteHelpers",
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerDeleteHelpers",
 				"invokeDeleteTypeDefMethod", repositoryId, type);
 		if (typeDefinition != null) {
 			session.deleteType(type);
@@ -61,25 +61,26 @@ public class SwaggerDeleteHelpers {
 	 */
 	public static boolean invokeDeleteMethod(String repositoryId, String typeId, String objectId, String userName,
 			String password) throws Exception {
+
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeobj = SwaggerHelpers.getType(typeId);
-		String typeidName = SwaggerHelpers.getIdName(typeobj);
+		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeobj.isBaseType() ? objectId : typeId + "::" + typeidName + "::" + objectId;
+			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, objectId: {}", "SwaggerDeleteHelpers",
-				"invokeDeleteMethod", repositoryId, typeId, objectId);
 
-		if (object != null && typeobj.getId().equals(object.getType().getId())) {
+		if (object != null && typeObject.getId().equals(object.getType().getId())) {
 			boolean isdelete = SwaggerApiServiceFactory.getApiService().beforeDelete(session, object);
 			if (isdelete) {
 				object.delete();
 				return true;
 			}
+			LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, objectId: {}",
+					"SwaggerDeleteHelpers", "invokeDeleteMethod", repositoryId, typeId, objectId);
 		} else {
 			throw new Exception("Type Missmatch or object not found");
 		}

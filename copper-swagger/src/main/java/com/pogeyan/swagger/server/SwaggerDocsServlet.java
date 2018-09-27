@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.api.utils.HttpUtils;
-import com.pogeyan.swagger.api.utils.SwaggerUIDefnHelpers;
+import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
 import com.pogeyan.swagger.services.SwaggerGenerator;
 
 /**
@@ -57,7 +57,7 @@ public class SwaggerDocsServlet extends HttpServlet {
 		String repositoryId = pathFragments[0];
 		LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerDocsServlet", "doGet", repositoryId);
 		if (repositoryId != null) {
-			SwaggerUIDefnHelpers.setHostSwaggerUrl(request.getServerName() + ":" + request.getServerPort() + "/api/");
+			SwaggerUIHelpers.setHostSwaggerUrl(request.getServerName() + ":" + request.getServerPort() + "/api/");
 			SwaggerGenerator swaggerGenerator = new SwaggerGenerator();
 			String content = swaggerGenerator.generateSwagger(repositoryId);
 			response.getWriter().write(content);

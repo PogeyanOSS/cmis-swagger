@@ -40,9 +40,9 @@ public class SwaggerPutHelpers {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		TypeDefinition typeDefinition = session.getTypeDefinition(typeId);
 		if (typeDefinition != null) {
-			TypeDefinition typedefinition = TypeUtils.readFromJSON(string);
-			TypeDefinition returnedType = session.updateType(typedefinition);
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerPutHelpers",
+			TypeDefinition typeDef = TypeUtils.readFromJSON(string);
+			TypeDefinition returnedType = session.updateType(typeDef);
+			LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerPutHelpers",
 					"invokePutTypeDefMethod", repositoryId, typeId);
 			return returnedType;
 		}
@@ -71,19 +71,19 @@ public class SwaggerPutHelpers {
 	public static Map<String, Object> invokePutMethod(String repositoryId, String typeId, String objectId,
 			Map<String, Object> inputMap, String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typdefinitionobj = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typdefinitionobj);
+		ObjectType typeDefinitionObj = SwaggerHelpers.getType(typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObj);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typdefinitionobj.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeDefinitionObj.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutHelpers",
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutHelpers",
 				"invokePutMethod", repositoryId, typeId, objectId);
-		if (object != null && typdefinitionobj.getId().equals(object.getType().getId())) {
-			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typdefinitionobj, session);
+		if (object != null && typeDefinitionObj.getId().equals(object.getType().getId())) {
+			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObj, session);
 			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
 					serializeMap, object.getPropertyValue("revisionId"));
 			if (updateProperties != null) {

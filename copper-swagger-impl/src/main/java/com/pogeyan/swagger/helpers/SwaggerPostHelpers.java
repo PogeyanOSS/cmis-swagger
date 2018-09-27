@@ -83,8 +83,6 @@ public class SwaggerPostHelpers {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		TypeDefinition typeDefinition = TypeUtils.readFromJSON(inputType);
 		TypeDefinition returnedType = session.createType(typeDefinition);
-		LOG.info("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
-				"invokePostTypeDefMethod", repositoryId, inputType);
 		if (SwaggerHelpers.customTypeHasFolder()) {
 			CmisObject object = session.getObjectByPath("/" + returnedType.getId());
 			HashMap<String, Object> properties = new HashMap<String, Object>();
@@ -95,6 +93,8 @@ public class SwaggerPostHelpers {
 			}
 			CmisObject newObject = object.updateProperties(updateProperties);
 		}
+		LOG.debug("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
+				"invokePostTypeDefMethod", repositoryId, inputType);
 		SwaggerHelpers.typeCacheMap.put(returnedType.getId().toString(), (ObjectType) returnedType);
 		return returnedType;
 
@@ -119,6 +119,7 @@ public class SwaggerPostHelpers {
 	 * @throws Exception
 	 */
 
+	@SuppressWarnings("unused")
 	public static Acl invokePostAcl(String repositoryId, String aclParam, Map<String, Object> inputMap, String userName,
 			String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
@@ -134,18 +135,17 @@ public class SwaggerPostHelpers {
 			removeAces.add(of.createAce(inputMap.get("principalId").toString(),
 					Collections.singletonList(inputMap.get("permission").toString())));
 		}
-		LOG.info(
-				"class name: {}, method name: {}, repositoryId: {} , aclParam: {}, Adding: {}, removing: {}, given ACEs",
+		LOG.debug(
+				"class name: {}, method name: {}, repositoryId: {}, aclParam: {}, Adding: {}, removing: {}, given ACEs",
 				"SwaggePostHelpers", "invokePostAcl", repositoryId, aclParam, addAces, removeAces);
 		Acl acl = session.applyAcl(object, addAces, removeAces, AclPropagation.OBJECTONLY);
 		HashMap<String, Object> properties = new HashMap<String, Object>();
 
 		CmisObject updateObject = session.getObject(inputMap.get("objectId").toString());
-		Map<String, Object> updateproperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
+		Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
 				properties, updateObject.getPropertyValue("revisionId"));
-		if (updateproperties != null && !updateproperties.isEmpty()) {
-			@SuppressWarnings("unused")
-			CmisObject newObject = updateObject.updateProperties(updateproperties);
+		if (updateProperties != null && !updateProperties.isEmpty()) {
+			CmisObject newObject = updateObject.updateProperties(updateProperties);
 		}
 		return acl;
 	}
@@ -180,6 +180,7 @@ public class SwaggerPostHelpers {
 	public static Map<String, Object> invokePostMethod(String repositoryId, String typeId, String parentId,
 			Map<String, Object> inputMap, String userName, String password, String objectId, Part filePart,
 			Boolean includeCrud, String jsonString) throws Exception {
+
 		Map<String, Object> propMap = new HashMap<String, Object>();
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeDefinitionObj = SwaggerHelpers.getType(typeId);
@@ -204,6 +205,8 @@ public class SwaggerPostHelpers {
 			return propMap;
 		} else {
 			ContentStream setContentStream = SwaggerPostHelpers.getContentStream(filePart);
+			LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggePostHelpers",
+					"invokePostMethod", repositoryId, typeId);
 			if (typeDefinitionObj != null) {
 				if (includeCrud) {
 					Map<String, Object> resultPropMap = SwaggerPostHelpers.crudOperation(session, repositoryId,
@@ -236,7 +239,7 @@ public class SwaggerPostHelpers {
 			String name = Files.getNameWithoutExtension(file);
 			InputStream fileContent = filePart.getInputStream();
 			BigInteger size = BigInteger.valueOf(filePart.getSize());
-			LOG.info("class name: {}, method name: {}", "SwaggerPostHelpers", "ContentStream");
+			LOG.debug("class name: {}, method name: {}", "SwaggerPostHelpers", "ContentStream");
 			setContentStream = new ContentStreamImpl(name, size, MimeUtils.guessMimeTypeFromExtension(extension),
 					fileContent);
 			return setContentStream;
@@ -248,6 +251,7 @@ public class SwaggerPostHelpers {
 	public static Map<String, Object> crudOperation(Session session, String repositoryId, ObjectType typeDef,
 			String input, String userName, String password) throws JSONParseException {
 		try {
+
 			JSONParser parser = new JSONParser();
 			Object obj = parser.parse(input);
 			JSONArray repoArray = (JSONArray) obj;
@@ -277,9 +281,8 @@ public class SwaggerPostHelpers {
 
 				String id = isDeleted == true ? (String) props.get("_id")
 						: (String) properties.get(PropertyIds.OBJECT_ID);
-				LOG.info("className: {}, methodName: {}, repoId: {}, ObjectId: {}", "SwaggerPostHelpers",
-						"crudOperation", repositoryId, id);
-
+				LOG.debug("className: {}, methodName: {}, repoId: {}, ObjectId: {}", "SwaggerPostHelpers",
+						"crudOperation", repositoryId, input);
 				try {
 					ArrayList<Object> relationData = SwaggerHelpers.getDescendantsForRelationObjects(userName, password,
 							repositoryId, id);
@@ -340,12 +343,15 @@ public class SwaggerPostHelpers {
 						return new HashMap<>();
 					}
 				} catch (Exception ex) {
-					LOG.error("Error in getDescendantsForRelationObjects for repoId: {}, Exception: {}", repositoryId,
-							ex);
+					LOG.error(
+							"className: {}, methodName: {}, repoId: {}, Error in getDescendantsForRelationObjects for repoId: {}, Exception: {}",
+							"SwaggerPostHelpers", "crudOperation", repositoryId, ex);
 				}
 			}
 		} catch (Exception e) {
-			LOG.error("Exception in compiling properties or type doesn't exist, crudOperation Error: {}", e);
+			LOG.error(
+					"className: {}, methodName: {}, repoId: {}, Exception in compiling properties or type doesn't exist: {}",
+					"SwaggerPostHelpers", "crudOperation", repositoryId, e);
 		}
 		return null;
 
@@ -394,14 +400,16 @@ public class SwaggerPostHelpers {
 				Map<String, Object> deprops = SwaggerHelpers.deserializeInput(propMapForMainObj, (ObjectType) typeDef,
 						session);
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("CompileProperties: {}", deprops);
+					LOG.debug("className: {}, methodName: {}, repoId: {}, CompileProperties: {}", "SwaggerPostHelpers",
+							"compileCrudProperties", session.getRepositoryInfo().getId(), deprops);
 				}
 				return deprops;
 			} else {
 				// throw new Exception("Id should not be null");
 			}
 		} catch (Exception ex) {
-			LOG.error("Error in compileCrudProperties, Exception: {}", ex);
+			LOG.error("className: {}, methodName: {}, repoId: {}, Error in compileCrudProperties, Exception: {}",
+					"SwaggerPostHelpers", "compileCrudProperties", session.getRepositoryInfo().getId(), ex);
 		}
 		return null;
 	}
@@ -525,7 +533,7 @@ public class SwaggerPostHelpers {
 	private static CmisObject updateObject(Session tokenSession, CmisObject obj, String type,
 			Map<String, Object> properties, Map<String, Object> attachmentProps, List<Ace> aceList) throws Exception {
 
-		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "updateObject-CRUD operation",
+		LOG.debug("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "updateObject-CRUD operation",
 				obj.getId());
 		properties.remove(PropertyIds.OBJECT_ID);
 		properties.remove(PropertyIds.OBJECT_TYPE_ID);
@@ -545,7 +553,7 @@ public class SwaggerPostHelpers {
 
 	private static void deleteObject(Session tokenSession, String objectToBeDeleted, List<String> deletedIds) {
 
-		LOG.info("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "deleteObject-CRUD operation",
+		LOG.debug("className: {}, methodName: {}, object: {}", "SwaggerPostHelpers", "deleteObject-CRUD operation",
 				objectToBeDeleted);
 		deleteAttachments(tokenSession, objectToBeDeleted);
 		deleteRelationObjects(tokenSession, objectToBeDeleted, deletedIds);
@@ -615,7 +623,8 @@ public class SwaggerPostHelpers {
 			if (attachFolder != null) {
 
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("Adding attachments for objectId: {}", mainObjId);
+					LOG.debug("className: {}, methodName: {}, Adding attachments for objectId: {}",
+							"SwaggerPostHelpers", "addAttachments", mainObjId);
 				}
 				attachmentProps.forEach((filename, attachment) -> {
 					HashMap<String, Object> attachData = (HashMap<String, Object>) attachment;
@@ -635,7 +644,8 @@ public class SwaggerPostHelpers {
 						CmisObject attachmentObj = SwaggerPostHelpers.createForBaseTypes(tokenSession,
 								BaseTypeId.CMIS_DOCUMENT, attachFolder.getId(), aprops, stream);
 					} catch (Exception ex) {
-						LOG.error("Error in creating attachment document, error: {}", ex);
+						LOG.error("className: {}, methodName: {}, error: {}", "SwaggerPostHelpers", "addAttachments",
+								ex);
 					}
 				});
 			} else {
@@ -733,7 +743,8 @@ public class SwaggerPostHelpers {
 
 		String parentId = deProps.get("parentId") == null ? null : deProps.get("parentId").toString();
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Creating new Object with properties: {}", deProps);
+			LOG.debug("className: {}, methodName: {}, repositoryId: {}, Creating new Object with properties: {}",
+					"SwaggerPostHelpers", "createForMainObject", session.getRepositoryInfo().getId(), deProps);
 		}
 		CmisObject mainObj = SwaggerPostHelpers.createForBaseTypes(session, typeDef.getBaseTypeId(), parentId, deProps,
 				null);
@@ -759,7 +770,9 @@ public class SwaggerPostHelpers {
 			targetObjectId.add(targetObject.getId());
 			deletedIds.add(targetObject.getId());
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Deleting relation object: {}", relId.getId());
+				LOG.debug("className: {}, methodName: {}, repositoryId: {}, Deleting relation object: {}",
+						"SwaggerPostHelpers", "deleteRelationObjects", session.getRepositoryInfo().getId(),
+						relId.getId());
 			}
 			relId.delete();
 		});
@@ -770,7 +783,9 @@ public class SwaggerPostHelpers {
 		});
 		if (targetObjectId.size() > 0) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("Deleting target objects: {}", targetObjectId);
+				LOG.debug("className: {}, methodName: {}, repositoryId: {}, Deleting target objects: {}",
+						"SwaggerPostHelpers", "deleteRelationObjects", session.getRepositoryInfo().getId(),
+						targetObjectId);
 			}
 			for (String deletedId : targetObjectId) {
 				deleteRelationObjects(session, deletedId, deletedIds);
@@ -925,7 +940,8 @@ public class SwaggerPostHelpers {
 			TypeDefinition targetTypeDef, Map<String, Object> foreignKey, List<Ace> aceList, String parentId,
 			String relName, Map<String, Map<String, Object>> relationShip) {
 		try {
-			LOG.info("class name: {}, method name: {}", "SwaggerPostHelpers", "createNewObject");
+			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerPostHelpers", "createNewObject",
+					session.getRepositoryInfo().getId());
 			CmisObject innerObject = createForMainObject(session, deProps, targetTypeDef, foreignKey, aceList);
 			Map<String, Object> relationShipObjects = new HashMap<>();
 			relationShipObjects.put("sourceId", parentId);
@@ -933,8 +949,8 @@ public class SwaggerPostHelpers {
 			relationShipObjects.put("relType", relName);
 			relationShip.put(innerObject.getId(), relationShipObjects);
 		} catch (Exception ex) {
-			LOG.error("Error while creating new Relation Object, id: {}, Exception: {}",
-					deProps.get(PropertyIds.OBJECT_ID), ex);
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, Exception: {}", "SwaggerPostHelpers",
+					"createNewObject", session.getRepositoryInfo().getId(), ex);
 		}
 		return deProps;
 	}
@@ -946,7 +962,10 @@ public class SwaggerPostHelpers {
 			CmisObject updateObj = session.getObject(deprops.get(PropertyIds.OBJECT_ID).toString());
 			updateObject(session, updateObj, targetTypeDef.getBaseTypeId().value(), deprops, null, aceList);
 		} catch (Exception ex) {
-			LOG.error("Error in updateRelationObject for id: {}, Cause: {}", deprops.get(PropertyIds.OBJECT_ID), ex);
+			LOG.error(
+					"class name: {}, method name: {}, repositoryId: {}, Error in updateRelationObject for id: {}, Cause: {}",
+					"SwaggerPostHelpers", "updateRelationObject", session.getRepositoryInfo().getId(),
+					deprops.get(PropertyIds.OBJECT_ID), ex);
 		}
 	}
 
@@ -960,7 +979,9 @@ public class SwaggerPostHelpers {
 				}
 			});
 		} catch (Exception ex) {
-			LOG.error("Error while creating relationships, Exception: {}", ex);
+			LOG.error(
+					"class name: {}, method name: {}, repositoryId: {}, Error while creating relationships, Exception: {}",
+					"SwaggerPostHelpers", "createNewRelationShipsObject", session.getRepositoryInfo().getId(), ex);
 		}
 	}
 
@@ -968,7 +989,10 @@ public class SwaggerPostHelpers {
 			List<Ace> aceList) {
 
 		if (LOG.isDebugEnabled()) {
-			LOG.debug("Creating relationship for source: {}, target: {}", sourceId, targetId);
+			LOG.debug(
+					"class name: {}, method name: {}, repositoryId: {}, Creating relationship for source: {}, target: {}",
+					"SwaggerPostHelpers", "createRelationship", session.getRepositoryInfo().getId(), sourceId,
+					targetId);
 		}
 		Map<String, Object> relProps = new HashMap<String, Object>();
 		relProps.put(PropertyIds.SOURCE_ID, sourceId);
@@ -982,8 +1006,7 @@ public class SwaggerPostHelpers {
 	public static CmisObject createForBaseTypes(Session session, BaseTypeId baseTypeId, String parentId,
 			Map<String, Object> input, ContentStream stream) throws Exception {
 		try {
-			// LOG.info("BaseTypeID:{}", baseTypeId.value());
-			LOG.info("class name: {}, method name: {}, repositoryId: {} BaseTypeID: {}", "SwaggerPostHelpers",
+			LOG.debug("class name: {}, method name: {}, repositoryId: {}, baseTypeId: {}", "SwaggerPostHelpers",
 					"createForBaseTypes", session.getRepositoryInfo().getId(), baseTypeId.value());
 			if (baseTypeId.equals(BaseTypeId.CMIS_FOLDER)) {
 				CmisObject folder = null;

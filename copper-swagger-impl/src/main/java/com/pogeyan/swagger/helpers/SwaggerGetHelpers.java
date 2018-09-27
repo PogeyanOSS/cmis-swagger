@@ -34,60 +34,63 @@ public class SwaggerGetHelpers {
 	@SuppressWarnings("unused")
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
 			String password, boolean includeRelationship) throws Exception {
+
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		JSONObject json = new JSONObject();
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
 		}
-		JSONArray JsonArray = new JSONArray();
-		TypeDefinition typedefinition = SwaggerHelpers.getType(typeId);
-		JSONObject object = JSONConverter.convert(typedefinition, DateTimeFormat.SIMPLE);
+		JSONArray jsonArray = new JSONArray();
+		TypeDefinition typeDefinition = SwaggerHelpers.getType(typeId);
+		JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
+			LOG.debug("class name: {}, method name: {}, repositoryId: {}, for type: {}", "SwaggerGetHelpers",
+					"invokeGetTypeDefMethod", repositoryId, typeId);
 			ItemIterable<CmisObject> relationType = getRelationshipType(session, typeId);
 			getRelationshipChild(session, relationType, object);
 		}
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, for type: {}",
-				"SwaggerGetHelpers", "invokeGetTypeDefMethod", repositoryId, typeId);
+		if (object == null) {
+			throw new Exception("Type: " + typeId + " not present!");
+		}
 		return object;
 	}
 
 	private static JSONObject getRelationshipChild(Session session, ItemIterable<CmisObject> relationType,
 			JSONObject mainObject) throws Exception {
-		JSONArray JsonArray = new JSONArray();
+		JSONArray jsonArray = new JSONArray();
 		if (relationType != null) {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
-				Map<String, Object> propmap = SwaggerHelpers.compileProperties(types, session);
-				TypeDefinition typedef = SwaggerHelpers.getType(propmap.get("target_table").toString());
-				JSONObject object = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typedef.getId());
+				Map<String, Object> propMap = SwaggerHelpers.compileProperties(types, session);
+				TypeDefinition typeDefinition = SwaggerHelpers.getType(propMap.get("target_table").toString());
+				JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
+				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typeDefinition.getId());
 				if (relationInnerChildType != null) {
 					getRelationshipChild(session, relationInnerChildType, object);
 				}
-				childObject.put(typedef.getId(), object);
-				JsonArray.add(childObject);
+				childObject.put(typeDefinition.getId(), object);
+				jsonArray.add(childObject);
 			}
 
 		}
-		mainObject.put("relations", JsonArray);
+		mainObject.put("relations", jsonArray);
 		return mainObject;
 	}
 
 	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String objectId,
 			String userName, String password) throws Exception {
-
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeObject = SwaggerHelpers.getType(typeId);
 		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customObjectId = null;
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
+				"invokeDownloadMethod", repositoryId, typeId, objectId);
 		if (SwaggerHelpers.customTypeHasFolder()) {
 			customObjectId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customObjectId = objectId;
 		}
 
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
-				"invokeDownloadMethod", repositoryId, typeId, customObjectId);
 		ContentStream stream = ((Document) session.getObject(customObjectId)).getContentStream(customObjectId);
 		return stream;
 	}
@@ -115,6 +118,7 @@ public class SwaggerGetHelpers {
 	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String parentId, String skipCount,
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
+
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
@@ -165,10 +169,10 @@ public class SwaggerGetHelpers {
 
 		}
 
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
-				"SwaggerGetHelpers", "invokeGetAllMethod", repositoryId, type);
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {
+				LOG.debug("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
+						"SwaggerGetHelpers", "invokeGetAllMethod", repositoryId, type);
 				ArrayList<Object> relationData = SwaggerHelpers.getDescendantsForRelationObjects(userName, password,
 						repositoryId, child.getId());
 				Map<String, Object> data = SwaggerGetHelpers.formRelationData(session, relationData);
@@ -204,15 +208,16 @@ public class SwaggerGetHelpers {
 	 */
 	public static Map<String, Object> invokeGetMethod(String repositoryId, String typeId, String objectId,
 			String userName, String password, String filter) throws Exception {
+
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
 		}
-		ObjectType typeobject = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeobject);
+		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeobject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
@@ -220,10 +225,10 @@ public class SwaggerGetHelpers {
 		if (filter != null) {
 			context.setFilterString(filter);
 		}
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ObjectId: {}", "SwaggerGETHelpers",
-				"invokeGetMethod", repositoryId, typeId, customId);
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, ObjectId: {}", "SwaggerGetHelpers",
+				"invokeGetMethod", repositoryId, typeId, objectId);
 		CmisObject object = session.getObject(customId, context);
-		if (object != null && typeobject.getId().equals(object.getType().getId())) {
+		if (object != null && typeObject.getId().equals(object.getType().getId())) {
 			Map<String, Object> propMap = SwaggerHelpers.compileProperties(object, session);
 			return propMap;
 		} else {
