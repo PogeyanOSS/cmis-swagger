@@ -13,39 +13,38 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 	@Override
 	public boolean invokeDeleteTypeDefMethod(IRequest obj) throws Exception {
 
-		boolean del = false;
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteTypeDefMethod", obj.getRepositoryId(), obj.getType(), obj.getObjectIdForMedia());
 			// here obj.getObjectIdForMedia() id the type to be deleted
-			del = SwaggerDeleteHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(), obj.getObjectIdForMedia(),
-					obj.getUserName(), obj.getPassword());
+			boolean del = SwaggerDeleteHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(),
+					obj.getObjectIdForMedia(), obj.getAuth().getUserName(), obj.getAuth().getPassword());
+			return del;
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, object: {}, Cause: {}",
 					"SwaggerDeleteDAOImpl", "invokeDeleteTypeDefMethod", obj.getRepositoryId(),
 					obj.getObjectIdForMedia(), e);
 			throw new Exception(e);
 		}
-		return del;
 
 	}
 
 	@Override
 	public boolean invokeDeleteMethod(IRequest obj) throws Exception {
 
-		boolean delete = false;
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteMethod", obj.getRepositoryId(), obj.getType(), obj.getInputType());
-			delete = SwaggerDeleteHelpers.invokeDeleteMethod(obj.getRepositoryId(), obj.getType(), obj.getInputType(),
-					obj.getUserName(), obj.getPassword());
+			boolean delete = SwaggerDeleteHelpers.invokeDeleteMethod(obj.getRepositoryId(), obj.getType(),
+					obj.getInputType(), obj.getAuth().getUserName(), obj.getAuth().getPassword());
+			return delete;
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, type: {}, Cause: {}", "SwaggerDeleteDAOImpl",
 					"invokeDeleteMethod", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
 
 		}
-		return delete;
+
 	}
 
 }

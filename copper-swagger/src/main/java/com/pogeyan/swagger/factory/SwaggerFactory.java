@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Session;
 
-import com.pogeyan.swagger.impl.factory.IObjectFacade;
+import com.pogeyan.swagger.api.factory.IObjectFacade;
 
 public class SwaggerFactory implements IObjectFacade {
 

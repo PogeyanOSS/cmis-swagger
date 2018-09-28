@@ -6,11 +6,10 @@ import java.util.Map;
 import javax.servlet.http.Part;
 
 public interface IRequest {
+
 	public String getRepositoryId();
 
-	public String getUserName();
-
-	public String getPassword();
+	public IAuthRequest getAuth();
 
 	public Map<String, Object> getRequestBaggage();
 
@@ -28,13 +27,4 @@ public interface IRequest {
 
 	public InputStream getInputStream();
 
-	public String getAclParam();
-
-	public String getparentId();
-
-	public String getaclParam();
-
-	public boolean getincludeCurd();
-
-	public InputStream getinput();
 }

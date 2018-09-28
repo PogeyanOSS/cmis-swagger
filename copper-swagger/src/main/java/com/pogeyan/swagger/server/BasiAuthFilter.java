@@ -16,12 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
 @WebFilter("/docs/*")
 public class BasiAuthFilter implements Filter {
+	private static final Logger LOG = LoggerFactory.getLogger(ApiDocsServlet.class);
 	private String realm = "Swagger";
 
 	public BasiAuthFilter() {
@@ -72,6 +75,9 @@ public class BasiAuthFilter implements Filter {
 									unauthorized(response, "Authorization Required");
 								}
 							} catch (Exception e) {
+								//log
+								LOG.error(
+										"class name: {}, method name: {}, Error While creating session: {} e: {}", "BasicAuthFilter", "doFilter", e);
 								e.printStackTrace();
 
 								try {

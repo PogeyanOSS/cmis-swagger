@@ -65,8 +65,7 @@ public class SwaggerUIHelpers {
 		TagObject aclType = new TagObject("acl", "acl Tag", externalDocsObject);
 		tagsList.add(aclType);
 		tagsList.sort((TagObject a, TagObject b) -> a.getName().toLowerCase().compareTo(b.getName().toLowerCase()));
-		LOG.debug("class name: {}, method name: {}, Tags: {}", "SwaggerUIHelpers", "generateTagsForAllTypes",
-				tagsList.toString());
+		LOG.debug("class name: {}, method name: {}, Tags: {}", "SwaggerUIHelpers", "generateTagsForAllTypes", tagsList);
 		return tagsList;
 	}
 
@@ -84,7 +83,7 @@ public class SwaggerUIHelpers {
 		SecurityDefinitionObject basicAuth = new SecurityDefinitionObject("basic", null, null, null, null, null);
 		security.put("BasicAuth", basicAuth);
 		LOG.debug("class name: {}, method name: {}, security: {}", "SwaggerUIHelpers", "getSecurityDefinitions",
-				security.toString());
+				security);
 		return security;
 
 	}
@@ -261,7 +260,7 @@ public class SwaggerUIHelpers {
 		definitionsMap.put("acl", definitionsAcl);
 
 		LOG.debug("class name: {}, method name: {}, definitions: {}", "SwaggerUIHelpers", "getDefinitions",
-				definitionsMap.toString());
+				definitionsMap);
 		return definitionsMap;
 	}
 
@@ -478,8 +477,7 @@ public class SwaggerUIHelpers {
 		// generate path for ACL
 		pathMap = postAclDefinitionCreation(pathMap, security);
 
-		LOG.debug("class name: {}, method name: {}, path: {}", "SwaggerUIHelpers", "getDefinitions",
-				pathMap.toString());
+		LOG.debug("class name: {}, method name: {}, path: {}", "SwaggerUIHelpers", "getDefinitions", pathMap);
 		return pathMap;
 	}
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
-import com.pogeyan.swagger.services.SwaggerGenerator;
+import com.pogeyan.swagger.ui.SwaggerGenerator;
 
 /**
  * Servlet implementation class SwaggerDocsServlet

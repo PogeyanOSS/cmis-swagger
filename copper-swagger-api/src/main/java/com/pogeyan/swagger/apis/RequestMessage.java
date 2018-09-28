@@ -9,62 +9,33 @@ import javax.servlet.http.Part;
 
 @SuppressWarnings("unused")
 public class RequestMessage implements IRequest {
-	private String[] credentials;
 	private String[] pathFragments;
 	private String repositoryId;
-	private String userName;
-	private String password;
 	private Map<String, Object> requestBaggage;
 	private Map<String, Object> inputMap;
 	private String jsonString;
 	private Part filePart;
 	private String type;
 	private InputStream inputStream;
-	private String aclParam;
 	private String objectIdForMedia;
 	private String inputType;
-	public String parentId;
-	
-	public boolean includeCurd;
-	
-	public boolean isIncludeCurd() {
-		return includeCurd;
-	}
-
-	public void setIncludeCurd(boolean includeCurd) {
-		this.includeCurd = includeCurd;
-	}
-
-	public String getParentId() {
-		return parentId;
-	}
-
-	public void setParentId(String parentId) {
-		this.parentId = parentId;
-	}
+	private IAuthRequest authorization;
 
 	public RequestMessage() {
 		super();
-		// TODO Auto-generated constructor stub
+
 	}
 
-	public RequestMessage(String[] credentials, String[] pathFragments) {
+	public RequestMessage(IAuthRequest authorization, String[] pathFragments) {
 		super();
-		this.credentials = credentials;
+		this.authorization = authorization;
 		this.pathFragments = pathFragments;
 		this.repositoryId = pathFragments[0];
 		this.type = pathFragments[1];
-		this.inputType = pathFragments[2];
-		this.userName = credentials[0];
-		this.password = credentials[1];
-	}
-	
-	public String getAclParam() {
-		return aclParam;
-	}
+		if (pathFragments.length > 2 && pathFragments[2] != null) {
+			this.inputType = pathFragments[2];
+		}
 
-	public void setAclParam(String aclParam) {
-		this.aclParam = aclParam;
 	}
 
 	@Override
@@ -74,24 +45,6 @@ public class RequestMessage implements IRequest {
 
 	public void setRepositoryId(String repositoryId) {
 		this.repositoryId = repositoryId;
-	}
-
-	@Override
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	@Override
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
 	}
 
 	@Override
@@ -156,6 +109,7 @@ public class RequestMessage implements IRequest {
 	public void setInputType(String inputType) {
 		this.inputType = inputType;
 	}
+
 	@Override
 	public InputStream getInputStream() {
 		return inputStream;
@@ -166,28 +120,7 @@ public class RequestMessage implements IRequest {
 	}
 
 	@Override
-	public String getparentId() {
-		
-		return parentId;
+	public IAuthRequest getAuth() {
+		return authorization;
 	}
-
-	@Override
-	public String getaclParam() {
-		
-		return aclParam;
-	}
-
-	@Override
-	public boolean getincludeCurd() {
-		
-		return includeCurd;
-	}
-
-	@Override
-	public InputStream getinput() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-
 }

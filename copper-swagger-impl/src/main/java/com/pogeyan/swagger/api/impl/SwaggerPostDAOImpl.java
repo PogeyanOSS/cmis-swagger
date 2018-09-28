@@ -17,12 +17,12 @@ public class SwaggerPostDAOImpl implements SwaggerPostDAO {
 
 	public TypeDefinition invokePostTypeDefMethod(IRequest obj) throws Exception {
 
-		TypeDefinition typeDefinition = null;
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerPostDAOImpl",
 					"invokePostTypeDefMethod", obj.getRepositoryId(), obj.getInputType());
-			typeDefinition = SwaggerPostHelpers.invokePostTypeDefMethod(obj.getRepositoryId(), obj.getUserName(),
-					obj.getPassword(), obj.getInputStream());
+			TypeDefinition typeDefinition = SwaggerPostHelpers.invokePostTypeDefMethod(obj.getRepositoryId(),
+					obj.getAuth().getUserName(), obj.getAuth().getPassword(), obj.getInputStream());
+			return typeDefinition;
 
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}",
@@ -31,16 +31,17 @@ public class SwaggerPostDAOImpl implements SwaggerPostDAO {
 
 		}
 
-		return typeDefinition;
 	}
 
 	public Acl invokePostAcl(IRequest obj) throws Exception {
-		Acl acl = null;
+
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerPostDAOImpl",
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, Input type: {}", "SwaggerPostDAOImpl",
 					"invokePostAcl", obj.getRepositoryId(), obj.getInputType());
-			acl = SwaggerPostHelpers.invokePostAcl(obj.getRepositoryId(), obj.getInputType(), obj.getInputMap(),
-					obj.getUserName(), obj.getPassword());
+			Acl acl = SwaggerPostHelpers.invokePostAcl(obj.getRepositoryId(), obj.getInputType(), obj.getInputMap(),
+					obj.getAuth().getUserName(), obj.getAuth().getPassword());
+			return acl;
+
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}",
 					"SwaggerPostDAOImpl", "invokePostAcl", obj.getRepositoryId(), obj.getInputType(), e);
@@ -48,23 +49,24 @@ public class SwaggerPostDAOImpl implements SwaggerPostDAO {
 
 		}
 
-		return acl;
 	}
 
 	public Map<String, Object> invokePostMethod(IRequest obj) throws Exception {
-		Map<String, Object> map = null;
+
 		try {
 			LOG.info("class name: {}, method name: {}, repositoryId: {}, typeId: {}, object: {}", "SwaggerPostDAOImpl",
 					"invokePostMethod", obj.getRepositoryId(), obj.getType(), obj.getInputType());
-			map = SwaggerPostHelpers.invokePostMethod(obj.getRepositoryId(), obj.getType(), obj.getparentId(),
-					obj.getInputMap(), obj.getUserName(), obj.getPassword(), obj.getInputType(), obj.getFilePart(),
-					obj.getincludeCurd(), obj.getJsonString());
+			Map<String, Object> map = SwaggerPostHelpers.invokePostMethod(obj.getRepositoryId(), obj.getType(),
+					(String) obj.getRequestBaggage().get("parentId"), obj.getInputMap(), obj.getAuth().getUserName(),
+					obj.getAuth().getPassword(), obj.getInputType(), obj.getFilePart(),
+					(boolean) obj.getRequestBaggage().get("includeRelation"), obj.getJsonString());
+			return map;
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}",
 					"SwaggerPostDAOImpl", "invokePostMethod", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
 		}
-		return map;
+
 	}
 
 }

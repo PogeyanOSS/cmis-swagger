@@ -33,9 +33,9 @@ import org.apache.chemistry.opencmis.commons.impl.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.factory.IObjectFacade;
 import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
-import com.pogeyan.swagger.impl.factory.IObjectFacade;
 
 @WebListener
 public class SwaggerServletContextListener implements ServletContextListener {
@@ -199,7 +199,7 @@ public class SwaggerServletContextListener implements ServletContextListener {
 			IObjectFacade apiService = (IObjectFacade) swaggerApiServiceClass.newInstance();
 			SwaggerApiServiceFactory.add(apiService);
 		} catch (Exception e) {
-			LOG.error("Could not create a Swagger Api services factory instance: {}", e.toString(), e);
+			LOG.error("Could not create a Swagger Api services factory instance: {}", e);
 			return false;
 		}
 		return true;

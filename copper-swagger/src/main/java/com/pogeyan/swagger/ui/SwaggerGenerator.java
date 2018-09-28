@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.pogeyan.swagger.services;
+package com.pogeyan.swagger.ui;
 
 import java.util.List;
 import java.util.Map;
