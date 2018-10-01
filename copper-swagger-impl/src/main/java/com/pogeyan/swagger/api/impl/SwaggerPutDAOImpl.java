@@ -6,8 +6,8 @@ import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.SwaggerPutDAO;
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.SwaggerPutDAO;
 import com.pogeyan.swagger.helpers.SwaggerPutHelpers;
 
 public class SwaggerPutDAOImpl implements SwaggerPutDAO {
@@ -27,7 +27,6 @@ public class SwaggerPutDAOImpl implements SwaggerPutDAO {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}", "SwaggerPutDAOImpl",
 					"invokePutTypeDefMethod", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
-
 		}
 	}
 

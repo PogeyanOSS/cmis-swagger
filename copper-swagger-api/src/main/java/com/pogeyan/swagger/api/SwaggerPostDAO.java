@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import java.util.Map;
 
@@ -12,5 +12,4 @@ public interface SwaggerPostDAO {
 	public Acl invokePostAcl(IRequest obj) throws Exception;
 
 	public Map<String, Object> invokePostMethod(IRequest obj) throws Exception;
-
 }

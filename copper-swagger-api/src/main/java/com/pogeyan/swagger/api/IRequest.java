@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import java.io.InputStream;
 import java.util.Map;
@@ -26,5 +26,4 @@ public interface IRequest {
 	public String getInputType();
 
 	public InputStream getInputStream();
-
 }

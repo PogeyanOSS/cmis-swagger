@@ -11,8 +11,8 @@ import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.impl.factory.SwaggerObjectServiceFactory;
 
 public class SwaggerPutHelpers {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerPutHelpers.class);
@@ -84,7 +84,7 @@ public class SwaggerPutHelpers {
 				"invokePutMethod", repositoryId, typeId, objectId);
 		if (object != null && typeDefinitionObj.getId().equals(object.getType().getId())) {
 			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObj, session);
-			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
+			Map<String, Object> updateProperties = SwaggerObjectServiceFactory.getApiService().beforeUpdate(session,
 					serializeMap, object.getPropertyValue("revisionId"));
 			if (updateProperties != null) {
 				CmisObject updatedObj = object.updateProperties(updateProperties);

@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import com.pogeyan.swagger.api.utils.HttpUtils;
 
@@ -30,5 +30,4 @@ public class AuthMessage implements IAuthRequest {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
 }

@@ -7,8 +7,8 @@ import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.impl.factory.SwaggerObjectServiceFactory;
 
 public class SwaggerDeleteHelpers {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerDeleteHelpers.class);
@@ -74,7 +74,7 @@ public class SwaggerDeleteHelpers {
 		CmisObject object = session.getObject(customId);
 
 		if (object != null && typeObject.getId().equals(object.getType().getId())) {
-			boolean isdelete = SwaggerApiServiceFactory.getApiService().beforeDelete(session, object);
+			boolean isdelete = SwaggerObjectServiceFactory.getApiService().beforeDelete(session, object);
 			if (isdelete) {
 				object.delete();
 				return true;

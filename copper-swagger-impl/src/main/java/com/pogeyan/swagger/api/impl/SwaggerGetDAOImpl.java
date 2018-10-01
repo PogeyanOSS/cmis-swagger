@@ -7,8 +7,8 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.SwaggerGetDAO;
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.SwaggerGetDAO;
 import com.pogeyan.swagger.helpers.SwaggerGetHelpers;
 
 public class SwaggerGetDAOImpl implements SwaggerGetDAO {
@@ -32,7 +32,6 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 					"SwaggerGetDAOImpl", "invokeGetTypeDefMethod", obj.getRepositoryId(), type, e);
 			throw new Exception(e);
 		}
-
 	}
 
 	public ContentStream invokeDownloadMethod(IRequest obj) throws Exception {
@@ -48,7 +47,6 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 
 			throw new Exception(e);
 		}
-
 	}
 
 	public JSONObject invokeGetAllMethod(IRequest obj) throws Exception {
@@ -67,7 +65,6 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 					"invokeGetAllMethod", obj.getRepositoryId(), obj.getType(), e);
 			throw new Exception(e);
 		}
-
 	}
 
 	public Map<String, Object> invokeGetMethod(IRequest obj) throws Exception {
@@ -83,7 +80,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 					"SwaggerGetDAOImpl", "invokeGetMethod", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
 		}
-		
+
 	}
 
 }

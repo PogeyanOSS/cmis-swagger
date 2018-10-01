@@ -3,8 +3,8 @@ package com.pogeyan.swagger.api.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.SwaggerDeleteDAO;
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.SwaggerDeleteDAO;
 import com.pogeyan.swagger.helpers.SwaggerDeleteHelpers;
 
 public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
@@ -14,9 +14,10 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 	public boolean invokeDeleteTypeDefMethod(IRequest obj) throws Exception {
 
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerDeleteDAOImpl",
-					"invokeDeleteTypeDefMethod", obj.getRepositoryId(), obj.getType(), obj.getObjectIdForMedia());
-			// here obj.getObjectIdForMedia() id the type to be deleted
+			LOG.info("class name: {}, method name: {}, repositoryId: {}, inputType: {}, type: {}",
+					"SwaggerDeleteDAOImpl", "invokeDeleteTypeDefMethod", obj.getRepositoryId(), obj.getType(),
+					obj.getObjectIdForMedia());
+			// obj.getObjectIdForMedia() id of the type to be deleted
 			boolean del = SwaggerDeleteHelpers.invokeDeleteTypeDefMethod(obj.getRepositoryId(),
 					obj.getObjectIdForMedia(), obj.getAuth().getUserName(), obj.getAuth().getPassword());
 			return del;
@@ -26,7 +27,6 @@ public class SwaggerDeleteDAOImpl implements SwaggerDeleteDAO {
 					obj.getObjectIdForMedia(), e);
 			throw new Exception(e);
 		}
-
 	}
 
 	@Override

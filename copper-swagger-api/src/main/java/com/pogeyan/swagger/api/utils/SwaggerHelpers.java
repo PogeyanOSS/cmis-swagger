@@ -76,10 +76,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.UncheckedExecutionException;
-import com.pogeyan.swagger.apis.AuthMessage;
-import com.pogeyan.swagger.apis.IAuthRequest;
-import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.RequestMessage;
+import com.pogeyan.swagger.api.AuthMessage;
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.RequestMessage;
 import com.pogeyan.swagger.pojos.ErrorResponse;
 
 /**
@@ -112,10 +111,12 @@ public class SwaggerHelpers {
 	public static final String METHOD_PUT = "PUT";
 	public static final String METHOD_DELETE = "DELETE";
 	public static final String CMIS_EXT_RELATIONMD = "cmis_ext:relationmd";
+	public static final String CMIS_EXT_RELATIONSHIP = "cmis_ext:relationship";
 	public static final String CMIS_EXT_CONFIG = "cmis_ext:config";
 	public static final String MEDIA = "media";
 	public static final String GETALL = "getAll";
 	public static final String TYPE = "type";
+	public static final String ACL = "acl";
 
 	public static ObjectMapper mapper = new ObjectMapper();
 
@@ -307,7 +308,7 @@ public class SwaggerHelpers {
 		list.add(BaseTypeId.CMIS_RELATIONSHIP.value());
 		list.add(BaseTypeId.CMIS_POLICY.value());
 		list.add(SwaggerHelpers.CMIS_EXT_RELATIONMD);
-		list.add(BaseTypeId.CMIS_RELATIONSHIP.value());
+		list.add(SwaggerHelpers.CMIS_EXT_RELATIONSHIP);
 		list.add(SwaggerHelpers.CMIS_EXT_CONFIG);
 		return list;
 	}
@@ -523,15 +524,15 @@ public class SwaggerHelpers {
 			}
 		}
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, serializedMap:{}", "SwaggerHelpers",
-				"deserializeInputForResponse", session.getRepositoryInfo().getId(), input, serializeMap);
+				"deserializeInputForResponse", session.getRepositoryInfo().getId(), object.getBaseTypeId().value(),
+				serializeMap);
 		return serializeMap;
 	}
 
 	@SuppressWarnings("unchecked")
 	public static Map<String, Object> deserializeInput(Map<String, Object> input, ObjectType object, Session session)
 			throws Exception {
-		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerHelpers", "deserializeInput",
-				session.getRepositoryInfo().getId(), input);
+
 		Map<String, Object> serializeMap = new HashMap<String, Object>();
 		Map<String, PropertyDefinition<?>> dataPropertyDefinition = object.getPropertyDefinitions();
 		for (String var : input.keySet()) {
@@ -620,7 +621,7 @@ public class SwaggerHelpers {
 		}
 
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, serializedMap: {}", "SwaggerHelpers",
-				"deserializeInput", session.getRepositoryInfo().getId(), input, serializeMap);
+				"deserializeInput", session.getRepositoryInfo().getId(), object.getBaseTypeId().value(), serializeMap);
 		return serializeMap;
 	}
 
@@ -636,7 +637,7 @@ public class SwaggerHelpers {
 	@SuppressWarnings("unchecked")
 	public static ArrayList<Object> getDescendantsForRelationObjects(String username, String password, String repoId,
 			String objectId) {
-		// TODO Auto-generated method stub
+
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse httpResponse = null;
 		try {
@@ -683,14 +684,15 @@ public class SwaggerHelpers {
 
 	@SuppressWarnings("unused")
 	public static IRequest getImplClient(HttpServletRequest request) throws Exception {
-		String authorization = request.getHeader("Authorization");
-		String pathFragments[] = HttpUtils.splitPath(request);
-		String method = request.getMethod();
+
 		Map<String, Object> inputMap = new HashMap<String, Object>();
 		Map<String, Object> requestBaggage = new HashMap<String, Object>();
 		Part filePart = null;
 		String jsonString = null;
 
+		String authorization = request.getHeader("Authorization");
+		String pathFragments[] = HttpUtils.splitPath(request);
+		String method = request.getMethod();
 		RequestMessage sRequestMessage = new RequestMessage(new AuthMessage(authorization), pathFragments);
 
 		if (METHOD_POST.equals(method)) {
@@ -707,8 +709,10 @@ public class SwaggerHelpers {
 			}
 			String parentId = request.getParameter("parentId");
 			requestBaggage.put("parentId", parentId);
-			boolean InputStream = pathFragments.length > 2 && pathFragments[2].equals(SwaggerHelpers.TYPE);
-			sRequestMessage.setInputStream(request.getInputStream());
+
+			if (sRequestMessage.getInputType() != null && sRequestMessage.getInputType().equals(SwaggerHelpers.TYPE)) {
+				sRequestMessage.setInputStream(request.getInputStream());
+			}
 			String includeRelationString = request.getParameter("includeRelation");
 			boolean crudOperation = includeRelationString != null ? Boolean.parseBoolean(includeRelationString) : false;
 			requestBaggage.put("includeRelation", crudOperation);
@@ -726,9 +730,6 @@ public class SwaggerHelpers {
 				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
 				});
 			}
-
-			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
-			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
 
 		} else if (METHOD_GET.equals(method)) {
 			String select = null;
@@ -763,16 +764,6 @@ public class SwaggerHelpers {
 			requestBaggage.put("maxitems", maxItems);
 			requestBaggage.put("parentId", parentId);
 			requestBaggage.put("includeRelationship", includeRelationship);
-
-			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
-
-			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
-
-		} else if (METHOD_DELETE.equals(method)) {
-
-			String objectIdForMedia = pathFragments.length > 3 && pathFragments[3] != null ? pathFragments[3] : null;
-			sRequestMessage.setObjectIdForMedia(objectIdForMedia);
-
 		}
 
 		sRequestMessage.setInputMap(inputMap);
@@ -781,6 +772,5 @@ public class SwaggerHelpers {
 		sRequestMessage.setRequestBaggage(requestBaggage);
 		IRequest reqObj = sRequestMessage;
 		return reqObj;
-
 	}
 }

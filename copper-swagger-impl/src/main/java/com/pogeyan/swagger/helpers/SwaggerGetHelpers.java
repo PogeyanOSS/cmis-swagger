@@ -136,7 +136,10 @@ public class SwaggerGetHelpers {
 		if (orderBy != null) {
 			context.setOrderBy(orderBy);
 		}
-		if (typeObject.isBaseType()) {
+		if (typeObject == null) {
+			throw new Exception(type + " doesn't exist!");
+		}
+		if (typeObject != null && typeObject.isBaseType()) {
 			if (parentId != null) {
 				Folder object = (Folder) session.getObject(parentId);
 				json.put(object.getName(), object);
@@ -166,9 +169,7 @@ public class SwaggerGetHelpers {
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
-
 		}
-
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {
 				LOG.debug("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",

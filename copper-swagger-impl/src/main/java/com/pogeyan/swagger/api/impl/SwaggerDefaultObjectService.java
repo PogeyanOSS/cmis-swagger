@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.factory;
+package com.pogeyan.swagger.api.impl;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,7 @@ import org.apache.chemistry.opencmis.client.api.Session;
 
 import com.pogeyan.swagger.api.factory.IObjectFacade;
 
-public class SwaggerFactory implements IObjectFacade {
+public class SwaggerDefaultObjectService implements IObjectFacade {
 
 	@Override
 	public boolean beforeDelete(Session session, CmisObject obj) throws Exception {

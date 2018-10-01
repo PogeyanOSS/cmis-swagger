@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import java.util.Map;
 
@@ -14,5 +14,4 @@ public interface SwaggerGetDAO {
 	public JSONObject invokeGetAllMethod(IRequest obj) throws Exception;
 
 	public Map<String, Object> invokeGetMethod(IRequest obj) throws Exception;
-
 }

@@ -75,9 +75,9 @@ public class BasiAuthFilter implements Filter {
 									unauthorized(response, "Authorization Required");
 								}
 							} catch (Exception e) {
-								//log
-								LOG.error(
-										"class name: {}, method name: {}, Error While creating session: {} e: {}", "BasicAuthFilter", "doFilter", e);
+								// log
+								LOG.error("class name: {}, method name: {}, Error While creating session: {} e: {}",
+										"BasicAuthFilter", "doFilter", e);
 								e.printStackTrace();
 
 								try {

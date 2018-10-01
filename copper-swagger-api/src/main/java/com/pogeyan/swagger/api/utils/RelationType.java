@@ -20,5 +20,4 @@ public enum RelationType {
 		}
 		throw new IllegalArgumentException(v);
 	}
-
 }

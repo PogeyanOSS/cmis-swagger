@@ -1,10 +1,8 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.stream.Stream;
 
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.Part;
 
 @SuppressWarnings("unused")
@@ -23,7 +21,6 @@ public class RequestMessage implements IRequest {
 
 	public RequestMessage() {
 		super();
-
 	}
 
 	public RequestMessage(IAuthRequest authorization, String[] pathFragments) {
@@ -35,7 +32,9 @@ public class RequestMessage implements IRequest {
 		if (pathFragments.length > 2 && pathFragments[2] != null) {
 			this.inputType = pathFragments[2];
 		}
-
+		if (pathFragments.length > 3 && pathFragments[3] != null) {
+			this.objectIdForMedia = pathFragments[3];
+		}
 	}
 
 	@Override

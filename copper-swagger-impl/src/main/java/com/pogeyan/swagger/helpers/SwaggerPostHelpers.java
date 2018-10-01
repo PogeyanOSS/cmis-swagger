@@ -48,14 +48,15 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONArray;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.apache.chemistry.opencmis.commons.impl.json.parser.JSONParseException;
 import org.apache.chemistry.opencmis.commons.impl.json.parser.JSONParser;
+import org.apache.commons.io.input.ReaderInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.io.Files;
-import com.pogeyan.swagger.api.factory.SwaggerApiServiceFactory;
 import com.pogeyan.swagger.api.utils.MimeUtils;
 import com.pogeyan.swagger.api.utils.RelationType;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.impl.factory.SwaggerObjectServiceFactory;
 import com.pogeyan.swagger.pojos.ErrorResponse;
 
 public class SwaggerPostHelpers {
@@ -86,7 +87,7 @@ public class SwaggerPostHelpers {
 		if (SwaggerHelpers.customTypeHasFolder()) {
 			CmisObject object = session.getObjectByPath("/" + returnedType.getId());
 			HashMap<String, Object> properties = new HashMap<String, Object>();
-			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
+			Map<String, Object> updateProperties = SwaggerObjectServiceFactory.getApiService().beforecreate(session,
 					properties);
 			if (updateProperties != null && !updateProperties.isEmpty()) {
 				CmisObject newObject = object.updateProperties(updateProperties);
@@ -126,6 +127,9 @@ public class SwaggerPostHelpers {
 		ObjectFactory of = session.getObjectFactory();
 		List<Ace> addAces = new ArrayList<Ace>();
 		List<Ace> removeAces = new ArrayList<Ace>();
+		if (inputMap.size() == 0) {
+			throw new Exception("Empty Properties!!");
+		}
 		CmisObject object = session.getObject(inputMap.get("objectId").toString());
 		if (aclParam.equals("addAcl")) {
 			addAces.add(of.createAce(inputMap.get("principalId").toString(),
@@ -142,7 +146,7 @@ public class SwaggerPostHelpers {
 		HashMap<String, Object> properties = new HashMap<String, Object>();
 
 		CmisObject updateObject = session.getObject(inputMap.get("objectId").toString());
-		Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
+		Map<String, Object> updateProperties = SwaggerObjectServiceFactory.getApiService().beforeUpdate(session,
 				properties, updateObject.getPropertyValue("revisionId"));
 		if (updateProperties != null && !updateProperties.isEmpty()) {
 			CmisObject newObject = updateObject.updateProperties(updateProperties);
@@ -196,7 +200,7 @@ public class SwaggerPostHelpers {
 					.setContentStream(SwaggerPostHelpers.getContentStream(filePart), true);
 
 			HashMap<String, Object> properties = new HashMap<String, Object>();
-			Map<String, Object> updateProperties = SwaggerApiServiceFactory.getApiService().beforeUpdate(session,
+			Map<String, Object> updateProperties = SwaggerObjectServiceFactory.getApiService().beforeUpdate(session,
 					properties, document.getPropertyValue("revisionId"));
 			if (updateProperties != null && !updateProperties.isEmpty()) {
 				CmisObject newObject = document.updateProperties(updateProperties);
@@ -218,7 +222,7 @@ public class SwaggerPostHelpers {
 							session);
 					BaseTypeId baseTypeId = typeDefinitionObj.isBaseType() ? typeDefinitionObj.getBaseTypeId()
 							: typeDefinitionObj.getBaseType().getBaseTypeId();
-					Map<String, Object> properties = SwaggerApiServiceFactory.getApiService().beforecreate(session,
+					Map<String, Object> properties = SwaggerObjectServiceFactory.getApiService().beforecreate(session,
 							serializeMap);
 					CmisObject cmisObject = SwaggerPostHelpers.createForBaseTypes(session, baseTypeId, parentId,
 							properties, setContentStream);
@@ -630,8 +634,7 @@ public class SwaggerPostHelpers {
 					HashMap<String, Object> attachData = (HashMap<String, Object>) attachment;
 					String contentType = (String) attachData.get("content_type");
 					String data = (String) attachData.get("data");
-					InputStream inputStream = new org.apache.commons.io.input.ReaderInputStream(new StringReader(data),
-							StandardCharsets.UTF_8);
+					InputStream inputStream = new ReaderInputStream(new StringReader(data), StandardCharsets.UTF_8);
 					ContentStream stream = new ContentStreamImpl(filename, BigInteger.valueOf(data.length()),
 							contentType, inputStream);
 

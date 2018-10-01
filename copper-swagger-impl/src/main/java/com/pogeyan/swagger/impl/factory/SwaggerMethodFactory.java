@@ -1,18 +1,18 @@
-package com.pogeyan.swagger.factory;
+package com.pogeyan.swagger.impl.factory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.servlet.ServletRequest;
 
+import com.pogeyan.swagger.api.SwaggerDeleteDAO;
+import com.pogeyan.swagger.api.SwaggerGetDAO;
+import com.pogeyan.swagger.api.SwaggerPostDAO;
+import com.pogeyan.swagger.api.SwaggerPutDAO;
 import com.pogeyan.swagger.api.impl.SwaggerDeleteDAOImpl;
 import com.pogeyan.swagger.api.impl.SwaggerGetDAOImpl;
 import com.pogeyan.swagger.api.impl.SwaggerPostDAOImpl;
 import com.pogeyan.swagger.api.impl.SwaggerPutDAOImpl;
-import com.pogeyan.swagger.apis.SwaggerDeleteDAO;
-import com.pogeyan.swagger.apis.SwaggerGetDAO;
-import com.pogeyan.swagger.apis.SwaggerPostDAO;
-import com.pogeyan.swagger.apis.SwaggerPutDAO;
 
 public class SwaggerMethodFactory {
 	ServletRequest SRequestMeseage;
@@ -46,7 +46,7 @@ public class SwaggerMethodFactory {
 			return (T) new SwaggerPutDAOImpl();
 		} else if (className.equals(SwaggerMethodFactory.SDELETEDAOIMPL)) {
 			return (T) new SwaggerDeleteDAOImpl();
-		
+
 		}
 
 		return null;

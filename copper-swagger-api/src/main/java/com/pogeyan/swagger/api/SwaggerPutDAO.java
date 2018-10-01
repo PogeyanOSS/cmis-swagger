@@ -1,4 +1,4 @@
-package com.pogeyan.swagger.apis;
+package com.pogeyan.swagger.api;
 
 import java.util.Map;
 
@@ -9,5 +9,4 @@ public interface SwaggerPutDAO {
 	public TypeDefinition invokePutTypeDefMethod(IRequest obj) throws Exception;
 
 	public Map<String, Object> invokePutMethod(IRequest obj) throws Exception;
-
 }

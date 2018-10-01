@@ -7,8 +7,8 @@ import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.apis.IRequest;
-import com.pogeyan.swagger.apis.SwaggerPostDAO;
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.SwaggerPostDAO;
 import com.pogeyan.swagger.helpers.SwaggerPostHelpers;
 
 public class SwaggerPostDAOImpl implements SwaggerPostDAO {
@@ -28,9 +28,7 @@ public class SwaggerPostDAOImpl implements SwaggerPostDAO {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}",
 					"SwaggerPostDAOImpl", "invokePostTypeDefMethod", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
-
 		}
-
 	}
 
 	public Acl invokePostAcl(IRequest obj) throws Exception {
@@ -41,14 +39,11 @@ public class SwaggerPostDAOImpl implements SwaggerPostDAO {
 			Acl acl = SwaggerPostHelpers.invokePostAcl(obj.getRepositoryId(), obj.getInputType(), obj.getInputMap(),
 					obj.getAuth().getUserName(), obj.getAuth().getPassword());
 			return acl;
-
 		} catch (Exception e) {
 			LOG.error("class name: {}, method name: {}, repositoryId: {}, for type: {}, Cause: {}",
 					"SwaggerPostDAOImpl", "invokePostAcl", obj.getRepositoryId(), obj.getInputType(), e);
 			throw new Exception(e);
-
 		}
-
 	}
 
 	public Map<String, Object> invokePostMethod(IRequest obj) throws Exception {

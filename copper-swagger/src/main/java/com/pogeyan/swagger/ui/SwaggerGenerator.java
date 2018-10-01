@@ -37,7 +37,8 @@ public class SwaggerGenerator {
 		ObjectMapper mapper = new ObjectMapper();
 		String jsonString = null;
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerGenerator", "generateSwagger", repositoryId);
+			LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerGenerator", "generateSwagger",
+					repositoryId);
 
 			InfoObject infoObj = SwaggerUIHelpers.generateInfoObject();
 			List<TagObject> tags = SwaggerUIHelpers.generateTagsForAllTypes();
