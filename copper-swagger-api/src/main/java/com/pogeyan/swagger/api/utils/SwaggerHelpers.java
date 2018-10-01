@@ -559,9 +559,9 @@ public class SwaggerHelpers {
 				}
 
 				if (reqPropertyType.equals(PropertyType.INTEGER)) {
-					if (valueOfType instanceof Integer) {
+					if (valueOfType instanceof Integer || valueOfType instanceof BigInteger) {
 						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
-						serializeMap.put(var, valueBigInteger);
+						serializeMap.put(var, BigInteger.valueOf(valueBigInteger));
 					} else if (valueOfType instanceof List<?>) {
 						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
@@ -662,7 +662,7 @@ public class SwaggerHelpers {
 		} catch (Exception e) {
 			LOG.warn(
 					"class name: {}, method name: {}, repositoryId: {}, Error in building an HTTP Request or Descendants are null!",
-					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId, e);
+					"SwaggerHelpers", "getDescendantsForRelationObjects", repoId);
 		} finally {
 			try {
 				httpClient.close();
