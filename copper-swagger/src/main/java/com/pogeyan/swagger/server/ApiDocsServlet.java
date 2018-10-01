@@ -95,7 +95,6 @@ public class ApiDocsServlet extends HttpServlet {
 	 *      response)
 	 */
 	protected void doGet(SwaggerGetDAO getDao, IRequest reqObj, HttpServletResponse response) throws Exception {
-
 		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doGet",
 				reqObj.getRepositoryId(), reqObj.getType());
 
