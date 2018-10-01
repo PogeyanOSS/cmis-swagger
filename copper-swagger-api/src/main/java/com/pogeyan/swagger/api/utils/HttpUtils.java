@@ -13,7 +13,7 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package com.pogeyan.swagger.utils;
+package com.pogeyan.swagger.api.utils;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -113,7 +113,7 @@ public class HttpUtils {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			LOG.error("Exception: {}", e.getMessage());
+			LOG.error("Exception in invokeResponseWriter: {}", e.getMessage());
 		}
 	}
 

@@ -33,9 +33,9 @@ import org.apache.chemistry.opencmis.commons.impl.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.pogeyan.swagger.api.utils.SwaggerHelpers;
-import com.pogeyan.swagger.factory.SwaggerApiServiceFactory;
-import com.pogeyan.swagger.impl.factory.IObjectFacade;
+import com.pogeyan.swagger.api.factory.IObjectFacade;
+import com.pogeyan.swagger.api.utils.SwaggerUIHelpers;
+import com.pogeyan.swagger.impl.factory.SwaggerObjectServiceFactory;
 
 @WebListener
 public class SwaggerServletContextListener implements ServletContextListener {
@@ -58,8 +58,8 @@ public class SwaggerServletContextListener implements ServletContextListener {
 	private static final String DEFAULT_SERVER_TERMS_OF_SERVICE = "http://swagger.io/terms/";
 	private static final String DEFAULT_SERVER_EXTERNAL_DOCUMENT_DESCRIPTION = "";
 	private static final String DEFAULT_SERVER_EXTERNAL_DOCUMENT_URL = "";
-	private static final String DEFAULT_SWAGGER_API_CLASS = "com.pogeyan.swagger.factory.SwaggerFactory";
-	private static final String PROPERTY_SWAGGER_API_CLASS = "swaggerSyncApiClass";
+	private static final String DEFAULT_SWAGGER_API_CLASS = "com.pogeyan.swagger.api.impl.SwaggerDefaultObjectService";
+	private static final String PROPERTY_SWAGGER_API_CLASS = "swaggerSyncServiceClass";
 
 	static final Logger LOG = LoggerFactory.getLogger(SwaggerServletContextListener.class);
 
@@ -151,23 +151,24 @@ public class SwaggerServletContextListener implements ServletContextListener {
 		if (serverExternalDocumentUrl == null) {
 			serverExternalDocumentUrl = DEFAULT_SERVER_EXTERNAL_DOCUMENT_URL;
 		}
-		String swaggerApiClass = props.getProperty(PROPERTY_SWAGGER_API_CLASS);
-		if (swaggerApiClass == null) {
-			swaggerApiClass = DEFAULT_SWAGGER_API_CLASS;
+		String swaggerObjectServiceClass = props.getProperty(PROPERTY_SWAGGER_API_CLASS);
+		if (swaggerObjectServiceClass == null) {
+			swaggerObjectServiceClass = DEFAULT_SWAGGER_API_CLASS;
 		}
 		return initializeExtensions(swaggerSeverTitle, swaggerSeverVersion, swaggerSeverName, swaggerSeverURL,
 				swaggerSeverDescription, swaggerSeverEmail, DEFAULT_SERVER_TERMS_OF_SERVICE,
-				serverExternalDocumentDescription, serverExternalDocumentUrl, swaggerApiClass);
+				serverExternalDocumentDescription, serverExternalDocumentUrl, swaggerObjectServiceClass);
 
 	}
 
 	private boolean initializeExtensions(String serverTitle, String serverVersion, String serverName, String serverUrl,
 			String serverDescription, String serverEmail, String serverTermsOfServcie,
-			String serverExternalDocumentDescription, String serverExternalDocumentUrl, String swaggerApiClass) {
+			String serverExternalDocumentDescription, String serverExternalDocumentUrl,
+			String swaggerObjectServiceClass) {
 
 		if (initializePropertyDetails(serverTitle, serverVersion, serverName, serverUrl, serverDescription, serverEmail,
 				DEFAULT_SERVER_TERMS_OF_SERVICE, serverExternalDocumentDescription, serverExternalDocumentUrl)) {
-			if (initializeSwaggerApiService(swaggerApiClass)) {
+			if (initializeSwaggerObjectService(swaggerObjectServiceClass)) {
 				return true;
 			}
 		}
@@ -184,22 +185,22 @@ public class SwaggerServletContextListener implements ServletContextListener {
 		contact.put("email", serverEmail);
 		license.put("name", serverName);
 		license.put("url", serverUrl);
-		SwaggerHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
+		SwaggerUIHelpers.setInfoObject(serverDescription, serverVersion, serverTitle, serverTermsOfServcie, contact,
 				license);
-		SwaggerHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
+		SwaggerUIHelpers.setExternalDocsObject(serverExternalDocumentDescription, serverExternalDocumentUrl);
 		return true;
 
 	}
 
-	private boolean initializeSwaggerApiService(String swaggerApiClass) {
-
+	private boolean initializeSwaggerObjectService(String swaggerObjectServiceClass) {
 		try {
-			LOG.info("Initialized Swagger Api Services Class: {}", swaggerApiClass);
-			Class<?> swaggerApiServiceClass = Class.forName(swaggerApiClass);
+			LOG.info("class name: {}, method name: {}", "SwaggerServletContextListener",
+					"initializeSwaggerObjectService");
+			Class<?> swaggerApiServiceClass = Class.forName(swaggerObjectServiceClass);
 			IObjectFacade apiService = (IObjectFacade) swaggerApiServiceClass.newInstance();
-			SwaggerApiServiceFactory.add(apiService);
+			SwaggerObjectServiceFactory.add(apiService);
 		} catch (Exception e) {
-			LOG.error("Could not create a Swagger Api services factory instance: {}", e.toString(), e);
+			LOG.error("Could not create a Swagger Object Services factory instance: {}", e);
 			return false;
 		}
 		return true;

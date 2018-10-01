@@ -16,12 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.chemistry.opencmis.client.api.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
-import com.pogeyan.swagger.utils.HttpUtils;
 
 @WebFilter("/docs/*")
 public class BasiAuthFilter implements Filter {
+	private static final Logger LOG = LoggerFactory.getLogger(ApiDocsServlet.class);
 	private String realm = "Swagger";
 
 	public BasiAuthFilter() {
@@ -60,10 +63,10 @@ public class BasiAuthFilter implements Filter {
 							String username = credentials.substring(0, p).trim();
 							String password = credentials.substring(p + 1).trim();
 							String pathFragments[] = HttpUtils.splitPath(request);
-							String repoId = pathFragments[0];
+							String repositoryId = pathFragments[0];
 							Session session;
 							try {
-								session = SwaggerHelpers.createSession(repoId, username, password);
+								session = SwaggerHelpers.createSession(repositoryId, username, password);
 								SwaggerHelpers.getAllTypes(session);
 
 								if (session != null) {
@@ -72,6 +75,9 @@ public class BasiAuthFilter implements Filter {
 									unauthorized(response, "Authorization Required");
 								}
 							} catch (Exception e) {
+								// log
+								LOG.error("class name: {}, method name: {}, Error While creating session: {} e: {}",
+										"BasicAuthFilter", "doFilter", e);
 								e.printStackTrace();
 
 								try {

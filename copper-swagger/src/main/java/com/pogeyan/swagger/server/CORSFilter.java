@@ -72,8 +72,8 @@ public final class CORSFilter implements Filter {
 	private FilterConfig filterConfig;
 
 	/**
-	 * A {@link Collection} of origins consisting of zero or more origins that are
-	 * allowed access to the resource.
+	 * A {@link Collection} of origins consisting of zero or more origins that
+	 * are allowed access to the resource.
 	 */
 	private final Collection<String> allowedOrigins;
 
@@ -83,14 +83,14 @@ public final class CORSFilter implements Filter {
 	private boolean anyOriginAllowed;
 
 	/**
-	 * A {@link Collection} of methods consisting of zero or more methods that are
-	 * supported by the resource.
+	 * A {@link Collection} of methods consisting of zero or more methods that
+	 * are supported by the resource.
 	 */
 	private final Collection<String> allowedHttpMethods;
 
 	/**
-	 * A {@link Collection} of headers consisting of zero or more header field names
-	 * that are supported by the resource.
+	 * A {@link Collection} of headers consisting of zero or more header field
+	 * names that are supported by the resource.
 	 */
 	private final Collection<String> allowedHttpHeaders;
 
@@ -102,15 +102,15 @@ public final class CORSFilter implements Filter {
 	private final Collection<String> exposedHeaders;
 
 	/**
-	 * A supports credentials flag that indicates whether the resource supports user
-	 * credentials in the request. It is true when the resource does and false
-	 * otherwise.
+	 * A supports credentials flag that indicates whether the resource supports
+	 * user credentials in the request. It is true when the resource does and
+	 * false otherwise.
 	 */
 	private boolean supportsCredentials;
 
 	/**
-	 * Indicates (in seconds) how long the results of a pre-flight request can be
-	 * cached in a pre-flight result cache.
+	 * Indicates (in seconds) how long the results of a pre-flight request can
+	 * be cached in a pre-flight result cache.
 	 */
 	private long preflightMaxAge;
 
@@ -368,9 +368,9 @@ public final class CORSFilter implements Filter {
 	}
 
 	/**
-	 * Handles a request, that's not a CORS request, but is a valid request i.e. it
-	 * is not a cross-origin request. This implementation, just forwards the request
-	 * down the filter chain.
+	 * Handles a request, that's not a CORS request, but is a valid request i.e.
+	 * it is not a cross-origin request. This implementation, just forwards the
+	 * request down the filter chain.
 	 * 
 	 * @param request
 	 *            The {@link HttpServletRequest} object.
@@ -431,8 +431,8 @@ public final class CORSFilter implements Filter {
 	 * request. Set to <code>true</code> if CORS request; <code>false</code>
 	 * otherwise.</li>
 	 * <li><b>cors.request.origin:</b> The Origin URL.</li>
-	 * <li><b>cors.request.type:</b> Type of request. Values: <code>simple</code> or
-	 * <code>preflight</code> or <code>not_cors</code> or
+	 * <li><b>cors.request.type:</b> Type of request. Values:
+	 * <code>simple</code> or <code>preflight</code> or <code>not_cors</code> or
 	 * <code>invalid_cors</code></li>
 	 * <li><b>cors.request.headers:</b> Request headers sent as
 	 * 'Access-Control-Request-Headers' header, for pre-flight request.</li>
@@ -486,15 +486,15 @@ public final class CORSFilter implements Filter {
 	}
 
 	/**
-	 * Joins elements of {@link Set} into a string, where each element is separated
-	 * by the provided separator.
+	 * Joins elements of {@link Set} into a string, where each element is
+	 * separated by the provided separator.
 	 * 
 	 * @param elements
 	 *            The {@link Set} containing elements to join together.
 	 * @param joinSeparator
 	 *            The character to be used for separating elements.
-	 * @return The joined {@link String}; <code>null</code> if elements {@link Set}
-	 *         is null.
+	 * @return The joined {@link String}; <code>null</code> if elements
+	 *         {@link Set} is null.
 	 */
 	public static String join(final Collection<String> elements, final String joinSeparator) {
 		String separator = ",";
@@ -585,7 +585,8 @@ public final class CORSFilter implements Filter {
 	 * 
 	 * @param origin
 	 *            The Origin.
-	 * @return <code>true</code> if origin is allowed; <code>false</code> otherwise.
+	 * @return <code>true</code> if origin is allowed; <code>false</code>
+	 *         otherwise.
 	 */
 	private boolean isOriginAllowed(final String origin) {
 		if (anyOriginAllowed) {
@@ -608,8 +609,8 @@ public final class CORSFilter implements Filter {
 	}
 
 	/**
-	 * Parses each param-value and populates configuration variables. If a param is
-	 * provided, it overrides the default.
+	 * Parses each param-value and populates configuration variables. If a param
+	 * is provided, it overrides the default.
 	 * 
 	 * @param allowedOrigins
 	 *            A {@link String} of comma separated origins.
@@ -803,7 +804,8 @@ public final class CORSFilter implements Filter {
 	}
 
 	/**
-	 * Returns the {@link Set} of allowed origins that are allowed to make requests.
+	 * Returns the {@link Set} of allowed origins that are allowed to make
+	 * requests.
 	 * 
 	 * @return {@link Set}
 	 */
@@ -831,23 +833,23 @@ public final class CORSFilter implements Filter {
 
 	// -------------------------------------------------- CORS Response Headers
 	/**
-	 * The Access-Control-Allow-Origin header indicates whether a resource can be
-	 * shared based by returning the value of the Origin request header in the
-	 * response.
+	 * The Access-Control-Allow-Origin header indicates whether a resource can
+	 * be shared based by returning the value of the Origin request header in
+	 * the response.
 	 */
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
 
 	/**
-	 * The Access-Control-Allow-Credentials header indicates whether the response to
-	 * request can be exposed when the omit credentials flag is unset. When part of
-	 * the response to a preflight request it indicates that the actual request can
-	 * include user credentials.
+	 * The Access-Control-Allow-Credentials header indicates whether the
+	 * response to request can be exposed when the omit credentials flag is
+	 * unset. When part of the response to a preflight request it indicates that
+	 * the actual request can include user credentials.
 	 */
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
 
 	/**
-	 * The Access-Control-Expose-Headers header indicates which headers are safe to
-	 * expose to the API of a CORS API specification
+	 * The Access-Control-Expose-Headers header indicates which headers are safe
+	 * to expose to the API of a CORS API specification
 	 */
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
 
@@ -858,15 +860,16 @@ public final class CORSFilter implements Filter {
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
 
 	/**
-	 * The Access-Control-Allow-Methods header indicates, as part of the response to
-	 * a preflight request, which methods can be used during the actual request.
+	 * The Access-Control-Allow-Methods header indicates, as part of the
+	 * response to a preflight request, which methods can be used during the
+	 * actual request.
 	 */
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
 
 	/**
-	 * The Access-Control-Allow-Headers header indicates, as part of the response to
-	 * a preflight request, which header field names can be used during the actual
-	 * request.
+	 * The Access-Control-Allow-Headers header indicates, as part of the
+	 * response to a preflight request, which header field names can be used
+	 * during the actual request.
 	 */
 	public static final String RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
 
@@ -878,8 +881,8 @@ public final class CORSFilter implements Filter {
 	public static final String REQUEST_HEADER_ORIGIN = "Origin";
 
 	/**
-	 * The Access-Control-Request-Method header indicates which method will be used
-	 * in the actual request as part of the preflight request.
+	 * The Access-Control-Request-Method header indicates which method will be
+	 * used in the actual request as part of the preflight request.
 	 */
 	public static final String REQUEST_HEADER_ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
 
@@ -919,8 +922,8 @@ public final class CORSFilter implements Filter {
 
 	// -------------------------------------------------------------- Constants
 	/**
-	 * Enumerates varies types of CORS requests. Also, provides utility methods to
-	 * determine the request type.
+	 * Enumerates varies types of CORS requests. Also, provides utility methods
+	 * to determine the request type.
 	 */
 	public static enum CORSRequestType {
 		/**
@@ -932,8 +935,8 @@ public final class CORSFilter implements Filter {
 		 */
 		ACTUAL,
 		/**
-		 * A pre-flight CORS request, to get meta information, before a non-simple HTTP
-		 * request is sent.
+		 * A pre-flight CORS request, to get meta information, before a
+		 * non-simple HTTP request is sent.
 		 */
 		PRE_FLIGHT,
 		/**
@@ -941,8 +944,8 @@ public final class CORSFilter implements Filter {
 		 */
 		NOT_CORS,
 		/**
-		 * An invalid CORS request, i.e. it qualifies to be a CORS request, but fails to
-		 * be a valid one.
+		 * An invalid CORS request, i.e. it qualifies to be a CORS request, but
+		 * fails to be a valid one.
 		 */
 		INVALID_CORS;
 	}
@@ -1013,9 +1016,9 @@ public final class CORSFilter implements Filter {
 	public static final String DEFAULT_SUPPORTS_CREDENTIALS = "true";
 
 	/**
-	 * By default, following headers are supported: Origin,Accept,X-Requested-With,
-	 * Content-Type, Access-Control-Request-Method, and
-	 * Access-Control-Request-Headers.
+	 * By default, following headers are supported:
+	 * Origin,Accept,X-Requested-With, Content-Type,
+	 * Access-Control-Request-Method, and Access-Control-Request-Headers.
 	 */
 	public static final String DEFAULT_ALLOWED_HTTP_HEADERS = "Origin,Accept,X-Requested-With,Content-Type,"
 			+ "Access-Control-Request-Method,Access-Control-Request-Headers";

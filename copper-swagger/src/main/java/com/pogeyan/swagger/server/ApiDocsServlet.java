@@ -13,18 +13,16 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package com.pogeyan.swagger.server;
 
-import java.net.URLDecoder;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 
 import org.apache.chemistry.opencmis.commons.data.Acl;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
@@ -32,82 +30,58 @@ import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.DateTimeFormat;
 import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
-import org.apache.cxf.helpers.IOUtils;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.pogeyan.swagger.api.IRequest;
+import com.pogeyan.swagger.api.SwaggerDeleteDAO;
+import com.pogeyan.swagger.api.SwaggerGetDAO;
+import com.pogeyan.swagger.api.SwaggerPostDAO;
+import com.pogeyan.swagger.api.SwaggerPutDAO;
+import com.pogeyan.swagger.api.utils.HttpUtils;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
+import com.pogeyan.swagger.impl.factory.SwaggerMethodFactory;
 import com.pogeyan.swagger.pojos.ErrorResponse;
-import com.pogeyan.swagger.services.SwaggerApiService;
-import com.pogeyan.swagger.utils.HttpUtils;
 
 /**
  * Servlet implementation class ApiDocsServlet
  */
 @WebServlet("/api/*")
 @MultipartConfig
+
 public class ApiDocsServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger LOG = LoggerFactory.getLogger(ApiDocsServlet.class);
 	ObjectMapper mapper = new ObjectMapper();
-	public static final String METHOD_GET = "GET";
-	public static final String METHOD_POST = "POST";
-	public static final String METHOD_PUT = "PUT";
-	public static final String METHOD_DELETE = "DELETE";
 
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
 	public ApiDocsServlet() {
 		super();
+
 	}
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			@SuppressWarnings("unused")
-			boolean skip = false;
-			Map<String, Object> input = null;
-			Part filePart = null;
-			String jsonString = null;
 			String method = request.getMethod();
-			String auth = request.getHeader("Authorization");
-			String credentials[] = HttpUtils.getCredentials(auth);
-			String pathFragments[] = HttpUtils.splitPath(request);
+			IRequest reqObj = SwaggerHelpers.getImplClient(request);
+			SwaggerMethodFactory sFactory = new SwaggerMethodFactory();
 
-			if (METHOD_POST.equals(method)) {
-				if (request.getContentType().contains("multipart/form-data")) {
-					input = request.getParameterMap().entrySet().stream()
-							.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
-					filePart = request.getPart("file") != null ? request.getPart("file") : null;
-				} else if (request.getContentType().equals("application/x-www-form-urlencoded")) {
-					input = request.getParameterMap().entrySet().stream()
-							.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
-				} else if (pathFragments[1].equals("_metadata")) {
-					skip = true;
-				} else {
-					jsonString = IOUtils.toString(request.getInputStream());
-				}
-			}
-			if (METHOD_PUT.equals(method) && request.getInputStream() != null) {
-				if (pathFragments[1].equals("_metadata")) {
-					skip = true;
-				} else {
-					jsonString = IOUtils.toString(request.getInputStream());
-					input = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
-					});
-				}
-			}
-			if (METHOD_POST.equals(method)) {
-				doPost(request, response, credentials, pathFragments, input, filePart, jsonString);
-			} else if (METHOD_GET.equals(method)) {
-				doGet(request, response, credentials, pathFragments);
-			} else if (METHOD_PUT.equals(method)) {
-				doPut(request, response, credentials, pathFragments, input);
-			} else if (METHOD_DELETE.equals(method)) {
-				doDelete(request, response, credentials, pathFragments);
+			if ((SwaggerHelpers.METHOD_GET.equals(method))) {
+				SwaggerGetDAO getDao = sFactory.getMethodService(SwaggerGetDAO.class);
+				doGet(getDao, reqObj, response);
+			} else if ((SwaggerHelpers.METHOD_POST.equals(method))) {
+				SwaggerPostDAO postDao = sFactory.getMethodService(SwaggerPostDAO.class);
+				doPost(postDao, reqObj, response);
+			} else if (SwaggerHelpers.METHOD_PUT.equals(method)) {
+				SwaggerPutDAO putDao = sFactory.getMethodService(SwaggerPutDAO.class);
+				doPut(putDao, reqObj, response);
+			} else if (SwaggerHelpers.METHOD_DELETE.equals(method)) {
+				SwaggerDeleteDAO deleteDao = sFactory.getMethodService(SwaggerDeleteDAO.class);
+				doDelete(deleteDao, reqObj, response);
 			}
 		} catch (Exception e) {
 			ErrorResponse resp = SwaggerHelpers.handleException(e);
@@ -116,73 +90,40 @@ public class ApiDocsServlet extends HttpServlet {
 	}
 
 	/**
+	 * @param reqObj
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response, String[] credentials,
-			String[] pathFragments) throws Exception {
-		try {
-			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
-			Map<String, Object> propMap = null;
-			JSONObject obj = null;
-			ContentStream stream = null;
-			String repositoryId = pathFragments[0];
-			// String typeId = pathFragments[1].replace("_", ":");
-			String typeId = pathFragments[1];
-			String id = pathFragments[2];
-			String select = null;
-			String filter = null;
-			String order = null;
-			if (request.getQueryString() != null) {
-				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
-						: null;
-				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
-						: null;
-				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
-						: null;
-			}
-			if (select != null && filter != null) {
-				select = select + "," + URLDecoder.decode(filter, "UTF-8");
-			} else if (select == null && filter != null) {
-				select = "*," + filter;
-			}
-			if (id != null && !id.equals("media")) {
-				if (id.equals("type")) {
-					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetTypeDefMethod(repositoryId,
-							pathFragments.length > 3 ? pathFragments[3] : typeId, credentials[0], credentials[1],
-							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
-				} else if (id.equals("getAll")) {
-					String skipCount = request.getParameter("skipcount");
-					String maxItems = request.getParameter("maxitems");
-					String parentId = request.getParameter("parentId");
-					String includeRelationship = request.getParameter("includeRelationship");
-					obj = SwaggerApiService.invokeGetAllMethod(repositoryId, typeId, parentId != null ? parentId : null,
-							skipCount, maxItems, credentials[0], credentials[1], select, order,
-							includeRelationship != null ? Boolean.parseBoolean(includeRelationship) : false);
-				} else {
-					propMap = SwaggerApiService.invokeGetMethod(repositoryId, typeId, id, credentials[0],
-							credentials[1], select);
-				}
-			}
+	protected void doGet(SwaggerGetDAO getDao, IRequest reqObj, HttpServletResponse response) throws Exception {
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doGet",
+				reqObj.getRepositoryId(), reqObj.getType());
 
-			if (pathFragments.length > 3 && pathFragments[3] != null && pathFragments[2].equals("media")) {
-				stream = SwaggerApiService.invokeDownloadMethod(repositoryId, typeId, pathFragments[3], credentials[0],
-						credentials[1], response);
-			}
+		Map<String, Object> propMap = null;
+		JSONObject jsonObj = null;
+		ContentStream stream = null;
 
-			if (propMap != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
-			} else if (obj != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, obj);
-			} else if (stream != null) {
-				HttpUtils.invokeDownloadWriter(stream, response);
+		if (reqObj.getInputType() != null && !reqObj.getInputType().equals(SwaggerHelpers.MEDIA)) {
+			if (reqObj.getInputType().equals(SwaggerHelpers.TYPE)) {
+				jsonObj = getDao.invokeGetTypeDefMethod(reqObj);
+			} else if (reqObj.getInputType().equals(SwaggerHelpers.GETALL)) {
+				jsonObj = getDao.invokeGetAllMethod(reqObj);
 			} else {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_FOUND,
-						pathFragments[1] + " not found");
+				propMap = getDao.invokeGetMethod(reqObj);
 			}
-		} catch (ErrorResponse e) {
-			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getMessage());
+		}
+
+		if (reqObj.getObjectIdForMedia() != null && reqObj.getInputType().equals(SwaggerHelpers.MEDIA)) {
+			stream = getDao.invokeDownloadMethod(reqObj);
+		}
+
+		if (propMap != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
+		} else if (jsonObj != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, jsonObj);
+		} else if (stream != null) {
+			HttpUtils.invokeDownloadWriter(stream, response);
+		} else {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_FOUND, reqObj.getType() + " not found");
 		}
 	}
 
@@ -191,113 +132,84 @@ public class ApiDocsServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response, String[] credentials,
-			String pathFragments[], Map<String, Object> input, Part filePart, String inputString) throws Exception {
-		try {
-			LOG.info("method: {} repositoryId: {} type: {}", request.getMethod(), pathFragments[0], pathFragments[1]);
-			JSONObject obj = null;
-			Acl acl = null;
-			Map<String, Object> propMap = null;
-			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1];
-			String parentId = request.getParameter("parentId");
-			boolean crudOpreation = false;
-			if (request.getQueryString() != null) {
-				crudOpreation = request.getParameter("includeRelation") != null
-						? Boolean.parseBoolean(request.getParameter("includeRelation")) : false;
-			}
+	protected void doPost(SwaggerPostDAO postDao, IRequest reqObj, HttpServletResponse response) throws Exception {
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServelet", "doPost",
+				reqObj.getRepositoryId(), reqObj.getType());
 
-			if (!crudOpreation && inputString != null) {
-				input = mapper.readValue(inputString, new TypeReference<Map<String, String>>() {
-				});
-			}
+		JSONObject typeDefinitonObject = null;
+		Acl objectAcl = null;
+		Map<String, Object> propMap = null;
 
-			if (pathFragments.length > 2 && pathFragments[2].equals("type")) {
-				TypeDefinition typedef = SwaggerApiService.invokePostTypeDefMethod(repositoryId, credentials[0],
-						credentials[1], request.getInputStream());
-				obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-			} else if (typeId.equals("Acl")) {
-				acl = SwaggerApiService.invokePostAcl(repositoryId, pathFragments[2], input, credentials[0],
-						credentials[1]);
-			} else {
-				propMap = SwaggerApiService.invokePostMethod(repositoryId, typeId, parentId, input, credentials[0],
-						credentials[1], pathFragments, filePart, crudOpreation, inputString);
-			}
-			if (propMap != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
-			} else if (obj != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, obj);
-			} else if (acl != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, acl);
-			} else {
-				// error
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT,
-						pathFragments[1] + " not created.");
-			}
-		} catch (ErrorResponse e) {
-			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getError());
+		if (reqObj.getInputType() != null && reqObj.getInputType().equals(SwaggerHelpers.TYPE)) {
+			TypeDefinition typeDefiniton = postDao.invokePostTypeDefMethod(reqObj);
+			typeDefinitonObject = JSONConverter.convert(typeDefiniton, DateTimeFormat.SIMPLE);
+		} else if (reqObj.getType() != null && reqObj.getType().equals(SwaggerHelpers.ACL)) {
+			objectAcl = postDao.invokePostAcl(reqObj);
+		} else {
+			propMap = postDao.invokePostMethod(reqObj);
+		}
+
+		if (propMap != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CREATED, propMap);
+		} else if (typeDefinitonObject != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, typeDefinitonObject);
+		} else if (objectAcl != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, objectAcl);
+		} else {
+			// error
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_CONFLICT,
+					reqObj.getType() + " not created.");
 		}
 	}
 
-	protected void doPut(HttpServletRequest req, HttpServletResponse response, String[] credentials,
-			String[] pathFragments, Map<String, Object> input) throws Exception {
-		try {
-			LOG.info("method:{} repositoryId:{} type:{}", req.getMethod(), pathFragments[0], pathFragments[1]);
-			JSONObject obj = new JSONObject();
-			Map<String, Object> propMap = null;
-			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1];
-			String id = pathFragments[2];
-			if (id.equals("type")) {
-				TypeDefinition typedef = SwaggerApiService.invokePutTypeDefMethod(repositoryId, pathFragments[3],
-						req.getInputStream(), credentials[0], credentials[1]);
-				obj = JSONConverter.convert(typedef, DateTimeFormat.SIMPLE);
-			} else {
-				propMap = SwaggerApiService.invokePutMethod(repositoryId, typeId, id, input, credentials[0],
-						credentials[1]);
-			}
-			if (propMap != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
-			} else if (obj != null) {
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, obj);
-			} else {
-				// error
-				HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_MODIFIED,
-						pathFragments[1] + "not updated.");
-			}
-		} catch (ErrorResponse e) {
-			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getError());
+	protected void doPut(SwaggerPutDAO putDao, IRequest reqObj, HttpServletResponse response) throws Exception {
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doPut",
+				reqObj.getRepositoryId(), reqObj.getType());
+
+		JSONObject typeDefinitionObject = new JSONObject();
+		Map<String, Object> propMap = null;
+
+		if (reqObj.getInputType() != null && reqObj.getInputType().equals(SwaggerHelpers.TYPE)) {
+			TypeDefinition typeDefinition = putDao.invokePutTypeDefMethod(reqObj);
+			typeDefinitionObject = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
+		} else {
+			propMap = putDao.invokePutMethod(reqObj);
+		}
+
+		if (propMap != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, propMap);
+		} else if (typeDefinitionObject != null) {
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_OK, typeDefinitionObject);
+		} else {
+			// error
+			HttpUtils.invokeResponseWriter(response, HttpServletResponse.SC_NOT_MODIFIED,
+					reqObj.getType() + "not updated.");
 		}
 	}
 
-	protected void doDelete(HttpServletRequest req, HttpServletResponse response, String[] credentials,
-			String[] pathFragments) throws Exception {
-		try {
-			LOG.info("method:{} repositoryId:{} type:{}", req.getMethod(), pathFragments[0], pathFragments[1]);
-			String statusMessage = null;
-			int code = 0;
-			boolean status = false;
-			String repositoryId = pathFragments[0];
-			String typeId = pathFragments[1];
-			String id = pathFragments[2];
-			if (id != null) {
-				if (id.equals("type")) {
-					status = SwaggerApiService.invokeDeleteTypeDefMethod(repositoryId, pathFragments[3], credentials[0],
-							credentials[1]);
-				} else {
-					status = SwaggerApiService.invokeDeleteMethod(repositoryId, typeId, id, credentials[0],
-							credentials[1]);
-				}
-			}
-			if (status) {
-				code = HttpServletResponse.SC_OK;
-				statusMessage = pathFragments[1] + " Deleted Successfully";
-			}
-			HttpUtils.invokeResponseWriter(response, code, statusMessage);
+	protected void doDelete(SwaggerDeleteDAO deleteDAO, IRequest reqObj, HttpServletResponse response)
+			throws Exception {
 
-		} catch (ErrorResponse e) {
-			HttpUtils.invokeResponseWriter(response, e.getErrorCode(), e.getError());
+		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doDelete",
+				reqObj.getRepositoryId(), reqObj.getType());
+
+		String statusMessage = null;
+		int code = HttpServletResponse.SC_NOT_FOUND;
+		boolean status = false;
+		if (reqObj.getInputType() != null) {
+			if (reqObj.getInputType().equals(SwaggerHelpers.TYPE)) {
+				status = deleteDAO.invokeDeleteTypeDefMethod(reqObj);
+			} else {
+				status = deleteDAO.invokeDeleteMethod(reqObj);
+			}
 		}
-	}
 
+		if (status) {
+			code = HttpServletResponse.SC_OK;
+			String message = reqObj.getInputType().equals(SwaggerHelpers.TYPE) ? reqObj.getObjectIdForMedia()
+					: reqObj.getInputType();
+			statusMessage = message + " Deleted Successfully";
+		}
+		HttpUtils.invokeResponseWriter(response, code, statusMessage);
+	}
 }

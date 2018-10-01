@@ -1,9 +1,8 @@
-package com.pogeyan.swagger.factory;
+package com.pogeyan.swagger.impl.factory;
 
-import com.pogeyan.swagger.impl.factory.IObjectFacade;
+import com.pogeyan.swagger.api.factory.IObjectFacade;
 
-public class SwaggerApiServiceFactory {
-
+public class SwaggerObjectServiceFactory {
 	static IObjectFacade apiServiceClass;
 
 	public static void add(IObjectFacade apiService) {
