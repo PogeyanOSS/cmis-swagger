@@ -94,7 +94,6 @@ public class ApiDocsServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
-
 	protected void doGet(SwaggerGetDAO getDao, IRequest reqObj, HttpServletResponse response) throws Exception {
 
 		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServlet", "doGet",
@@ -130,10 +129,10 @@ public class ApiDocsServlet extends HttpServlet {
 	}
 
 	/**
+	 * @param input
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */
-
 	protected void doPost(SwaggerPostDAO postDao, IRequest reqObj, HttpServletResponse response) throws Exception {
 		LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "ApiDocsServelet", "doPost",
 				reqObj.getRepositoryId(), reqObj.getType());
