@@ -71,19 +71,19 @@ public class SwaggerPutHelpers {
 	public static Map<String, Object> invokePutMethod(String repositoryId, String typeId, String objectId,
 			Map<String, Object> inputMap, String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeDefinitionObj = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObj);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeDefinitionObj.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutHelpers",
 				"invokePutMethod", repositoryId, typeId, objectId);
-		if (object != null && typeDefinitionObj.getId().equals(object.getType().getId())) {
-			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObj, session);
+		if (object != null && typeObject.getId().equals(object.getType().getId())) {
+			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeObject, session);
 			Map<String, Object> updateProperties = SwaggerObjectServiceFactory.getApiService().beforeUpdate(session,
 					serializeMap, object.getPropertyValue("revisionId"));
 			if (updateProperties != null) {

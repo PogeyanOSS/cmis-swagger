@@ -559,9 +559,11 @@ public class SwaggerHelpers {
 				}
 
 				if (reqPropertyType.equals(PropertyType.INTEGER)) {
-					if (valueOfType instanceof Integer || valueOfType instanceof BigInteger) {
+					if (valueOfType instanceof Integer) {
 						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
 						serializeMap.put(var, BigInteger.valueOf(valueBigInteger));
+					} else if (valueOfType instanceof BigInteger) {
+						serializeMap.put(var, ((BigInteger) valueOfType).intValue());
 					} else if (valueOfType instanceof List<?>) {
 						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
@@ -765,12 +767,20 @@ public class SwaggerHelpers {
 			requestBaggage.put("parentId", parentId);
 			requestBaggage.put("includeRelationship", includeRelationship);
 		}
-
 		sRequestMessage.setInputMap(inputMap);
 		sRequestMessage.setFilePart(filePart);
 		sRequestMessage.setJsonString(jsonString);
 		sRequestMessage.setRequestBaggage(requestBaggage);
 		IRequest reqObj = sRequestMessage;
 		return reqObj;
+	}
+
+	public static ObjectType getTypeDefinition(Session session, String typeId) {
+		ObjectType typeDefinition = SwaggerHelpers.getType(typeId);
+		if (typeDefinition == null) {
+			SwaggerHelpers.getAllTypes(session);
+			typeDefinition = SwaggerHelpers.getType(typeId);
+		}
+		return typeDefinition;
 	}
 }

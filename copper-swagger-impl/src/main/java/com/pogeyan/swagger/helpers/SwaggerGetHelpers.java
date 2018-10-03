@@ -37,11 +37,9 @@ public class SwaggerGetHelpers {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		JSONObject json = new JSONObject();
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
 		JSONArray jsonArray = new JSONArray();
-		TypeDefinition typeDefinition = SwaggerHelpers.getType(typeId);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		TypeDefinition typeDefinition = SwaggerHelpers.getTypeDefinition(session, typeId);
 		JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, for type: {}", "SwaggerGetHelpers",
@@ -80,7 +78,7 @@ public class SwaggerGetHelpers {
 	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String objectId,
 			String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customObjectId = null;
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
@@ -122,10 +120,7 @@ public class SwaggerGetHelpers {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
-		ObjectType typeObject = SwaggerHelpers.getType(type);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
@@ -214,7 +209,7 @@ public class SwaggerGetHelpers {
 		if (!SwaggerHelpers.getTypeIsPresents()) {
 			SwaggerHelpers.getAllTypes(session);
 		}
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {

@@ -63,7 +63,7 @@ public class SwaggerDeleteHelpers {
 			String password) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
+		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
