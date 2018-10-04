@@ -51,7 +51,7 @@ public class SwaggerUIHelpers {
 	 */
 	public static List<TagObject> generateTagsForAllTypes() {
 		List<TagObject> tagsList = new ArrayList<TagObject>();
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 			String name = getDefinitionName(type);
 			TagObject tag = new TagObject(name, type.getDescription() + " Tag", externalDocsObject);
 			tagsList.add(tag);
@@ -94,19 +94,15 @@ public class SwaggerUIHelpers {
 	 */
 	public static Map<String, DefinitionsObject> getDefinitions() {
 		Map<String, DefinitionsObject> definitionsMap = new HashMap<String, DefinitionsObject>();
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
-
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 			ArrayList<String> required = new ArrayList<String>();
 			required.add(PropertyIds.OBJECT_TYPE_ID);
 			required.add(PropertyIds.NAME);
-
 			String defName = getDefinitionName(type);
 			Map<String, String> xml = new HashMap<String, String>();
 			xml.put("name", type.getDescription());
-
 			Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
-
 			if (type.isBaseType()) {
 				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 					HashMap<String, String> propObjBase = new HashMap<String, String>();
@@ -171,6 +167,9 @@ public class SwaggerUIHelpers {
 						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
 							propObject.put("type", "number");
 							propObject.put("format", "double");
+						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.BOOLEAN)) {
+							propObject.put("type", "boolean");
+							propObject.put("format", "boolean");
 						} else {
 							propObject.put("type", "string");
 						}
@@ -289,7 +288,7 @@ public class SwaggerUIHelpers {
 		List<Map<String, String[]>> security = new ArrayList<Map<String, String[]>>();
 		security.add(api);
 
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 
 			String[] consumes = new String[] { "application/json" };
 			String[] produces = new String[] { "application/json" };
@@ -798,6 +797,9 @@ public class SwaggerUIHelpers {
 			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
 				paramType = "number";
 				format = "double";
+			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.BOOLEAN)) {
+				paramType = propertiesValues.getValue().getPropertyType().name().toLowerCase();
+				format = "boolean";
 			} else {
 				paramType = "string";
 			}

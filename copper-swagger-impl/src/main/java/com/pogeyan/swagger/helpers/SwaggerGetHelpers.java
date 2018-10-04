@@ -23,34 +23,26 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
 public class SwaggerGetHelpers {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerGetHelpers.class);
-	public static Cache<String, ObjectType> typeCacheMap;
+	public static Map<String, ObjectType> typeMap;
 
 	@SuppressWarnings("unused")
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
 			String password, boolean includeRelationship) throws Exception {
-
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		JSONObject json = new JSONObject();
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
 		JSONArray jsonArray = new JSONArray();
-		TypeDefinition typeDefinition = SwaggerHelpers.getType(typeId);
-		JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		JSONObject object = JSONConverter.convert(typeDefinitionObject, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, for type: {}", "SwaggerGetHelpers",
 					"invokeGetTypeDefMethod", repositoryId, typeId);
 			ItemIterable<CmisObject> relationType = getRelationshipType(session, typeId);
 			getRelationshipChild(session, relationType, object);
-		}
-		if (object == null) {
-			throw new Exception("Type: " + typeId + " not present!");
 		}
 		return object;
 	}
@@ -62,7 +54,8 @@ public class SwaggerGetHelpers {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
 				Map<String, Object> propMap = SwaggerHelpers.compileProperties(types, session);
-				TypeDefinition typeDefinition = SwaggerHelpers.getType(propMap.get("target_table").toString());
+				TypeDefinition typeDefinition = SwaggerHelpers.getTypeDefinition(session,
+						propMap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
 				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typeDefinition.getId());
 				if (relationInnerChildType != null) {
@@ -80,13 +73,14 @@ public class SwaggerGetHelpers {
 	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String objectId,
 			String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 		String customObjectId = null;
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
 				"invokeDownloadMethod", repositoryId, typeId, objectId);
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customObjectId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customObjectId = typeDefinitionObject.isBaseType() ? objectId
+					: typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customObjectId = objectId;
 		}
@@ -118,14 +112,10 @@ public class SwaggerGetHelpers {
 	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String parentId, String skipCount,
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
-
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
-		ObjectType typeObject = SwaggerHelpers.getType(type);
+		ObjectType typeDefinitionObject = session.getTypeDefinition(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
@@ -136,10 +126,7 @@ public class SwaggerGetHelpers {
 		if (orderBy != null) {
 			context.setOrderBy(orderBy);
 		}
-		if (typeObject == null) {
-			throw new Exception(type + " doesn't exist!");
-		}
-		if (typeObject != null && typeObject.isBaseType()) {
+		if (typeDefinitionObject != null && typeDefinitionObject.isBaseType()) {
 			if (parentId != null) {
 				Folder object = (Folder) session.getObject(parentId);
 				json.put(object.getName(), object);
@@ -165,7 +152,7 @@ public class SwaggerGetHelpers {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		} else {
-			children = ((Folder) session.getObjectByPath("/" + typeObject.getId())).getChildren(context);
+			children = ((Folder) session.getObjectByPath("/" + typeDefinitionObject.getId())).getChildren(context);
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
@@ -211,14 +198,11 @@ public class SwaggerGetHelpers {
 			String userName, String password, String filter) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeDefinitionObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
@@ -229,7 +213,7 @@ public class SwaggerGetHelpers {
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, ObjectId: {}", "SwaggerGetHelpers",
 				"invokeGetMethod", repositoryId, typeId, objectId);
 		CmisObject object = session.getObject(customId, context);
-		if (object != null && typeObject.getId().equals(object.getType().getId())) {
+		if (object != null && typeDefinitionObject.getId().equals(object.getType().getId())) {
 			Map<String, Object> propMap = SwaggerHelpers.compileProperties(object, session);
 			return propMap;
 		} else {
@@ -267,7 +251,7 @@ public class SwaggerGetHelpers {
 	}
 
 	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
-		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
+		ObjectType relationshipType = session.getTypeDefinition(SwaggerHelpers.CMIS_EXT_RELATIONMD);
 		if (relationshipType != null) {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {

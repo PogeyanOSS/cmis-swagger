@@ -63,17 +63,17 @@ public class SwaggerDeleteHelpers {
 			String password) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getType(typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeDefinitionObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
 
-		if (object != null && typeObject.getId().equals(object.getType().getId())) {
+		if (object != null && typeDefinitionObject.getId().equals(object.getType().getId())) {
 			boolean isdelete = SwaggerObjectServiceFactory.getApiService().beforeDelete(session, object);
 			if (isdelete) {
 				object.delete();

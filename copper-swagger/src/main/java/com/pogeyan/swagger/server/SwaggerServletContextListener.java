@@ -59,7 +59,7 @@ public class SwaggerServletContextListener implements ServletContextListener {
 	private static final String DEFAULT_SERVER_EXTERNAL_DOCUMENT_DESCRIPTION = "";
 	private static final String DEFAULT_SERVER_EXTERNAL_DOCUMENT_URL = "";
 	private static final String DEFAULT_SWAGGER_API_CLASS = "com.pogeyan.swagger.api.impl.SwaggerDefaultObjectService";
-	private static final String PROPERTY_SWAGGER_API_CLASS = "swaggerSyncServiceClass";
+	private static final String PROPERTY_SWAGGER_API_CLASS = "swaggerObjectServiceClass";
 
 	static final Logger LOG = LoggerFactory.getLogger(SwaggerServletContextListener.class);
 

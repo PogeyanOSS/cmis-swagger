@@ -96,7 +96,6 @@ public class SwaggerPostHelpers {
 		}
 		LOG.debug("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
 				"invokePostTypeDefMethod", repositoryId, inputType);
-		SwaggerHelpers.typeCacheMap.put(returnedType.getId().toString(), (ObjectType) returnedType);
 		return returnedType;
 
 	}
@@ -187,12 +186,12 @@ public class SwaggerPostHelpers {
 
 		Map<String, Object> propMap = new HashMap<String, Object>();
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeDefinitionObj = SwaggerHelpers.getType(typeId);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		if (objectId != null) {
-			String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObj);
+			String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 			String customId = null;
 			if (SwaggerHelpers.customTypeHasFolder()) {
-				customId = typeDefinitionObj.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+				customId = typeDefinitionObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 			} else {
 				customId = objectId;
 			}
@@ -211,17 +210,17 @@ public class SwaggerPostHelpers {
 			ContentStream setContentStream = SwaggerPostHelpers.getContentStream(filePart);
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggePostHelpers",
 					"invokePostMethod", repositoryId, typeId);
-			if (typeDefinitionObj != null) {
+			if (typeDefinitionObject != null) {
 				if (includeCrud) {
 					Map<String, Object> resultPropMap = SwaggerPostHelpers.crudOperation(session, repositoryId,
-							typeDefinitionObj, jsonString, userName, password);
+							typeDefinitionObject, jsonString, userName, password);
 					return resultPropMap;
 				} else {
 
-					Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObj,
+					Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObject,
 							session);
-					BaseTypeId baseTypeId = typeDefinitionObj.isBaseType() ? typeDefinitionObj.getBaseTypeId()
-							: typeDefinitionObj.getBaseType().getBaseTypeId();
+					BaseTypeId baseTypeId = typeDefinitionObject.isBaseType() ? typeDefinitionObject.getBaseTypeId()
+							: typeDefinitionObject.getBaseType().getBaseTypeId();
 					Map<String, Object> properties = SwaggerObjectServiceFactory.getApiService().beforecreate(session,
 							serializeMap);
 					CmisObject cmisObject = SwaggerPostHelpers.createForBaseTypes(session, baseTypeId, parentId,
@@ -275,7 +274,7 @@ public class SwaggerPostHelpers {
 							.filter(objData -> ((objData.getKey().equals(PropertyIds.OBJECT_TYPE_ID)
 									|| objData.getKey().equals("objectTypeId") || objData.getKey().equals("type"))))
 							.map(a -> (String) a.getValue()).findFirst().get();
-					typeDef = SwaggerHelpers.getType(type);
+					typeDef = SwaggerHelpers.getTypeDefinition(session, type);
 				}
 				if (typeDef != null && props.get("acl") != null) {
 					newAclArray = (ArrayList<Object>) props.get("acl");
