@@ -443,7 +443,7 @@ public class SwaggerHelpers {
 
 				if (reqPropType.equals(PropertyType.INTEGER)) {
 					if (valueOfType.size() == 1) {
-						Integer valueBigInteger = convertInstanceOfObject(valueOfType.get(0), Integer.class);
+						BigInteger valueBigInteger = convertInstanceOfObject(valueOfType.get(0), BigInteger.class);
 						serializeMap.put(var, valueBigInteger);
 					} else {
 						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
@@ -542,6 +542,8 @@ public class SwaggerHelpers {
 					} else if (valueOfType instanceof List<?>) {
 						List<BigInteger> value = convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
+					} else if (valueOfType instanceof String) {
+						serializeMap.put(var, new BigInteger((String) valueOfType));
 					}
 
 				} else if (reqPropertyType.equals(PropertyType.BOOLEAN)) {
@@ -551,6 +553,8 @@ public class SwaggerHelpers {
 					} else if (valueOfType instanceof List<?>) {
 						List<Boolean> booleanValue = convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, booleanValue);
+					} else if (valueOfType instanceof String) {
+						serializeMap.put(var, Boolean.valueOf((String) valueOfType));
 					}
 
 				} else if (reqPropertyType.equals(PropertyType.DATETIME)) {
@@ -572,6 +576,10 @@ public class SwaggerHelpers {
 							calenderList.add(lastModifiedCalender);
 						});
 						serializeMap.put(var, calenderList);
+					} else if (valueOfType instanceof String) {
+						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
+						lastModifiedCalender.setTimeInMillis(Long.valueOf((String) valueOfType));
+						serializeMap.put(var, lastModifiedCalender);
 					}
 
 				} else if (reqPropertyType.equals(PropertyType.DECIMAL)) {
@@ -581,6 +589,8 @@ public class SwaggerHelpers {
 					} else if (valueOfType instanceof List<?>) {
 						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
 						serializeMap.put(var, value);
+					} else if (valueOfType instanceof String) {
+						serializeMap.put(var, Double.valueOf((String) valueOfType));
 					}
 				} else {
 					// string type

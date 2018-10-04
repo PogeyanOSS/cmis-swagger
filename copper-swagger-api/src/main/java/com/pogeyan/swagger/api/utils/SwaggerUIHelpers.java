@@ -167,6 +167,9 @@ public class SwaggerUIHelpers {
 						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
 							propObject.put("type", "number");
 							propObject.put("format", "double");
+						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.BOOLEAN)) {
+							propObject.put("type", "boolean");
+							propObject.put("format", "boolean");
 						} else {
 							propObject.put("type", "string");
 						}
@@ -794,6 +797,9 @@ public class SwaggerUIHelpers {
 			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
 				paramType = "number";
 				format = "double";
+			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.BOOLEAN)) {
+				paramType = propertiesValues.getValue().getPropertyType().name().toLowerCase();
+				format = "boolean";
 			} else {
 				paramType = "string";
 			}
