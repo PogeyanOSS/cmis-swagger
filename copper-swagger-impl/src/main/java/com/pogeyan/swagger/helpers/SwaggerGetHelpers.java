@@ -36,8 +36,8 @@ public class SwaggerGetHelpers {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
-		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
-		JSONObject object = JSONConverter.convert(typeObject, DateTimeFormat.SIMPLE);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		JSONObject object = JSONConverter.convert(typeDefinitionObject, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, for type: {}", "SwaggerGetHelpers",
 					"invokeGetTypeDefMethod", repositoryId, typeId);
@@ -73,13 +73,14 @@ public class SwaggerGetHelpers {
 	public static ContentStream invokeDownloadMethod(String repositoryId, String typeId, String objectId,
 			String userName, String password) throws Exception {
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 		String customObjectId = null;
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, typeId: {}, objectId: {}", "SwaggerGetHelpers",
 				"invokeDownloadMethod", repositoryId, typeId, objectId);
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customObjectId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customObjectId = typeDefinitionObject.isBaseType() ? objectId
+					: typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customObjectId = objectId;
 		}
@@ -114,7 +115,7 @@ public class SwaggerGetHelpers {
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = session.getTypeDefinition(type);
+		ObjectType typeDefinitionObject = session.getTypeDefinition(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
@@ -125,10 +126,7 @@ public class SwaggerGetHelpers {
 		if (orderBy != null) {
 			context.setOrderBy(orderBy);
 		}
-		if (typeObject == null) {
-			throw new Exception(type + " doesn't exist!");
-		}
-		if (typeObject != null && typeObject.isBaseType()) {
+		if (typeDefinitionObject != null && typeDefinitionObject.isBaseType()) {
 			if (parentId != null) {
 				Folder object = (Folder) session.getObject(parentId);
 				json.put(object.getName(), object);
@@ -154,7 +152,7 @@ public class SwaggerGetHelpers {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		} else {
-			children = ((Folder) session.getObjectByPath("/" + typeObject.getId())).getChildren(context);
+			children = ((Folder) session.getObjectByPath("/" + typeDefinitionObject.getId())).getChildren(context);
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
@@ -200,11 +198,11 @@ public class SwaggerGetHelpers {
 			String userName, String password, String filter) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
-		String typeIdName = SwaggerHelpers.getIdName(typeObject);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 		String customId = null;
 		if (SwaggerHelpers.customTypeHasFolder()) {
-			customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+			customId = typeDefinitionObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 		} else {
 			customId = objectId;
 		}
@@ -215,7 +213,7 @@ public class SwaggerGetHelpers {
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, ObjectId: {}", "SwaggerGetHelpers",
 				"invokeGetMethod", repositoryId, typeId, objectId);
 		CmisObject object = session.getObject(customId, context);
-		if (object != null && typeObject.getId().equals(object.getType().getId())) {
+		if (object != null && typeDefinitionObject.getId().equals(object.getType().getId())) {
 			Map<String, Object> propMap = SwaggerHelpers.compileProperties(object, session);
 			return propMap;
 		} else {

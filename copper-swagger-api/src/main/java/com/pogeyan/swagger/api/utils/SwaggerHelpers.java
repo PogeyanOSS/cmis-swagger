@@ -751,10 +751,17 @@ public class SwaggerHelpers {
 	}
 
 	public static ObjectType getTypeDefinition(Session session, String typeId) throws Exception {
-		ObjectType typeDefinition = session.getTypeDefinition(typeId);
-		if (typeDefinition == null) {
+		try {
+			ObjectType typeDefinition = session.getTypeDefinition(typeId);
+			if (typeDefinition == null) {
+				throw new Exception("Type: " + typeId + " not present!");
+			}
+			return typeDefinition;
+		} catch (Exception e) {
+			LOG.error(
+					"class name: {}, method name: {}, repositoryId: {}, Fetching TypeDefinition Error for type: {}, Cause: {}",
+					"SwaggerHelpers", "getTypeDefinition", session.getRepositoryInfo().getId(), typeId, e);
 			throw new Exception("Type: " + typeId + " not present!");
 		}
-		return typeDefinition;
 	}
 }

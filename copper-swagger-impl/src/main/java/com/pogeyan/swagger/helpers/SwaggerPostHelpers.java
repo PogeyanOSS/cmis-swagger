@@ -186,12 +186,12 @@ public class SwaggerPostHelpers {
 
 		Map<String, Object> propMap = new HashMap<String, Object>();
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
+		ObjectType typeDefinitionObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		if (objectId != null) {
-			String typeIdName = SwaggerHelpers.getIdName(typeObject);
+			String typeIdName = SwaggerHelpers.getIdName(typeDefinitionObject);
 			String customId = null;
 			if (SwaggerHelpers.customTypeHasFolder()) {
-				customId = typeObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
+				customId = typeDefinitionObject.isBaseType() ? objectId : typeId + "::" + typeIdName + "::" + objectId;
 			} else {
 				customId = objectId;
 			}
@@ -210,16 +210,17 @@ public class SwaggerPostHelpers {
 			ContentStream setContentStream = SwaggerPostHelpers.getContentStream(filePart);
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggePostHelpers",
 					"invokePostMethod", repositoryId, typeId);
-			if (typeObject != null) {
+			if (typeDefinitionObject != null) {
 				if (includeCrud) {
 					Map<String, Object> resultPropMap = SwaggerPostHelpers.crudOperation(session, repositoryId,
-							typeObject, jsonString, userName, password);
+							typeDefinitionObject, jsonString, userName, password);
 					return resultPropMap;
 				} else {
 
-					Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeObject, session);
-					BaseTypeId baseTypeId = typeObject.isBaseType() ? typeObject.getBaseTypeId()
-							: typeObject.getBaseType().getBaseTypeId();
+					Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObject,
+							session);
+					BaseTypeId baseTypeId = typeDefinitionObject.isBaseType() ? typeDefinitionObject.getBaseTypeId()
+							: typeDefinitionObject.getBaseType().getBaseTypeId();
 					Map<String, Object> properties = SwaggerObjectServiceFactory.getApiService().beforecreate(session,
 							serializeMap);
 					CmisObject cmisObject = SwaggerPostHelpers.createForBaseTypes(session, baseTypeId, parentId,
