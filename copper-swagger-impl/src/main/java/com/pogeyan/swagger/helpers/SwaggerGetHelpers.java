@@ -23,32 +23,26 @@ import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.cache.Cache;
 import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 
 public class SwaggerGetHelpers {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerGetHelpers.class);
-	public static Cache<String, ObjectType> typeCacheMap;
+	public static Map<String, ObjectType> typeMap;
 
 	@SuppressWarnings("unused")
 	public static JSONObject invokeGetTypeDefMethod(String repositoryId, String typeId, String userName,
 			String password, boolean includeRelationship) throws Exception {
-
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		JSONObject json = new JSONObject();
 		JSONArray jsonArray = new JSONArray();
 		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
-		TypeDefinition typeDefinition = SwaggerHelpers.getTypeDefinition(session, typeId);
-		JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
+		JSONObject object = JSONConverter.convert(typeObject, DateTimeFormat.SIMPLE);
 		if (includeRelationship) {
 			LOG.debug("class name: {}, method name: {}, repositoryId: {}, for type: {}", "SwaggerGetHelpers",
 					"invokeGetTypeDefMethod", repositoryId, typeId);
 			ItemIterable<CmisObject> relationType = getRelationshipType(session, typeId);
 			getRelationshipChild(session, relationType, object);
-		}
-		if (object == null) {
-			throw new Exception("Type: " + typeId + " not present!");
 		}
 		return object;
 	}
@@ -60,7 +54,8 @@ public class SwaggerGetHelpers {
 			for (CmisObject types : relationType) {
 				JSONObject childObject = new JSONObject();
 				Map<String, Object> propMap = SwaggerHelpers.compileProperties(types, session);
-				TypeDefinition typeDefinition = SwaggerHelpers.getType(propMap.get("target_table").toString());
+				TypeDefinition typeDefinition = SwaggerHelpers.getTypeDefinition(session,
+						propMap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
 				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typeDefinition.getId());
 				if (relationInnerChildType != null) {
@@ -116,11 +111,10 @@ public class SwaggerGetHelpers {
 	public static JSONObject invokeGetAllMethod(String repositoryId, String type, String parentId, String skipCount,
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
-
 		JSONObject json = new JSONObject();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, type);
+		ObjectType typeObject = session.getTypeDefinition(type);
 		OperationContext context = new OperationContextImpl();
 		if (maxItems != null) {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
@@ -206,9 +200,6 @@ public class SwaggerGetHelpers {
 			String userName, String password, String filter) throws Exception {
 
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
-		if (!SwaggerHelpers.getTypeIsPresents()) {
-			SwaggerHelpers.getAllTypes(session);
-		}
 		ObjectType typeObject = SwaggerHelpers.getTypeDefinition(session, typeId);
 		String typeIdName = SwaggerHelpers.getIdName(typeObject);
 		String customId = null;
@@ -262,7 +253,7 @@ public class SwaggerGetHelpers {
 	}
 
 	public static ItemIterable<CmisObject> getRelationshipType(Session session, String typeId) {
-		ObjectType relationshipType = typeCacheMap.getIfPresent("cmis_ext:relationmd");
+		ObjectType relationshipType = session.getTypeDefinition(SwaggerHelpers.CMIS_EXT_RELATIONMD);
 		if (relationshipType != null) {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {

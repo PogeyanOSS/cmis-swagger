@@ -88,7 +88,7 @@ import com.pogeyan.swagger.pojos.ErrorResponse;
  */
 public class SwaggerHelpers {
 	private static final Logger LOG = LoggerFactory.getLogger(SwaggerHelpers.class);
-	public static Cache<String, ObjectType> typeCacheMap;
+	public static Map<String, ObjectType> typeMap = new HashMap<String, ObjectType>();
 	private static Cache<String, Session> sessionMap;
 	public static final int InvalidArgumentExceptionCode = 400;
 	public static final int ConstraintExceptionCode = 409;
@@ -121,7 +121,6 @@ public class SwaggerHelpers {
 	public static ObjectMapper mapper = new ObjectMapper();
 
 	static {
-		setTypeCacheMap(CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build());
 		sessionMap = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build();
 	}
 
@@ -224,34 +223,14 @@ public class SwaggerHelpers {
 		List<String> list = getBaseTypeList();
 		for (String type : list) {
 			ObjectType baseType = session.getTypeDefinition(type);
-			getTypeCacheMap().put(baseType.getId().toString(), baseType);
+			getTypeMap().put(baseType.getId().toString(), baseType);
 			List<Tree<ObjectType>> allTypes = session.getTypeDescendants(type, -1, true);
 			for (Tree<ObjectType> object : allTypes) {
 				getChildTypes(object);
 			}
 		}
 		LOG.debug("class name: {}, method name: {}, repositoryId: {}, Types in repository: {}", "SwaggerHelpers",
-				"getAllTypes", session.getRepositoryInfo().getId(), typeCacheMap);
-	}
-
-	public static Boolean getTypeIsPresents() {
-		if (getTypeCacheMap().size() > 0) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * @param session
-	 *            the property session is used to get all details about that
-	 *            repository.
-	 * @param typeId
-	 *            the property typeId is used to get that particular type based
-	 *            on this id.
-	 * @return the Object Type
-	 */
-	public static ObjectType getType(String typeId) {
-		return ((Cache<String, ObjectType>) getTypeCacheMap()).getIfPresent(typeId);
+				"getAllTypes", session.getRepositoryInfo().getId(), typeMap);
 	}
 
 	/**
@@ -263,13 +242,13 @@ public class SwaggerHelpers {
 		List<Tree<ObjectType>> getChildren = typeChildren.getChildren();
 		if (getChildren.size() > 0) {
 			// this will add the higher level item
-			getTypeCacheMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
+			getTypeMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
 			for (Tree<ObjectType> object : getChildren) {
 				getChildTypes(object);
 			}
 		} else {
 			// this will add all children
-			getTypeCacheMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
+			getTypeMap().put(typeChildren.getItem().getId().toString(), typeChildren.getItem());
 		}
 	}
 
@@ -399,12 +378,8 @@ public class SwaggerHelpers {
 	 * 
 	 * @return return the Cache Map which contains all the types
 	 */
-	public static Cache<String, ObjectType> getTypeCacheMap() {
-		return typeCacheMap;
-	}
-
-	public static void setTypeCacheMap(Cache<String, ObjectType> typeCacheMap) {
-		SwaggerHelpers.typeCacheMap = typeCacheMap;
+	public static Map<String, ObjectType> getTypeMap() {
+		return typeMap;
 	}
 
 	/**
@@ -775,11 +750,10 @@ public class SwaggerHelpers {
 		return reqObj;
 	}
 
-	public static ObjectType getTypeDefinition(Session session, String typeId) {
-		ObjectType typeDefinition = SwaggerHelpers.getType(typeId);
+	public static ObjectType getTypeDefinition(Session session, String typeId) throws Exception {
+		ObjectType typeDefinition = session.getTypeDefinition(typeId);
 		if (typeDefinition == null) {
-			SwaggerHelpers.getAllTypes(session);
-			typeDefinition = SwaggerHelpers.getType(typeId);
+			throw new Exception("Type: " + typeId + " not present!");
 		}
 		return typeDefinition;
 	}

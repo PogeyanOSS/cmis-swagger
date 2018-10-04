@@ -96,7 +96,6 @@ public class SwaggerPostHelpers {
 		}
 		LOG.debug("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
 				"invokePostTypeDefMethod", repositoryId, inputType);
-		SwaggerHelpers.typeCacheMap.put(returnedType.getId().toString(), (ObjectType) returnedType);
 		return returnedType;
 
 	}
@@ -274,7 +273,7 @@ public class SwaggerPostHelpers {
 							.filter(objData -> ((objData.getKey().equals(PropertyIds.OBJECT_TYPE_ID)
 									|| objData.getKey().equals("objectTypeId") || objData.getKey().equals("type"))))
 							.map(a -> (String) a.getValue()).findFirst().get();
-					typeDef = SwaggerHelpers.getType(type);
+					typeDef = SwaggerHelpers.getTypeDefinition(session, type);
 				}
 				if (typeDef != null && props.get("acl") != null) {
 					newAclArray = (ArrayList<Object>) props.get("acl");

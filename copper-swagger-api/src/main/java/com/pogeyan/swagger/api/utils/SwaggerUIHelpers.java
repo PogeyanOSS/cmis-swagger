@@ -51,7 +51,7 @@ public class SwaggerUIHelpers {
 	 */
 	public static List<TagObject> generateTagsForAllTypes() {
 		List<TagObject> tagsList = new ArrayList<TagObject>();
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 			String name = getDefinitionName(type);
 			TagObject tag = new TagObject(name, type.getDescription() + " Tag", externalDocsObject);
 			tagsList.add(tag);
@@ -94,19 +94,15 @@ public class SwaggerUIHelpers {
 	 */
 	public static Map<String, DefinitionsObject> getDefinitions() {
 		Map<String, DefinitionsObject> definitionsMap = new HashMap<String, DefinitionsObject>();
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
-
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 			ArrayList<String> required = new ArrayList<String>();
 			required.add(PropertyIds.OBJECT_TYPE_ID);
 			required.add(PropertyIds.NAME);
-
 			String defName = getDefinitionName(type);
 			Map<String, String> xml = new HashMap<String, String>();
 			xml.put("name", type.getDescription());
-
 			Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
-
 			if (type.isBaseType()) {
 				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 					HashMap<String, String> propObjBase = new HashMap<String, String>();
@@ -289,7 +285,7 @@ public class SwaggerUIHelpers {
 		List<Map<String, String[]>> security = new ArrayList<Map<String, String[]>>();
 		security.add(api);
 
-		for (ObjectType type : SwaggerHelpers.getTypeCacheMap().asMap().values()) {
+		for (ObjectType type : SwaggerHelpers.getTypeMap().values()) {
 
 			String[] consumes = new String[] { "application/json" };
 			String[] produces = new String[] { "application/json" };
