@@ -57,6 +57,12 @@ public class SwaggerGetHelpers {
 				TypeDefinition typeDefinition = SwaggerHelpers.getTypeDefinition(session,
 						propMap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
+				propMap.forEach((k, v) -> {
+					if (!k.equalsIgnoreCase("cmis:baseTypeId") && !k.equalsIgnoreCase("cmis:objectTypeId")
+							&& !k.equalsIgnoreCase("cmis:objectId")) {
+						object.put(k, v);
+					}
+				});
 				ItemIterable<CmisObject> relationInnerChildType = getRelationshipType(session, typeDefinition.getId());
 				if (relationInnerChildType != null) {
 					getRelationshipChild(session, relationInnerChildType, object);
@@ -256,7 +262,9 @@ public class SwaggerGetHelpers {
 			Folder relationObject = (Folder) session.getObjectByPath("/" + relationshipType.getId());
 			if (relationObject != null) {
 				OperationContext context = new OperationContextImpl();
-				context.setFilterString("target_table,source_table eq " + typeId);
+				context.setFilterString(
+						"target_table,source_table,source_column,target_column,copper_relationType,source_table eq "
+								+ typeId);
 				ItemIterable<CmisObject> relationDescendants = relationObject.getChildren(context);
 				return relationDescendants;
 			}
