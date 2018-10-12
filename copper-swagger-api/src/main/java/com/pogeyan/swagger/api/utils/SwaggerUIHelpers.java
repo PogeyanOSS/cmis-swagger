@@ -508,6 +508,11 @@ public class SwaggerUIHelpers {
 		PathCommonObject deleteTypeObject = postDeleteTypeDefinitionCreation(security, typeParams);
 		PathObject getTypePathObj = new PathObject(null, getTypeObject, putTypeObject, deleteTypeObject);
 		pathMap.put("/_metadata/type/{typeId}", getTypePathObj);
+
+		PathCommonObject getAllTypeObjects = postGetAllTypesDefinitionCreation(security, typeParams);
+		PathObject pathGetAllObj = new PathObject(null, getAllTypeObjects, null, null);
+		pathMap.put("/_metadata/getAllTypes", pathGetAllObj);
+
 		return pathMap;
 
 	}
@@ -574,6 +579,38 @@ public class SwaggerUIHelpers {
 				getResponsesMap, security);
 		return getTypeObject;
 
+	}
+
+	/**
+	 * @param security
+	 *            the property security is used to defines a security scheme
+	 *            that can be used by the operations.
+	 * @param typeParams
+	 *            the property typeParams is used to get that ParameterObject.
+	 *            it describes a single operation parameter. A unique parameter
+	 *            is defined by a combination of a name and location.
+	 * @return PathCommonObject describes the operations available on a single
+	 *         path. A Path Item MAY be empty, due to ACL constraints. The path
+	 *         itself is still exposed to the documentation viewer but they will
+	 *         not know which operations and parameters are available
+	 */
+	private static PathCommonObject postGetAllTypesDefinitionCreation(List<Map<String, String[]>> security,
+			ParameterObject typeParams) {
+		Map<String, ResponseObject> getResponsesMap = new HashMap<String, ResponseObject>();
+		ResponseObject respObj1 = new ResponseObject("Type not found", null);
+		ResponseObject respObj2 = new ResponseObject("Invalid ID supplied", null);
+		ResponseObject respObj3 = new ResponseObject("successful operation", null);
+		getResponsesMap.put("404", respObj1);
+		getResponsesMap.put("400", respObj2);
+		getResponsesMap.put("200", respObj3);
+
+		Map<String, ResponseObject> getAllresponses = new HashMap<String, ResponseObject>();
+		ResponseObject obj3 = new ResponseObject("Successful Operation", null);
+		getAllresponses.put("200", obj3);
+		PathCommonObject getAllTypeObj = new PathCommonObject(new String[] { "Types" }, "Get All Types", null,
+				"getAllTypes", null, new String[] { "application/json" }, null, getAllresponses, security);
+
+		return getAllTypeObj;
 	}
 
 	/**
