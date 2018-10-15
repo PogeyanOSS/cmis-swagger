@@ -103,7 +103,8 @@ public class ApiDocsServlet extends HttpServlet {
 		ContentStream stream = null;
 
 		if (reqObj.getInputType() != null && !reqObj.getInputType().equals(SwaggerHelpers.MEDIA)) {
-			if (reqObj.getInputType().equals(SwaggerHelpers.TYPE)) {
+			if (reqObj.getInputType().equals(SwaggerHelpers.TYPE)
+					|| reqObj.getInputType().equals(SwaggerHelpers.GETALLTYPES)) {
 				jsonObj = getDao.invokeGetTypeDefMethod(reqObj);
 			} else if (reqObj.getInputType().equals(SwaggerHelpers.GETALL)) {
 				jsonObj = getDao.invokeGetAllMethod(reqObj);

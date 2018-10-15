@@ -130,11 +130,11 @@ public class SwaggerPostHelpers {
 			throw new Exception("Empty Properties!!");
 		}
 		CmisObject object = session.getObject(inputMap.get("objectId").toString());
-		if (aclParam.equals("addAcl")) {
+		if (aclParam.equals(SwaggerHelpers.ADD_ACL)) {
 			addAces.add(of.createAce(inputMap.get("principalId").toString(),
 					Collections.singletonList(inputMap.get("permission").toString())));
 			removeAces = null;
-		} else if (aclParam.equals("removeAcl")) {
+		} else if (aclParam.equals(SwaggerHelpers.REMOVE_ACL)) {
 			removeAces.add(of.createAce(inputMap.get("principalId").toString(),
 					Collections.singletonList(inputMap.get("permission").toString())));
 		}
@@ -276,9 +276,9 @@ public class SwaggerPostHelpers {
 							.map(a -> (String) a.getValue()).findFirst().get();
 					typeDef = SwaggerHelpers.getTypeDefinition(session, type);
 				}
-				if (typeDef != null && props.get("acl") != null) {
-					newAclArray = (ArrayList<Object>) props.get("acl");
-					props.remove("acl");
+				if (typeDef != null && props.get(SwaggerHelpers.ACL) != null) {
+					newAclArray = (ArrayList<Object>) props.get(SwaggerHelpers.ACL);
+					props.remove(SwaggerHelpers.ACL);
 				}
 				Map<String, Object> properties = SwaggerPostHelpers.compileCrudProperties(session, props, typeDef);
 
@@ -303,7 +303,7 @@ public class SwaggerPostHelpers {
 							List<Ace> aceList = new ArrayList<Ace>();
 							if (resultedObject.get(id) != null && resultedObject.get(id).size() > 0) {
 								Map<String, Object> resultObjectProps = resultedObject.get(id).get(0);
-								oldAclArray = (List<Object>) resultObjectProps.get("acl");
+								oldAclArray = (List<Object>) resultObjectProps.get(SwaggerHelpers.ACL);
 								if (newAclArray != null && newAclArray.size() > 0) {
 									if (oldAclArray.containsAll(newAclArray)) {
 										aceList = null;
@@ -378,9 +378,9 @@ public class SwaggerPostHelpers {
 
 				Map<String, Object> propMapForMainObj = new HashMap<String, Object>();
 				typeDef.getPropertyDefinitions().entrySet().stream()
-						.filter(map -> (!(map.getKey().equalsIgnoreCase("cmis:name")
-								|| map.getKey().equalsIgnoreCase("cmis:objectTypeId")
-								|| map.getKey().equalsIgnoreCase("cmis:objectId"))))
+						.filter(map -> (!(map.getKey().equalsIgnoreCase(PropertyIds.NAME)
+								|| map.getKey().equalsIgnoreCase(PropertyIds.OBJECT_TYPE_ID)
+								|| map.getKey().equalsIgnoreCase(PropertyIds.OBJECT_ID))))
 						.forEach(a -> {
 							if (props.get(a.getKey()) != null) {
 								propMapForMainObj.put(a.getKey(), props.get(a.getKey()));
@@ -690,20 +690,19 @@ public class SwaggerPostHelpers {
 				|| name.equalsIgnoreCase("modifiedBy") || name.equalsIgnoreCase("versionSeriesCheckedOutBy")) {
 			return getFieldName(name);
 		} else if (name.equalsIgnoreCase("id")) {
-			return "cmis:objectId";
+			return PropertyIds.OBJECT_ID;
 		} else if (name.equalsIgnoreCase("typeId")) {
-			return "cmis:objectTypeId";
+			return PropertyIds.OBJECT_TYPE_ID;
 		} else if (name.equalsIgnoreCase("modifiedBy")) {
-
-			return "cmis:lastModifiedBy";
+			return PropertyIds.LAST_MODIFIED_BY;
 		} else if (name.equalsIgnoreCase("createdAt")) {
-			return "cmis:creationDate";
+			return PropertyIds.CREATION_DATE;
 		} else if (name.equalsIgnoreCase("token")) {
-			return "cmis:changeToken";
+			return PropertyIds.CHANGE_TOKEN;
 		} else if (name.equalsIgnoreCase("modifiedAt")) {
-			return "cmis:lastModificationDate";
+			return PropertyIds.LAST_MODIFICATION_DATE;
 		} else if (name.equalsIgnoreCase("baseId")) {
-			return "cmis:baseTypeId";
+			return PropertyIds.BASE_TYPE_ID;
 		} else {
 			return name;
 		}
@@ -725,7 +724,8 @@ public class SwaggerPostHelpers {
 				LinkedHashMap<Object, Object> getObject = (LinkedHashMap<Object, Object>) object.get("object");
 				LinkedHashMap<Object, Object> succintProps = (LinkedHashMap<Object, Object>) getObject
 						.get("succinctProperties");
-				LinkedHashMap<Object, Object> aclProps = (LinkedHashMap<Object, Object>) getObject.get("acl");
+				LinkedHashMap<Object, Object> aclProps = (LinkedHashMap<Object, Object>) getObject
+						.get(SwaggerHelpers.ACL);
 				JSONObject objmainProps = formProperties(session, succintProps, false, true, true, aclProps);
 				String relType = succintProps.get(PropertyIds.OBJECT_ID).toString();
 				List<Map<String, Object>> resultesMap = new ArrayList<>();
@@ -888,7 +888,7 @@ public class SwaggerPostHelpers {
 						aceMap.put("permission", permission.get(0));
 						aclList.add(aceMap);
 					});
-					newObj.put("acl", aclList);
+					newObj.put(SwaggerHelpers.ACL, aclList);
 				}
 			}
 		}
@@ -914,7 +914,7 @@ public class SwaggerPostHelpers {
 		jsonObject.entrySet().stream().forEach(k -> {
 			String relType = k.getKey();
 
-			CmisObject relTypeItem = session.getObjectByPath("/cmis_ext:relationmd/" + relType);
+			CmisObject relTypeItem = session.getObjectByPath("/" + SwaggerHelpers.CMIS_EXT_RELATIONMD + "/" + relType);
 			String targetType = relTypeItem.getPropertyValue("target_table");
 			Map<String, Object> foreignKey = new HashMap<>();
 
@@ -999,7 +999,7 @@ public class SwaggerPostHelpers {
 		Map<String, Object> relProps = new HashMap<String, Object>();
 		relProps.put(PropertyIds.SOURCE_ID, sourceId);
 		relProps.put(PropertyIds.TARGET_ID, targetId);
-		relProps.put(PropertyIds.OBJECT_TYPE_ID, "cmis_ext:relationship");
+		relProps.put(PropertyIds.OBJECT_TYPE_ID, SwaggerHelpers.CMIS_EXT_RELATIONSHIP);
 		relProps.put("relation_name", objectTypeId);
 		relProps.put(PropertyIds.NAME, sourceId + "_" + targetId);
 		session.createRelationship(relProps, null, aceList, null);

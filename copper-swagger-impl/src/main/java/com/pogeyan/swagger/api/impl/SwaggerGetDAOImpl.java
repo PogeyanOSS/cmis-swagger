@@ -1,14 +1,18 @@
 package com.pogeyan.swagger.api.impl;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
+import org.apache.chemistry.opencmis.commons.enums.DateTimeFormat;
+import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.pogeyan.swagger.api.IRequest;
 import com.pogeyan.swagger.api.SwaggerGetDAO;
+import com.pogeyan.swagger.api.utils.SwaggerHelpers;
 import com.pogeyan.swagger.helpers.SwaggerGetHelpers;
 
 public class SwaggerGetDAOImpl implements SwaggerGetDAO {
@@ -18,13 +22,22 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 	public JSONObject invokeGetTypeDefMethod(IRequest obj) throws Exception {
 
 		String type = null;
+		JSONObject typeDefinition = new JSONObject();
 		try {
-			LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
-					"invokeGetTypeDefMethod", obj.getRepositoryId(), obj.getInputType());
-			type = obj.getObjectIdForMedia() != null ? obj.getObjectIdForMedia() : obj.getInputType();
-			JSONObject typeDefinition = SwaggerGetHelpers.invokeGetTypeDefMethod(obj.getRepositoryId(), type,
-					obj.getAuth().getUserName(), obj.getAuth().getPassword(),
-					(boolean) obj.getRequestBaggage().get("includeRelationship"));
+			if (obj.getInputType().equals(SwaggerHelpers.GETALLTYPES) && obj.getObjectIdForMedia().equals("all")) {
+				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
+						"invokeGetAllTypes", obj.getRepositoryId(), obj.getInputType());
+				typeDefinition.putAll(SwaggerHelpers.getTypeMap().entrySet().stream().collect(Collectors.toMap(
+						key -> key.getKey(), value -> JSONConverter.convert(value.getValue(), DateTimeFormat.SIMPLE))));
+				return typeDefinition;
+			} else {
+				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
+						"invokeGetTypeDefMethod", obj.getRepositoryId(), obj.getInputType());
+				type = obj.getObjectIdForMedia() != null ? obj.getObjectIdForMedia() : obj.getInputType();
+				typeDefinition = SwaggerGetHelpers.invokeGetTypeDefMethod(obj.getRepositoryId(), type,
+						obj.getAuth().getUserName(), obj.getAuth().getPassword(),
+						(boolean) obj.getRequestBaggage().get("includeRelationship"));
+			}
 			return typeDefinition;
 		} catch (Exception e) {
 			LOG.error(

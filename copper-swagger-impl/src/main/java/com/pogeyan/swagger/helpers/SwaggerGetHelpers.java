@@ -58,8 +58,8 @@ public class SwaggerGetHelpers {
 						propMap.get("target_table").toString());
 				JSONObject object = JSONConverter.convert(typeDefinition, DateTimeFormat.SIMPLE);
 				propMap.forEach((k, v) -> {
-					if (!k.equalsIgnoreCase("cmis:baseTypeId") && !k.equalsIgnoreCase("cmis:objectTypeId")
-							&& !k.equalsIgnoreCase("cmis:objectId")) {
+					if (!k.equalsIgnoreCase(PropertyIds.BASE_TYPE_ID) && !k.equalsIgnoreCase(PropertyIds.OBJECT_TYPE_ID)
+							&& !k.equalsIgnoreCase(PropertyIds.OBJECT_ID)) {
 						object.put(k, v);
 					}
 				});
