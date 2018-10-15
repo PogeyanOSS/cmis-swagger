@@ -116,8 +116,10 @@ public class SwaggerHelpers {
 	public static final String MEDIA = "media";
 	public static final String GETALL = "getAll";
 	public static final String TYPE = "type";
-	public static final String GETALLTYPES = "getAllTypes";
+	public static final String GETALLTYPES = "types";
 	public static final String ACL = "acl";
+	public static final String ADD_ACL = "addAcl";
+	public static final String REMOVE_ACL = "removeAcl";
 
 	public static ObjectMapper mapper = new ObjectMapper();
 

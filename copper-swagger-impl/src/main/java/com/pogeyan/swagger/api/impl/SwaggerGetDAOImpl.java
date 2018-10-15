@@ -24,7 +24,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 		String type = null;
 		JSONObject typeDefinition = new JSONObject();
 		try {
-			if (obj.getInputType().equals(SwaggerHelpers.GETALLTYPES)) {
+			if (obj.getInputType().equals(SwaggerHelpers.GETALLTYPES) && obj.getObjectIdForMedia().equals("all")) {
 				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 						"invokeGetAllTypes", obj.getRepositoryId(), obj.getInputType());
 				typeDefinition.putAll(SwaggerHelpers.getTypeMap().entrySet().stream().collect(Collectors.toMap(

@@ -511,7 +511,7 @@ public class SwaggerUIHelpers {
 
 		PathCommonObject getAllTypeObjects = postGetAllTypesDefinitionCreation(security, typeParams);
 		PathObject pathGetAllObj = new PathObject(null, getAllTypeObjects, null, null);
-		pathMap.put("/_metadata/getAllTypes", pathGetAllObj);
+		pathMap.put("/_metadata/types/all", pathGetAllObj);
 
 		return pathMap;
 
