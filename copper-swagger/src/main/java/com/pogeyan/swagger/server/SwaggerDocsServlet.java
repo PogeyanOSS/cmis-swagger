@@ -57,7 +57,8 @@ public class SwaggerDocsServlet extends HttpServlet {
 		String repositoryId = pathFragments[0];
 		LOG.info("class name: {}, method name: {}, repositoryId: {}", "SwaggerDocsServlet", "doGet", repositoryId);
 		if (repositoryId != null) {
-			SwaggerUIHelpers.setHostSwaggerUrl(request.getServerName() + ":" + request.getServerPort() + "/api/");
+			SwaggerUIHelpers.setHostSwaggerUrl(
+					request.getServerName() + ":" + request.getServerPort() + request.getContextPath() + "/api/");
 			SwaggerGenerator swaggerGenerator = new SwaggerGenerator();
 			String content = swaggerGenerator.generateSwagger(repositoryId);
 			response.getWriter().write(content);

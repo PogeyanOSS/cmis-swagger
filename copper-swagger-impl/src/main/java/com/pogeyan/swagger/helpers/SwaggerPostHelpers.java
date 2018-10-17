@@ -129,14 +129,15 @@ public class SwaggerPostHelpers {
 		if (inputMap.size() == 0) {
 			throw new Exception("Empty Properties!!");
 		}
-		CmisObject object = session.getObject(inputMap.get("objectId").toString());
+		checkAclProperties(inputMap);
+		CmisObject object = session.getObject((String) inputMap.get("objectId"));
 		if (aclParam.equals(SwaggerHelpers.ADD_ACL)) {
-			addAces.add(of.createAce(inputMap.get("principalId").toString(),
-					Collections.singletonList(inputMap.get("permission").toString())));
+			addAces.add(of.createAce((String) inputMap.get("principalId"),
+					Collections.singletonList((String) inputMap.get("permission"))));
 			removeAces = null;
 		} else if (aclParam.equals(SwaggerHelpers.REMOVE_ACL)) {
-			removeAces.add(of.createAce(inputMap.get("principalId").toString(),
-					Collections.singletonList(inputMap.get("permission").toString())));
+			removeAces.add(of.createAce((String) inputMap.get("principalId"),
+					Collections.singletonList((String) inputMap.get("permission"))));
 		}
 		LOG.debug(
 				"class name: {}, method name: {}, repositoryId: {}, aclParam: {}, Adding: {}, removing: {}, given ACEs",
@@ -151,6 +152,16 @@ public class SwaggerPostHelpers {
 			CmisObject newObject = updateObject.updateProperties(updateProperties);
 		}
 		return acl;
+	}
+
+	public static void checkAclProperties(Map<String, Object> inputMap) throws Exception {
+		if (inputMap.get("objectId") == null) {
+			throw new Exception("objectId must be present!!");
+		} else if (inputMap.get("principalId") == null) {
+			throw new Exception("principalId must be present!!");
+		} else if (inputMap.get("permission") == null) {
+			throw new Exception("permission must be present!!");
+		}
 	}
 
 	/**
