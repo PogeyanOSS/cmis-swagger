@@ -208,8 +208,8 @@ public class SwaggerHelpers {
 			session.setDefaultContext(session.createOperationContext());
 			sessionMap.put(userName, session);
 		} catch (Exception e) {
-			LOG.error("class name: {}, method name: {}, repositoryId: {} ,Exception on createSession: {}",
-					"SwaggerHelpers", "createSession", repoId, e.getMessage());
+			LOG.error("class name: {}, method name: {}, repositoryId: {}, Exception on createSession: {}",
+					"SwaggerHelpers", "createSession", repoId, e);
 			ErrorResponse response = SwaggerHelpers.handleException(e);
 			throw new ErrorResponse(response);
 		}

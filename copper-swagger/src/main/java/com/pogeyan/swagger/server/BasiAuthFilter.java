@@ -75,11 +75,8 @@ public class BasiAuthFilter implements Filter {
 									unauthorized(response, "Authorization Required");
 								}
 							} catch (Exception e) {
-								// log
-								LOG.error("class name: {}, method name: {}, Error While creating session: {} e: {}",
+								LOG.error("class name: {}, method name: {}, Error While creating session: {}",
 										"BasicAuthFilter", "doFilter", e);
-								e.printStackTrace();
-
 								try {
 									SwaggerHelpers.removeSession(username);
 								} catch (Exception ex) {

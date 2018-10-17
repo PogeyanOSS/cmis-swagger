@@ -80,7 +80,7 @@ public class SwaggerPutHelpers {
 			customId = objectId;
 		}
 		CmisObject object = session.getObject(customId);
-		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, object: {}", "SwaggerPutHelpers",
+		LOG.debug("class name: {}, method name: {}, repositoryId: {}, type: {}, objectId: {}", "SwaggerPutHelpers",
 				"invokePutMethod", repositoryId, typeId, objectId);
 		if (object != null && typeDefinitionObject.getId().equals(object.getType().getId())) {
 			Map<String, Object> serializeMap = SwaggerHelpers.deserializeInput(inputMap, typeDefinitionObject, session);
