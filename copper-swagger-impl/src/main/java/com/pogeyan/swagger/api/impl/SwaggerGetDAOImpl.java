@@ -25,9 +25,9 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 						"invokeGetAllTypes", obj.getRepositoryId(), obj.getInputType());
 				typeDefinition = SwaggerGetHelpers.fetchAllTypes(obj.getRepositoryId(), obj.getAuth().getUserName(),
-                        obj.getAuth().getPassword());
+						obj.getAuth().getPassword());
 				return typeDefinition;
-				
+
 			} else {
 				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 						"invokeGetTypeDefMethod", obj.getRepositoryId(), obj.getInputType());

@@ -92,7 +92,6 @@ public class SwaggerPostHelpers {
 			if (updateProperties != null && !updateProperties.isEmpty()) {
 				CmisObject newObject = object.updateProperties(updateProperties);
 			}
-			CmisObject newObject = object.updateProperties(updateProperties);
 		}
 		LOG.debug("class name: {}, method name: {}, repositoryId: {},  type: {}", "SwaggePostHelpers",
 				"invokePostTypeDefMethod", repositoryId, inputType);
@@ -154,6 +153,12 @@ public class SwaggerPostHelpers {
 		return acl;
 	}
 
+	/**
+	 * 
+	 * @param inputMap
+	 *            checks if required Acl properties are present or not
+	 * @throws Exception
+	 */
 	public static void checkAclProperties(Map<String, Object> inputMap) throws Exception {
 		if (inputMap.get("objectId") == null) {
 			throw new Exception("objectId must be present!!");
@@ -239,7 +244,6 @@ public class SwaggerPostHelpers {
 					propMap = SwaggerHelpers.compileProperties(cmisObject, session);
 					return propMap;
 				}
-
 			}
 		}
 		return null;
