@@ -274,7 +274,6 @@ public class SwaggerGetHelpers {
 
 	}
 
-	
 	public static JSONObject fetchAllTypes(String repositoryId, String userName, String password) throws Exception {
 		JSONObject typeDefinition = new JSONObject();
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
