@@ -3,6 +3,7 @@ package com.pogeyan.swagger.helpers;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.Document;
@@ -271,5 +272,15 @@ public class SwaggerGetHelpers {
 		}
 		return null;
 
+	}
+
+	
+	public static JSONObject fetchAllTypes(String repositoryId, String userName, String password) throws Exception {
+		JSONObject typeDefinition = new JSONObject();
+		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
+		SwaggerHelpers.getAllTypes(session);
+		typeDefinition.putAll(SwaggerHelpers.getTypeMap().entrySet().stream().collect(Collectors
+				.toMap(key -> key.getKey(), value -> JSONConverter.convert(value.getValue(), DateTimeFormat.SIMPLE))));
+		return typeDefinition;
 	}
 }

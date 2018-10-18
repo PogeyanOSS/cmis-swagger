@@ -1,11 +1,8 @@
 package com.pogeyan.swagger.api.impl;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
-import org.apache.chemistry.opencmis.commons.enums.DateTimeFormat;
-import org.apache.chemistry.opencmis.commons.impl.JSONConverter;
 import org.apache.chemistry.opencmis.commons.impl.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +24,10 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 			if (obj.getInputType().equals(SwaggerHelpers.GETALLTYPES) && obj.getObjectIdForMedia().equals("all")) {
 				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 						"invokeGetAllTypes", obj.getRepositoryId(), obj.getInputType());
-				typeDefinition.putAll(SwaggerHelpers.getTypeMap().entrySet().stream().collect(Collectors.toMap(
-						key -> key.getKey(), value -> JSONConverter.convert(value.getValue(), DateTimeFormat.SIMPLE))));
+				typeDefinition = SwaggerGetHelpers.fetchAllTypes(obj.getRepositoryId(), obj.getAuth().getUserName(),
+                        obj.getAuth().getPassword());
 				return typeDefinition;
+				
 			} else {
 				LOG.info("class name: {}, method name: {}, repositoryId: {}, type: {}", "SwaggerGetDAOImpl",
 						"invokeGetTypeDefMethod", obj.getRepositoryId(), obj.getInputType());
