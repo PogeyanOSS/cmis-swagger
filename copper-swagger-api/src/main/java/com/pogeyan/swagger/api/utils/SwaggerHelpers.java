@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
+import org.apache.chemistry.opencmis.commons.enums.Cardinality;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConstraintException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisContentAlreadyExistsException;
@@ -535,7 +537,14 @@ public class SwaggerHelpers {
 				} else {
 					reqPropertyType = definitionObject.getPropertyType();
 				}
-
+				// checking cardinality
+				if (definitionObject.getCardinality().value().equals(Cardinality.MULTI.value())) {
+					if (valueOfType instanceof String || valueOfType instanceof Integer
+							|| valueOfType instanceof Boolean || valueOfType instanceof GregorianCalendar
+							|| valueOfType instanceof Double) {
+						valueOfType = convertInstanceOfObject(Arrays.asList(valueOfType), List.class);
+					}
+				}
 				if (reqPropertyType.equals(PropertyType.INTEGER)) {
 					if (valueOfType instanceof Integer) {
 						Integer valueBigInteger = convertInstanceOfObject(valueOfType, Integer.class);
@@ -708,7 +717,7 @@ public class SwaggerHelpers {
 			requestBaggage.put("includeRelation", crudOperation);
 
 			if (!crudOperation && jsonString != null) {
-				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
 				});
 			}
 

@@ -25,14 +25,14 @@ public class DefinitionsObject {
 	private String type;
 	private List<String> required;
 	private Map<String, String> xml;
-	private Map<String, Map<String, String>> properties;
+	private Map<String, Map<String, Object>> properties;
 
 	public DefinitionsObject() {
 		super();
 	}
 
 	public DefinitionsObject(String type, List<String> required, Map<String, String> xml,
-			Map<String, Map<String, String>> properties) {
+			Map<String, Map<String, Object>> properties) {
 		super();
 		this.type = type;
 		this.required = required;
@@ -64,11 +64,11 @@ public class DefinitionsObject {
 		this.xml = xml;
 	}
 
-	public Map<String, Map<String, String>> getProperties() {
+	public Map<String, Map<String, Object>> getProperties() {
 		return properties;
 	}
 
-	public void setProperties(Map<String, Map<String, String>> properties) {
+	public void setProperties(Map<String, Map<String, Object>> properties) {
 		this.properties = properties;
 	}
 

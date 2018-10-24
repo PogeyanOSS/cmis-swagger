@@ -29,7 +29,7 @@ public class ParameterObject {
 	private Map<String, String> schema;
 	private String type;
 	private String collectionFormat;
-	private String items;
+	private Map<String, Object> items;
 	private String format;
 	private String defaultParam;
 
@@ -38,7 +38,7 @@ public class ParameterObject {
 	}
 
 	public ParameterObject(String in, String name, String description, boolean required, Map<String, String> schema,
-			String type, String collectionFormat, String items, String format, String defaultParam) {
+			String type, String collectionFormat, Map<String, Object> items, String format, String defaultParam) {
 		super();
 		this.in = in;
 		this.name = name;
@@ -108,11 +108,11 @@ public class ParameterObject {
 		this.collectionFormat = collectionFormat;
 	}
 
-	public String getItems() {
+	public Map<String, Object> getItems() {
 		return items;
 	}
 
-	public void setItems(String items) {
+	public void setItems(Map<String, Object> items) {
 		this.items = items;
 	}
 

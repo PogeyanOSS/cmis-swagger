@@ -16,6 +16,7 @@ import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.definitions.TypeMutability;
 import org.apache.chemistry.opencmis.commons.enums.BaseTypeId;
+import org.apache.chemistry.opencmis.commons.enums.Cardinality;
 import org.apache.chemistry.opencmis.commons.enums.PropertyType;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AbstractPropertyDefinition;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.AbstractTypeDefinition;
@@ -101,11 +102,11 @@ public class SwaggerUIHelpers {
 			String defName = getDefinitionName(type);
 			Map<String, String> xml = new HashMap<String, String>();
 			xml.put("name", type.getDescription());
-			Map<String, Map<String, String>> properties = new HashMap<String, Map<String, String>>();
+			Map<String, Map<String, Object>> properties = new HashMap<String, Map<String, Object>>();
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			if (type.isBaseType()) {
 				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
-					HashMap<String, String> propObjBase = new HashMap<String, String>();
+					HashMap<String, Object> propObjBase = new HashMap<String, Object>();
 					if (propertiesValues.getKey().equals(PropertyIds.OBJECT_TYPE_ID)
 							|| propertiesValues.getKey().equals(PropertyIds.NAME)
 							|| propertiesValues.getKey().equals(PropertyIds.DESCRIPTION)
@@ -125,7 +126,7 @@ public class SwaggerUIHelpers {
 			} else {
 				// custom type
 				for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
-					HashMap<String, String> propObject = new HashMap<String, String>();
+					HashMap<String, Object> propObject = new HashMap<String, Object>();
 					if (propertiesValues.getKey().equalsIgnoreCase(PropertyIds.CONTENT_STREAM_LENGTH)
 							|| propertiesValues.getKey().equalsIgnoreCase(PropertyIds.OBJECT_ID)
 							|| propertiesValues.getKey().equalsIgnoreCase(PropertyIds.CONTENT_STREAM_FILE_NAME)
@@ -176,6 +177,21 @@ public class SwaggerUIHelpers {
 						if (propertiesValues.getKey().equals(PropertyIds.OBJECT_TYPE_ID)) {
 							propObject.put("example", type.getQueryName());
 						}
+
+						String cardinality = propertiesValues.getValue().getCardinality().value()
+								.equals(Cardinality.MULTI.value()) ? "multi" : null;
+						if (cardinality != null) {
+							Map<String, Object> items = new HashMap<String, Object>();
+							items.put("type", propObject.get("type"));
+							propObject.put("type", "array");
+							propObject.put("items", items);
+						}
+
+						// add choiceList as enum values here
+						if (propertiesValues.getValue().getChoices() != null
+								&& propertiesValues.getValue().getChoices().size() > 0) {
+							propObject.put("enum", propertiesValues.getValue().getChoices().get(0).getValue());
+						}
 						properties.put(propertiesValues.getKey(), propObject);
 					}
 				}
@@ -187,10 +203,10 @@ public class SwaggerUIHelpers {
 
 		Map<String, String> xmlType = new HashMap<String, String>();
 		xmlType.put("name", "Type");
-		Map<String, Map<String, String>> propertiesForType = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, Object>> propertiesForType = new HashMap<String, Map<String, Object>>();
 		Field[] fieldsType = AbstractTypeDefinition.class.getDeclaredFields();
 		for (Field f : fieldsType) {// java.util.Map
-			HashMap<String, String> propObj = new HashMap<String, String>();
+			HashMap<String, Object> propObj = new HashMap<String, Object>();
 			if (f.getType().equals(Integer.class)) {
 				propObj.put("type", "integer");
 				propObj.put("format", "int64");
@@ -211,10 +227,10 @@ public class SwaggerUIHelpers {
 
 		Map<String, String> xmlMut = new HashMap<String, String>();
 		xmlMut.put("name", "TypeMutability");
-		Map<String, Map<String, String>> propertiesForTypeMut = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, Object>> propertiesForTypeMut = new HashMap<String, Map<String, Object>>();
 		Field[] fieldsMut = TypeMutability.class.getDeclaredFields();
 		for (Field f : fieldsMut) {
-			HashMap<String, String> propObj = new HashMap<String, String>();
+			HashMap<String, Object> propObj = new HashMap<String, Object>();
 			if (f.getType().equals(Boolean.class)) {
 				propObj.put("type", "boolean");
 			} else {
@@ -228,10 +244,10 @@ public class SwaggerUIHelpers {
 
 		Map<String, String> xmlPropDef = new HashMap<String, String>();
 		xmlPropDef.put("name", "PropertyDefinitions");
-		Map<String, Map<String, String>> propertiesForPropDef = new HashMap<String, Map<String, String>>();
+		Map<String, Map<String, Object>> propertiesForPropDef = new HashMap<String, Map<String, Object>>();
 		Field[] fieldsPropDef = AbstractPropertyDefinition.class.getDeclaredFields();
 		for (Field f : fieldsPropDef) {
-			HashMap<String, String> propObj = new HashMap<String, String>();
+			HashMap<String, Object> propObj = new HashMap<String, Object>();
 			if (f.getType().equals(Integer.class)) {
 				propObj.put("type", "integer");
 				propObj.put("format", "int64");
@@ -248,8 +264,8 @@ public class SwaggerUIHelpers {
 
 		Map<String, String> xmlAcl = new HashMap<String, String>();
 		xmlPropDef.put("name", "acl");
-		Map<String, Map<String, String>> propertiesForAcl = new HashMap<String, Map<String, String>>();
-		HashMap<String, String> princObj = new HashMap<String, String>();
+		Map<String, Map<String, Object>> propertiesForAcl = new HashMap<String, Map<String, Object>>();
+		HashMap<String, Object> princObj = new HashMap<String, Object>();
 		princObj.put("type", "string");
 		propertiesForAcl.put("objectId", princObj);
 		propertiesForAcl.put("principalId", princObj);
@@ -818,6 +834,7 @@ public class SwaggerUIHelpers {
 			boolean required = false;
 			String paramType = null;
 			String format = null;
+			Map<String, Object> items = new HashMap<String, Object>();
 			if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
 					&& propertiesValues.getValue().getLocalName().equals("primaryKey")
 					|| propertiesValues.getKey().equalsIgnoreCase(PropertyIds.NAME)
@@ -840,9 +857,19 @@ public class SwaggerUIHelpers {
 			} else {
 				paramType = "string";
 			}
-
+			String collection = propertiesValues.getValue().getCardinality().value().equals(Cardinality.MULTI.value())
+					? "multi" : null;
+			if (collection != null) {
+				items.put("type", paramType);
+				if (propertiesValues.getValue().getChoices() != null
+						&& propertiesValues.getValue().getChoices().size() > 0) {
+					items.put("enum", propertiesValues.getValue().getChoices().get(0).getValue());
+				}
+				paramType = "array";
+			}
 			ParameterObject object = new ParameterObject("formData", propertiesValues.getKey(),
-					propertiesValues.getValue().getDescription(), required, null, paramType, null, null, format,
+					propertiesValues.getValue().getDescription(), required, null, paramType, collection,
+					items.size() > 0 ? items : null, format,
 					propertiesValues.getKey().equalsIgnoreCase(PropertyIds.OBJECT_TYPE_ID) ? type.getId() : null);
 			list.add(object);
 		}
