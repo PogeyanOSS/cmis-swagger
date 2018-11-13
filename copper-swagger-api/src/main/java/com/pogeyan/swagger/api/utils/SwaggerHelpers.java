@@ -139,11 +139,10 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
+	 * @return session is a connection to a CMIS repository with a specific user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
+	 *             Swagger CMIS session connection URL not defined in environment
+	 *             variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -174,11 +173,10 @@ public class SwaggerHelpers {
 	 * @param password
 	 *            the property password is used to login that particular user
 	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
+	 * @return session is a connection to a CMIS repository with a specific user.
 	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
+	 *             Swagger CMIS session connection URL not defined in environment
+	 *             variable
 	 * @throws Exception
 	 *             if session not found
 	 */
@@ -271,7 +269,8 @@ public class SwaggerHelpers {
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 				if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-						? propertiesValues.getValue().getLocalName().equals("primaryKey") : false) {
+						? propertiesValues.getValue().getLocalName().equals("primaryKey")
+						: false) {
 					objectIdName = propertiesValues.getKey();
 					return objectIdName;
 				}
@@ -368,8 +367,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return true means type have custom folder,false means type does not have
-	 *         any custom folder
+	 * @return true means type have custom folder,false means type does not have any
+	 *         custom folder
 	 */
 	public static boolean customTypeHasFolder() {
 		final String value = System.getenv("CUSTOM_TYPE_HAS_FOLDER");
@@ -590,7 +589,8 @@ public class SwaggerHelpers {
 						serializeMap.put(var, calenderList);
 					} else if (valueOfType instanceof String) {
 						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
-						lastModifiedCalender.setTimeInMillis(Long.valueOf((String) valueOfType));
+						String[] s = ((String) valueOfType).split("-");
+						lastModifiedCalender.set(Integer.valueOf(s[0]), Integer.valueOf(s[1]), Integer.valueOf(s[2]));
 						serializeMap.put(var, lastModifiedCalender);
 					}
 
@@ -757,7 +757,8 @@ public class SwaggerHelpers {
 			String parentId = request.getParameter("parentId");
 			String includeRelationshipString = request.getParameter("includeRelationship");
 			boolean includeRelationship = includeRelationshipString != null
-					? Boolean.parseBoolean(includeRelationshipString) : false;
+					? Boolean.parseBoolean(includeRelationshipString)
+					: false;
 
 			requestBaggage.put("skipcount", skipCount);
 			requestBaggage.put("maxitems", maxItems);
