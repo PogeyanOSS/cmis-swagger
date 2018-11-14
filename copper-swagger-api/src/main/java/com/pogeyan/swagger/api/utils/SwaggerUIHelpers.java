@@ -162,7 +162,7 @@ public class SwaggerUIHelpers {
 							propObject.put("type", propertiesValues.getValue().getPropertyType().name().toLowerCase());
 							propObject.put("format", "int64");
 						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DATETIME)) {
-							propObject.put("type", "string");
+							propObject.put("type", "data-time");
 							propObject.put("format", "data-time");
 							propObject.put("example", sdf.format(new Date(System.currentTimeMillis())));
 						} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
@@ -846,7 +846,7 @@ public class SwaggerUIHelpers {
 				paramType = propertiesValues.getValue().getPropertyType().name().toLowerCase();
 				format = "int32";
 			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DATETIME)) {
-				paramType = "string";
+				paramType = "date-time";
 				format = "data-time";
 			} else if (propertiesValues.getValue().getPropertyType().equals(PropertyType.DECIMAL)) {
 				paramType = "number";
