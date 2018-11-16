@@ -591,7 +591,7 @@ public class SwaggerHelpers {
 					} else if (valueOfType instanceof String) {
 						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
 						String[] s = ((String) valueOfType).split("-");
-						lastModifiedCalender.set(Integer.valueOf(s[0]), Integer.valueOf(s[0]), Integer.valueOf(s[0]));
+						lastModifiedCalender.set(Integer.valueOf(s[0]), Integer.valueOf(s[1]), Integer.valueOf(s[2]));
 						serializeMap.put(var, lastModifiedCalender);
 					}
 
