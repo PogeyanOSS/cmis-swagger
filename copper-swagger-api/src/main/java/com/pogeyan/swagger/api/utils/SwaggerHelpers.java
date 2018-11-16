@@ -728,7 +728,7 @@ public class SwaggerHelpers {
 				sRequestMessage.setInputStream(request.getInputStream());
 			} else {
 				jsonString = IOUtils.toString(request.getInputStream());
-				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, String>>() {
+				inputMap = mapper.readValue(jsonString, new TypeReference<Map<String, Object>>() {
 				});
 			}
 
