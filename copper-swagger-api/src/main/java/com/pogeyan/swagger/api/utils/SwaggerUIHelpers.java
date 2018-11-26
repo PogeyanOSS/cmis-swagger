@@ -314,7 +314,8 @@ public class SwaggerUIHelpers {
 			String id = SwaggerHelpers.getIdName(type);
 			// GET METHODS
 			// get all folders /folder GET skipCount and maxItems in query
-			if (type.getBaseTypeId().equals(BaseTypeId.CMIS_FOLDER)
+			if (type.getBaseTypeId().equals(BaseTypeId.CMIS_FOLDER) || type.getBaseTypeId().equals(BaseTypeId.CMIS_ITEM)
+					|| type.getBaseTypeId().equals(BaseTypeId.CMIS_POLICY)
 					|| type.getBaseTypeId().equals(BaseTypeId.CMIS_DOCUMENT)) {
 				ParameterObject skipCount = new ParameterObject("query", "skipcount", null, false, null, "integer",
 						null, null, null, null);
