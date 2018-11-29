@@ -580,19 +580,17 @@ public class SwaggerHelpers {
 						lastModifiedCalender.setTimeInMillis(value);
 						serializeMap.put(var, lastModifiedCalender);
 					} else if (valueOfType instanceof List<?>) {
-						List<String> value = convertInstanceOfObject(valueOfType, List.class);
+						List<Long> value = convertInstanceOfObject(valueOfType, List.class);
 						List<GregorianCalendar> calenderList = new ArrayList<>();
 						value.forEach(v -> {
 							GregorianCalendar lastModifiedCalender = new GregorianCalendar();
-							String[] s = ((String) v).split("-");
-							lastModifiedCalender.set(Integer.valueOf(s[0]), Integer.valueOf(s[1]), Integer.valueOf(s[2]));
+							lastModifiedCalender.setTimeInMillis(v);
 							calenderList.add(lastModifiedCalender);
 						});
-						serializeMap.put(var, calenderList);
+						serializeMap.put(var, calenderList);;
 					} else if (valueOfType instanceof String) {
 						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
-						String[] s = ((String) valueOfType).split("-");
-						lastModifiedCalender.set(Integer.valueOf(s[0]), Integer.valueOf(s[1]), Integer.valueOf(s[2]));
+						lastModifiedCalender.setTimeInMillis(Long.valueOf((String) valueOfType));
 						serializeMap.put(var, lastModifiedCalender);
 					}
 
