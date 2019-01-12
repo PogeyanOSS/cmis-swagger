@@ -128,6 +128,12 @@ public class SwaggerGetHelpers {
 			context.setMaxItemsPerPage(Integer.parseInt(maxItems));
 		}
 		if (filter != null) {
+			if (filter.contains("*")) {
+				filter = filter.replace("*", typeDefinitionObject.getPropertyDefinitions().values().stream()
+						.map(a -> a.getId()).collect(Collectors.joining(",")));
+			} else {
+				filter = PropertyIds.NAME + "," + filter;
+			}
 			context.setFilterString(filter);
 		}
 		if (orderBy != null) {

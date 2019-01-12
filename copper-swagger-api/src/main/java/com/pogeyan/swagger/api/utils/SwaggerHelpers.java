@@ -587,7 +587,8 @@ public class SwaggerHelpers {
 							lastModifiedCalender.setTimeInMillis(v);
 							calenderList.add(lastModifiedCalender);
 						});
-						serializeMap.put(var, calenderList);;
+						serializeMap.put(var, calenderList);
+						;
 					} else if (valueOfType instanceof String) {
 						GregorianCalendar lastModifiedCalender = new GregorianCalendar();
 						lastModifiedCalender.setTimeInMillis(Long.valueOf((String) valueOfType));
@@ -681,7 +682,6 @@ public class SwaggerHelpers {
 		return encoding;
 	}
 
-	@SuppressWarnings("unused")
 	public static IRequest getImplClient(HttpServletRequest request) throws Exception {
 
 		Map<String, Object> inputMap = new HashMap<String, Object>();
@@ -750,7 +750,8 @@ public class SwaggerHelpers {
 			}
 
 			requestBaggage.put("select", select);
-			requestBaggage.put("orderby", select);
+			requestBaggage.put("orderby", order);
+			requestBaggage.put("filter", filter);
 
 			String skipCount = request.getParameter("skipcount");
 			String maxItems = request.getParameter("maxitems");

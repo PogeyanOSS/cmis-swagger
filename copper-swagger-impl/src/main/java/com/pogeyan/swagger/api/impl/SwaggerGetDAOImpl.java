@@ -67,7 +67,7 @@ public class SwaggerGetDAOImpl implements SwaggerGetDAO {
 			JSONObject jsonType = SwaggerGetHelpers.invokeGetAllMethod(obj.getRepositoryId(), obj.getType(),
 					(String) obj.getRequestBaggage().get("parentId"), (String) obj.getRequestBaggage().get("skipcount"),
 					(String) obj.getRequestBaggage().get("maxitems"), obj.getAuth().getUserName(),
-					obj.getAuth().getPassword(), (String) obj.getRequestBaggage().get("select"),
+					obj.getAuth().getPassword(), (String) obj.getRequestBaggage().get("filter"),
 					(String) obj.getRequestBaggage().get("orderby"),
 					(boolean) obj.getRequestBaggage().get("includeRelationship"));
 			return jsonType;
