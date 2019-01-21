@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="UTF-8">
+  <title>CMIS Swagger - Pogeyan OSS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#157878">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Window-target" content="_top">
+  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Content-Type" content="txt/html; charset=ISO-8859-1">
+  <meta http-equiv="Content-Language" content="en">
+  <meta name="keywords" content="Pogeyan Technologies private limited,Open Source ECM,ECM solutions,Product Consulting">
+  <link rel="canonical" href="http://www.pogeyan.com/">
+  <link rel="shortlink" href="http://www.pogeyan.com/">
+  <meta name="description" content=".">
+  <meta name="Robots" content="all">
+  <meta name="Distribution" content="Global">
+  <meta name="Revisit-After" content="1 days">
+  <meta name="Rating" content="General">
+  <meta name="Reply-to" content="fahad.suhaib@pogeyan.com">
+  <meta name="Owner" content="Pogeyan Technologies Private Ltd.">
+  <meta name="Author" content="Corporate Communications">
+  <meta name="Copyright" content="www.pogeyan.com,2012">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="css/cayman.css">
+</head>
+
+<body>
+  <section class="page-header">
+    <h1 class="project-name">CMIS Swagger Bindings</h1>
+    <h2 class="project-tagline">Swagger bindings for Apache Chemistry/CMIS system.</h2>
+    <a href="https://github.com/PogeyanOSS/cmis-swagger/" class="btn">View on GitHub</a>
+    <a href="https://github.com/PogeyanOSS/cmis-swagger/archive/master.zip" class="btn">Download .zip</a>
+  </section>
+
+  <section class="main-content">
+    <p>
+      This project implements the <a href="https://swagger.io/specification/">Swagger REST API definitions</a> for the OpenCMIS
+      specifications. The models defined in types are used as properties and generate a dynamic swagger definition to consume
+      it over HTTP REST. The below APIs are exposed for every type,
+      <ul>
+        <li>
+          <p>GET (/getAll) - Retrieve one or many objects.</p>
+        </li>
+        <li>
+          <p>POST - Insert a new `cmis:folder` or `cmis:document` or `cmis:item`</p>
+        </li>
+        <li>
+          <p>PUT - Update an existing object based on ObjectID.</p>
+        </li>
+        <li>
+          <p>DEL - Delete an existing object based on ObjectID.</p>
+        </li>
+      </ul>
+    </p>
+
+    <p>
+      This gives us very easy consumption in client applications using simple HTTP APIs.
+      <img src="images/login.gif" alt="Swagger Login" style="max-width:100%;" />
+    </p>
+
+    <footer class="site-footer">
+      <span class="site-footer-owner"><a href="http://www.pogeyan.com">Pogeyan Technologies Pvt Ltd.,</a></span>
+    </footer>
+
+  </section>
+
+</body>
+
+</html>
