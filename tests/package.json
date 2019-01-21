@@ -1,0 +1,14 @@
+{
+  "name": "swaggertests",
+  "version": "1.0.0",
+  "description": "Swagger Newman Testcases",
+  "main": "index.js",
+  "scripts": {
+    "test": "node swaggerTests.js"
+  },
+  "author": "Pogeyan Technologies",
+  "license": "ISC",
+  "dependencies": {
+    "newman": "^4.3.1"
+  }
+}

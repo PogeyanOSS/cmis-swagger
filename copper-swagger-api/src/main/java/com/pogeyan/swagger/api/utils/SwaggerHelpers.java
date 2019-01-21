@@ -735,12 +735,9 @@ public class SwaggerHelpers {
 			String filter = null;
 			String order = null;
 			if (request.getQueryString() != null) {
-				select = request.getParameter("select") != null ? request.getParameter("select").replace("_", ":")
-						: null;
-				filter = request.getParameter("filter") != null ? request.getParameter("filter").replace("_", ":")
-						: null;
-				order = request.getParameter("orderby") != null ? request.getParameter("orderby").replace("_", ":")
-						: null;
+				select = request.getParameter("select") != null ? request.getParameter("select") : null;
+				filter = request.getParameter("filter") != null ? request.getParameter("filter") : null;
+				order = request.getParameter("orderby") != null ? request.getParameter("orderby") : null;
 			}
 
 			if (select != null && filter != null) {
