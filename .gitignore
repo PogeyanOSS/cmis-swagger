@@ -22,3 +22,8 @@ output*/
 build/cmis-server/files/*
 .vscode/
 external/
+
+# Dependency directory
+node_modules
+node_modules/*
+node_modules/*/**
