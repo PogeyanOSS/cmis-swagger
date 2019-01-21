@@ -3852,7 +3852,7 @@
 												"exec": [
 													"pm.test(\"checking document under the cmis:objectTypeId present or not\", function () {",
 													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData[\"cmis:objectTypeId\"]).to.eql('cmis:document');",
+													"    pm.expect(jsonData[\"cmis:objectTypeId\"]).to.eql('apple');",
 													"});",
 													"pm.test(\"checking document under the cmis:objectId present or not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -3868,7 +3868,7 @@
 													"});",
 													"pm.test(\"checking document root as parentId\", function () {",
 													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData[\"cmis:path\"]).to.eql('/hello');",
+													"    pm.expect(jsonData[\"cmis:path\"]).to.eql('/apple/ABCD');",
 													"});",
 													"pm.test(\"checking property\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4407,7 +4407,7 @@
 												"exec": [
 													"pm.test(\"passing a wrong parentId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql('{\\\"message\\\":\\\"Object must not be null!\\\"}');",
+													"    pm.expect(jsonData).to.eql(\"{\\\"message\\\":\\\"null, Object is null\\\"}\");",
 													"});",
 													"pm.test(\"Successful POST request\", function () {",
 													"    pm.expect(pm.response.code).to.be.oneOf([503]);",
@@ -4642,67 +4642,6 @@
 											],
 											"path": [
 												"fv:party"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "PostErrorCase(openChoiceErrorCase)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "6805dc74-d55a-4883-848b-a5c1f413770d",
-												"exec": [
-													"pm.test(\"openChoice false, check\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.contains('java.lang.NullPointerException');",
-													"});",
-													"pm.test(\"Successful POST request\", function () {",
-													"    pm.expect(pm.response.code).to.be.oneOf([503]);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												},
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "POST",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "{\r\n\"cmis:name\":\"openChoiceCheck\",\r\n\"cmis:objectId\": \"11BC\",\r\n\"cmis:objectTypeId\": \"apple\",\r\n\"appleId\":\"201\",\r\n\"appleName\" :\"APPY\",\r\n\"appleProducts\":[\"ipad\"],\r\n\"productsType\":\"ProductA\",\r\n\"appleWatchProducts\":[\"WatchA\",\"WatchB\"],\r\n\"iBookProducts_type\":\"BCH\"\r\n}"
-										},
-										"url": {
-											"raw": "{{requestURL}}/apple",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"apple"
 											]
 										}
 									},
@@ -6556,11 +6495,7 @@
 														"exec": [
 															"pm.test(\"checking  document under orderby \", function () {",
 															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData[\"cmis_ext:relationmd\"][\"cmis:name\"]).to.eql('cmis_ext:relationmd');",
-															"});",
-															"pm.test(\"checking  document under filter\", function () {",
-															"    var jsonData = pm.response.json();",
-															"    pm.expect(jsonData[\"cmis_ext:relationship\"][\"cmis:objectTypeId\"]).to.eql('cmis:folder');",
+															"    pm.expect(jsonData[\"AndroidBE\"][\"cmis:name\"]).to.eql('AndroidBE');",
 															"});",
 															"pm.test(\"Status code is 200\", function () {",
 															"    pm.response.to.have.status(200);",
@@ -6593,7 +6528,7 @@
 													"raw": ""
 												},
 												"url": {
-													"raw": "{{requestURL}}/apple/getAll?orderby= cmis:name desc",
+													"raw": "{{requestURL}}/apple/getAll?orderby= cmis:name asc",
 													"host": [
 														"{{requestURL}}"
 													],
@@ -6604,7 +6539,7 @@
 													"query": [
 														{
 															"key": "orderby",
-															"value": " cmis:name desc"
+															"value": " cmis:name asc"
 														}
 													]
 												}
@@ -12254,329 +12189,6 @@
 											"path": [
 												"fv:partyught",
 												"28"
-											]
-										}
-									},
-									"response": []
-								}
-							],
-							"_postman_isSubFolder": true
-						},
-						{
-							"name": "SuccessCaseForTypes",
-							"item": [
-								{
-									"name": "DeleteSuccessCase(fv:party)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "02805a30-eafb-4940-af75-f6a80efa9613",
-												"exec": [
-													"pm.test(\"deleted TypeId successfully\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql(\"fv:party Deleted Successfully\");",
-													"});",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});",
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												},
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
-										"url": {
-											"raw": "{{requestURL}}/_metadata/type/fv%3Aparty",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"_metadata",
-												"type",
-												"fv%3Aparty"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "DeleteSuccessCase(apple)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "3b361492-24c6-49a0-bc82-068034a12261",
-												"exec": [
-													"pm.test(\"deleted TypeId successfully\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql(\"apple Deleted Successfully\");",
-													"});",
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});",
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												},
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
-										"url": {
-											"raw": "{{requestURL}}/_metadata/type/apple",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"_metadata",
-												"type",
-												"apple"
-											]
-										}
-									},
-									"response": []
-								}
-							],
-							"_postman_isSubFolder": true
-						},
-						{
-							"name": "ErrorCaseForTypes",
-							"item": [
-								{
-									"name": "DeleteErrorCaseForTypes(given already deleted Id)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "e67bd176-b654-4554-9643-8211f963396a",
-												"exec": [
-													"pm.test(\"given wrong TypeId in URL\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql(\"org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException: Not Found\");",
-													"});",
-													"pm.test(\"Status code is 503\", function () {",
-													"    pm.response.to.have.status(503);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												},
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"type": "text",
-												"value": "application/json"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
-										"url": {
-											"raw": "{{requestURL}}/_metadata/type/apple",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"_metadata",
-												"type",
-												"apple"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "DeleteErrorCase(given wrong Id)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "639a30a9-c105-43e2-8def-c16f88aa05f0",
-												"exec": [
-													"pm.test(\"given wrong TypeId in URL\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql(\"org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException: Not Found\");",
-													"});",
-													"pm.test(\"Status code is 503\", function () {",
-													"    pm.response.to.have.status(503);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												},
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
-										"url": {
-											"raw": "{{requestURL}}/_metadata/type/apple",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"_metadata",
-												"type",
-												"apple"
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "DeleteErrorCase(fv:partyType)",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"id": "d556e760-d34f-4f64-96c2-69280b72225f",
-												"exec": [
-													"pm.test(\"given wrong typeId\", function () {",
-													"    var jsonData = pm.response.json();",
-													"    pm.expect(jsonData).to.eql(\"org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException: Not Found\");",
-													"});",
-													"pm.test(\"Status code is 503\", function () {",
-													"    pm.response.to.have.status(503);",
-													"});",
-													""
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"auth": {
-											"type": "basic",
-											"basic": [
-												{
-													"key": "username",
-													"value": "{{USERNAME}}",
-													"type": "string"
-												},
-												{
-													"key": "password",
-													"value": "{{PASSWORD}}",
-													"type": "string"
-												}
-											]
-										},
-										"method": "DELETE",
-										"header": [
-											{
-												"key": "Content-Type",
-												"name": "Content-Type",
-												"value": "application/json",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
-										"url": {
-											"raw": "{{requestURL}}/_metadata/type/fv%3Apartytype",
-											"host": [
-												"{{requestURL}}"
-											],
-											"path": [
-												"_metadata",
-												"type",
-												"fv%3Apartytype"
 											]
 										}
 									},

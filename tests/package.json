@@ -9,6 +9,7 @@
   "author": "Pogeyan Technologies",
   "license": "ISC",
   "dependencies": {
-    "newman": "^4.3.1"
+    "newman": "^4.3.1",
+    "newman-reporter-html": "^1.0.2"
   }
 }
