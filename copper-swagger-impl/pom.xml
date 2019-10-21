@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>com.pogeyan.cmis</groupId>
 			<artifactId>copper-swagger-api</artifactId>
-			<version>1.0.0</version>
+			<version>${app.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
