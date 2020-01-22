@@ -196,7 +196,7 @@ public final class CORSFilter implements Filter {
 			String configLoggingEnabled = filterConfig.getInitParameter(PARAM_CORS_LOGGING_ENABLED);
 			String configDecorateRequest = filterConfig.getInitParameter(PARAM_CORS_REQUEST_DECORATE);
 
-			parseAndStore(configAllowedOrigins, configAllowedHttpMethods, configAllowedHttpHeaders,
+			parseAndStore(configAllowedOrigins == null ? System.getenv("CMIS_WHITELIST_URL") : configAllowedOrigins, configAllowedHttpMethods, configAllowedHttpHeaders,
 					configExposedHeaders, configSupportsCredentials, configPreflightMaxAge, configLoggingEnabled,
 					configDecorateRequest);
 		}
@@ -635,7 +635,7 @@ public final class CORSFilter implements Filter {
 			final String preflightMaxAge, final String loggingEnabled, final String decorateRequest)
 			throws ServletException {
 		if (allowedOrigins != null) {
-			if (allowedOrigins.trim().equals("*")) {
+			if (allowedOrigins.trim().equals("*") || allowedOrigins.trim().equals("ALL")) {
 				this.anyOriginAllowed = true;
 			} else {
 				this.anyOriginAllowed = false;
