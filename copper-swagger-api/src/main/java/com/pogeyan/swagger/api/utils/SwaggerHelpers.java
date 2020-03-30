@@ -696,12 +696,12 @@ public class SwaggerHelpers {
 
 		if (METHOD_POST.equals(method)) {
 			if (request.getContentType().contains("multipart/form-data")) {
-				inputMap = request.getParameterMap().entrySet().stream()
-						.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
+				inputMap = request.getParameterMap().entrySet().stream().collect(Collectors.toMap(t -> t.getKey(),
+						t -> t.getValue().length == 1 ? t.getValue()[0] : Arrays.asList(t.getValue())));
 				filePart = request.getPart("file") != null ? request.getPart("file") : null;
 			} else if (request.getContentType().equals("application/x-www-form-urlencoded")) {
-				inputMap = request.getParameterMap().entrySet().stream()
-						.collect(Collectors.toMap(t -> t.getKey(), t -> t.getValue()[0]));
+				inputMap = request.getParameterMap().entrySet().stream().collect(Collectors.toMap(t -> t.getKey(),
+						t -> t.getValue().length == 1 ? t.getValue()[0] : Arrays.asList(t.getValue())));
 			} else if (sRequestMessage.getType().equals("_metadata")) {
 			} else {
 				jsonString = IOUtils.toString(request.getInputStream());
