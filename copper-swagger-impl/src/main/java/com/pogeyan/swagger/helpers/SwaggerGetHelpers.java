@@ -120,6 +120,7 @@ public class SwaggerGetHelpers {
 			String maxItems, String userName, String password, String filter, String orderBy,
 			boolean includeRelationship) throws Exception {
 		JSONObject json = new JSONObject();
+		JSONArray arrayJson = new JSONArray();
 		ItemIterable<CmisObject> children = null;
 		Session session = SwaggerHelpers.getSession(repositoryId, userName, password);
 		ObjectType typeDefinitionObject = session.getTypeDefinition(type);
@@ -180,10 +181,12 @@ public class SwaggerGetHelpers {
 				json.putAll(data);
 			} else {
 				Map<String, Object> propmap = SwaggerHelpers.compileProperties(child, session);
-				json.put(child.getName(), propmap);
+				arrayJson.add(propmap);
 			}
 		}
-
+		if(arrayJson.size()>0) {
+			json.put(type, arrayJson);
+		}
 		return json;
 	}
 
