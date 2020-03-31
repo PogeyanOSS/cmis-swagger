@@ -184,7 +184,7 @@ public class SwaggerGetHelpers {
 				arrayJson.add(propmap);
 			}
 		}
-		if(arrayJson.size()>0) {
+		if (arrayJson.size() > 0) {
 			json.put(type, arrayJson);
 		}
 		return json;
