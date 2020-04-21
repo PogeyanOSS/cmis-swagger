@@ -130,22 +130,16 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @param repoId
-	 *            the property repoId,it will specify which repository to be
-	 *            connected for that user.
-	 * @param userName
-	 *            the property userName is used to login that particular user
-	 *            repository.
-	 * @param password
-	 *            the property password is used to login that particular user
-	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
-	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
-	 * @throws Exception
-	 *             if session not found
+	 * @param repoId   the property repoId,it will specify which repository to be
+	 *                 connected for that user.
+	 * @param userName the property userName is used to login that particular user
+	 *                 repository.
+	 * @param password the property password is used to login that particular user
+	 *                 repository.
+	 * @return session is a connection to a CMIS repository with a specific user.
+	 * @throws Exception Swagger CMIS session connection URL not defined in
+	 *                   environment variable
+	 * @throws Exception if session not found
 	 */
 	public static Session getSession(String repoId, String userName, String password) throws Exception {
 
@@ -156,31 +150,24 @@ public class SwaggerHelpers {
 
 	/**
 	 * 
-	 * @param userName
-	 *            the property userName is used to login that particular user
-	 *            repository
+	 * @param userName the property userName is used to login that particular user
+	 *                 repository
 	 */
 	public static void removeSession(String userName) throws Exception {
 		sessionMap.invalidate(userName);
 	}
 
 	/**
-	 * @param repoId
-	 *            the property repoId,it will specify which repository to be
-	 *            connected for that user.
-	 * @param userName
-	 *            the property userName is used to login that particular user
-	 *            repository.
-	 * @param password
-	 *            the property password is used to login that particular user
-	 *            repository.
-	 * @return session is a connection to a CMIS repository with a specific
-	 *         user.
-	 * @throws Exception
-	 *             Swagger CMIS session connection URL not defined in
-	 *             environment variable
-	 * @throws Exception
-	 *             if session not found
+	 * @param repoId   the property repoId,it will specify which repository to be
+	 *                 connected for that user.
+	 * @param userName the property userName is used to login that particular user
+	 *                 repository.
+	 * @param password the property password is used to login that particular user
+	 *                 repository.
+	 * @return session is a connection to a CMIS repository with a specific user.
+	 * @throws Exception Swagger CMIS session connection URL not defined in
+	 *                   environment variable
+	 * @throws Exception if session not found
 	 */
 	public static Session createSession(String repoId, String userName, String password) throws Exception {
 		Session session = null;
@@ -220,9 +207,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @param session
-	 *            the property session is used to get all types present that
-	 *            particular repository
+	 * @param session the property session is used to get all types present that
+	 *                particular repository
 	 */
 	public static void getAllTypes(Session session) {
 		List<String> list = getBaseTypeList();
@@ -239,9 +225,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @param typeChildren
-	 *            the property typeChildren it will give children's of one
-	 *            particular type.
+	 * @param typeChildren the property typeChildren it will give children's of one
+	 *                     particular type.
 	 */
 	public static void getChildTypes(Tree<ObjectType> typeChildren) {
 		List<Tree<ObjectType>> getChildren = typeChildren.getChildren();
@@ -258,8 +243,7 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @param type
-	 *            the property type is used to get the ObjectType.
+	 * @param type the property type is used to get the ObjectType.
 	 * @return ObjectId used to get the particular object in data
 	 */
 	public static String getIdName(ObjectType type) {
@@ -271,7 +255,8 @@ public class SwaggerHelpers {
 			Set<Entry<String, PropertyDefinition<?>>> data = type.getPropertyDefinitions().entrySet();
 			for (Entry<String, PropertyDefinition<?>> propertiesValues : data) {
 				if (propertiesValues.getValue() != null && propertiesValues.getValue().getLocalName() != null
-						? propertiesValues.getValue().getLocalName().equals("primaryKey") : false) {
+						? propertiesValues.getValue().getLocalName().equals("primaryKey")
+						: false) {
 					objectIdName = propertiesValues.getKey();
 					return objectIdName;
 				}
@@ -299,8 +284,7 @@ public class SwaggerHelpers {
 
 	//
 	/**
-	 * @param ex
-	 *            the property ex is used to catch various exception in server.
+	 * @param ex the property ex is used to catch various exception in server.
 	 * @return ErrorResponse give the correct exception with error code
 	 */
 	public static ErrorResponse handleException(Exception ex) {
@@ -368,8 +352,8 @@ public class SwaggerHelpers {
 	}
 
 	/**
-	 * @return true means type have custom folder,false means type does not have
-	 *         any custom folder
+	 * @return true means type have custom folder,false means type does not have any
+	 *         custom folder
 	 */
 	public static boolean customTypeHasFolder() {
 		final String value = System.getenv("CUSTOM_TYPE_HAS_FOLDER");
@@ -389,13 +373,10 @@ public class SwaggerHelpers {
 
 	/**
 	 * 
-	 * @param cmisObject
-	 *            compileProperties for the cmisObject
-	 * @param session
-	 *            the property session is used to get all details about that
-	 *            repository.
-	 * @throws Exception
-	 *             error in compileProperties
+	 * @param cmisObject compileProperties for the cmisObject
+	 * @param session    the property session is used to get all details about that
+	 *                   repository.
+	 * @throws Exception error in compileProperties
 	 */
 	public static Map<String, Object> compileProperties(CmisObject cmisObject, Session session) throws Exception {
 		Map<String, Object> propMap = new HashMap<String, Object>();
@@ -483,7 +464,7 @@ public class SwaggerHelpers {
 
 				} else if (reqPropType.equals(PropertyType.DECIMAL)) {
 					if (valueOfType.size() == 1) {
-						Double value = convertInstanceOfObject(valueOfType.get(0), Double.class);
+						BigDecimal value = convertInstanceOfObject(valueOfType.get(0), BigDecimal.class);
 						serializeMap.put(var, value);
 					} else {
 						List<BigDecimal> value = convertInstanceOfObject(valueOfType, List.class);
@@ -628,10 +609,8 @@ public class SwaggerHelpers {
 	/**
 	 * 
 	 * @param httpRequest
-	 * @param repoId
-	 *            repository Id
-	 * @param objectId
-	 *            objectId for which the relation data needs to be fetched
+	 * @param repoId      repository Id
+	 * @param objectId    objectId for which the relation data needs to be fetched
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -755,7 +734,8 @@ public class SwaggerHelpers {
 			String parentId = request.getParameter("parentId");
 			String includeRelationshipString = request.getParameter("includeRelationship");
 			boolean includeRelationship = includeRelationshipString != null
-					? Boolean.parseBoolean(includeRelationshipString) : false;
+					? Boolean.parseBoolean(includeRelationshipString)
+					: false;
 
 			requestBaggage.put("skipcount", skipCount);
 			requestBaggage.put("maxitems", maxItems);
