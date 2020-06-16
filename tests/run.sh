@@ -11,3 +11,7 @@ node clearDB.js
 echo "runing swagger tests"
 
 npm run swagger
+
+echo "clearing the db"
+
+node clearDB.js
