@@ -1,10 +1,72 @@
 {
 	"info": {
-		"_postman_id": "ffe80826-4a76-4a09-b19c-52fa054907a6",
+		"_postman_id": "c69ff89f-55ca-4ae3-b642-0829c3a2df5d",
 		"name": "SwaggerApiRequest",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "PreRequisites",
+			"item": [
+				{
+					"name": "LoginDetails",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f2c8d4bf-c6cf-4bf7-b8b6-5b0067cc0a1d",
+								"exec": [
+									"var obj =\r",
+									"{\r",
+									"        \"email\": pm.globals.get(\"email\"),\r",
+									"        \"password\": pm.globals.get(\"password\")\r",
+									"}\r",
+									"\r",
+									"pm.globals.set(\"LoginRawBody\",JSON.stringify(obj))"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "3b8aa02d-08d7-4ac2-93e4-249fdf3e0479",
+								"exec": [
+									"pm.test(\"setting repoId, username, passowrd from login details\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.globals.set(\"USERNAME\",jsonData[\"userAttributes\"][\"userId\"])",
+									"    pm.globals.set(\"PASSWORD\",jsonData[\"token\"])",
+									"    pm.globals.set(\"REPOID\",jsonData[\"repository\"][0])",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{LoginRawBody}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{HOST_URL}}login",
+							"host": [
+								"{{HOST_URL}}login"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
 		{
 			"name": "POST",
 			"item": [
@@ -20,7 +82,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "f869033d-815f-4c83-ae3e-b27dd3fd85ce",
+												"id": "ace63bcc-44f4-4149-b871-5738b7191049",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -182,7 +244,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "ab2a9175-5842-4d13-8854-2a2ce30cb611",
+												"id": "f7058b7b-6eb9-4fa0-9ffb-8c14521418df",
 												"exec": [
 													"pm.test(\"checking TypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -305,6 +367,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -316,7 +379,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "5eedc245-e7b4-4c55-8485-4a2958040a6e",
+												"id": "250ad3b4-052c-4877-a83a-c282f15dc479",
 												"exec": [
 													"pm.test(\"removed id in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -378,7 +441,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "62e492b7-3828-4d29-9e07-855b0be60cf3",
+												"id": "b8037efe-a343-4914-b9e9-00f92fa4934c",
 												"exec": [
 													"pm.test(\"checking customTypeId under propertyType present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -440,7 +503,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "764ac0cd-6e64-43bb-a1ff-18c11a92dda1",
+												"id": "e9ef772f-4167-4ead-9ee9-18c6c76db393",
 												"exec": [
 													"pm.test(\"removed cardinality in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -502,7 +565,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8f3cae35-8917-493b-abd2-10ddbbe1c89f",
+												"id": "086c9ef3-daa3-475c-8a0d-f09bedf66f4c",
 												"exec": [
 													"pm.test(\"wrong propertyType with caps in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -564,7 +627,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8e5e0be8-3531-45f5-94ec-2aa72f06e0b2",
+												"id": "d13ce212-137c-452f-a5d2-5c4a09506068",
 												"exec": [
 													"pm.test(\"changed propertyType in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -626,7 +689,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "683c58ae-f0c9-4ea2-a741-1f7dcd28cf4d",
+												"id": "733e6e03-eccf-4743-8af2-17b996ec5242",
 												"exec": [
 													"pm.test(\"given wrong cardinality value in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -688,7 +751,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "a0996d1e-8e2a-4bdc-83c7-369e13ae2428",
+												"id": "d6542816-fa51-4a8f-8d96-6a00108c8a36",
 												"exec": [
 													"pm.test(\"removed updadability in all properties in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -750,7 +813,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "197e62fa-345d-4333-9660-173230c8a281",
+												"id": "c75afa66-3a9d-4de3-9960-6ecd91b9da42",
 												"exec": [
 													"pm.test(\"removed id in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -812,7 +875,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "04836a25-a13d-470f-a009-d265729c73ac",
+												"id": "c3a985d9-711c-44fd-8d6b-2f48ba85c19a",
 												"exec": [
 													"pm.test(\"removed cardinality in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -869,9 +932,11 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -889,7 +954,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "69eebc22-8d18-4a81-a769-a34f31806d2f",
 														"exec": [
 															"pm.test(\"checking Folder under the objectId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -966,7 +1031,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "44acacb9-46b1-4ce9-ae59-03d29b4dc7d9",
+														"id": "2c1983f5-4522-4f4a-b95f-a85f7190defa",
 														"exec": [
 															"pm.test(\"checking Folder under the name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1028,7 +1093,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "1304988a-f49e-4b5b-bc98-1e6d08107986",
+														"id": "6d03bd5e-1399-4a1c-8927-c2aa4fa58df6",
 														"exec": [
 															"pm.test(\"checking folder under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1108,7 +1173,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "fdfae8b4-2bc3-4618-a582-83d3fefa5abe",
+														"id": "1f92441e-8164-424e-804a-b17904886080",
 														"exec": [
 															"pm.test(\"checking folder under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1187,7 +1252,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "dac85d74-fd50-4016-aca4-804a36724952",
+												"id": "7a43e3e9-ef53-4765-9cb0-ccbbc0118eae",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -1197,7 +1262,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "a3a0bc79-f430-4e02-af74-9c7a83521e1a",
+												"id": "02e25b51-8cba-407c-b421-29f8be320d38",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -1205,6 +1270,7 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -1216,7 +1282,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "84768c28-5ae0-482f-b9a6-de338908adbd",
 														"exec": [
 															"pm.test(\"removed cmis:name in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1277,7 +1343,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "e3adca3c-1dd6-4dd9-9618-0700e643e007",
 														"exec": [
 															"pm.test(\"removed cmis:objectTypeId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1339,7 +1405,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "1e160de9-ba23-40e3-bedc-f97b1662ca28",
 														"exec": [
 															"pm.test(\"removed all the json data\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1401,7 +1467,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "4a47b40d-ae20-46f2-828b-8e31b5255117",
 														"exec": [
 															"pm.test(\"given already present objectId in TestCase\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1462,7 +1528,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "e536ffd5-30fd-4f97-a090-8b069a95da8d",
+														"id": "b9f18dc8-f956-40a1-8c9f-8649d6ec9d3e",
 														"exec": [
 															"pm.test(\"given wrong objectIdin Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1523,7 +1589,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "33fc666a-cfcf-43fd-92fc-5d7cb09cd7a6",
+														"id": "a95f7c46-fac4-4fa8-afd9-553e1324c296",
 														"exec": [
 															"pm.test(\"given wrong parentId\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1590,7 +1656,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "83df3d7f-a328-4124-b8da-24568e9610ff",
+												"id": "d6ba6c72-7ad2-4bed-8518-fb684e206398",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -1600,7 +1666,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8acb47ba-7156-4f6c-9e36-b56c8df50cc8",
+												"id": "6a1e91a7-db02-4fef-98c2-bc8d138ed01e",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -1608,10 +1674,12 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
 							"description": "This is all FOLDER related",
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -1626,7 +1694,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "9e348bde-05cb-49b4-9bc8-e9d1eeee8c60",
 														"exec": [
 															"pm.test(\"checking document under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1720,7 +1788,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "a50bf21c-d0ba-4926-9b55-7d89c6b75074",
 														"exec": [
 															"pm.test(\"removed objectId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1786,7 +1854,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "73b5dfee-f1dc-422c-890f-5e4c5bb4e8f4",
 														"exec": [
 															"pm.test(\"checking document under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1892,7 +1960,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "972f3ec0-96f1-45fc-a980-c6917b670143",
+														"id": "8b296758-43cc-4d85-8b35-fcee9e5d9e85",
 														"exec": [
 															"pm.test(\"uploading a document present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -1969,7 +2037,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "569597fd-247c-446d-866e-f8f1eb720bc9",
+														"id": "df24bfb0-a50c-4682-9783-48f29e5816dd",
 														"exec": [
 															"pm.test(\"checking document under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2065,6 +2133,7 @@
 										}
 									],
 									"description": "This is all POST related success cases",
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -2076,7 +2145,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "c2489eb4-81be-47fc-95d8-f9da977efc49",
 														"exec": [
 															"pm.test(\"removed cmis:name in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2137,7 +2206,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "2599109a-aba8-4341-b00d-b05828dd118a",
 														"exec": [
 															"pm.test(\"removed cmis:objectTypeId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2198,7 +2267,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "d26d1639-3a4b-4605-a54c-131c079ccf32",
 														"exec": [
 															"pm.test(\"removed all the json data\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2259,7 +2328,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "94f62a21-5ad8-454d-9500-dc31e7bd2129",
 														"exec": [
 															"pm.test(\"passing a wrong parentId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2322,10 +2391,12 @@
 										}
 									],
 									"description": "This is post related error cases",
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
 							"description": "This is all related to cmis:document(POST) ",
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -2340,7 +2411,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "39d48b9b-0c55-4eaf-80b2-7261681bcbb9",
 														"exec": [
 															"pm.test(\"checking Item under the cmis:objectTypeId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2417,7 +2488,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "1830eab3-07a9-45b4-ba9e-c831647f401f",
 														"exec": [
 															"pm.test(\"checking item under name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2479,7 +2550,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "90a510a2-f797-43e0-9c91-ce0071fd85ce",
+														"id": "74695183-380a-43a8-b135-bc2a4c960970",
 														"exec": [
 															"pm.test(\"checking Item under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2555,7 +2626,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "4a47c6f2-6a58-4a4c-b0b4-6b0111da219a",
+														"id": "aeeedbd5-0e26-43f0-8f61-bf540077bc15",
 														"exec": [
 															"pm.test(\"checking Item under the cmis:objectId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2626,6 +2697,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -2637,7 +2709,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "0fe85969-30f5-41de-8d47-754a8e51d47c",
 														"exec": [
 															"pm.test(\"removed cmis:name in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2698,7 +2770,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "c1d13ae9-b9e8-45ae-b9f6-f58af44d0f50",
 														"exec": [
 															"pm.test(\"checking objectTypeId present r not\", function () {\r",
 															"    var jsonData = pm.response.json();\r",
@@ -2759,7 +2831,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "f7d5e28b-93f9-45c1-bf54-b66ad81f7b8f",
 														"exec": [
 															"pm.test(\"removed all tha json data\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2820,7 +2892,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "928390e8-902c-4aa4-8eae-11e20ab4e521",
+														"id": "393dfe2d-2371-4a18-9a8f-87f9caed277a",
 														"exec": [
 															"pm.test(\"given wrong objectTypeId in Body\", function () {\r",
 															"    var jsonData = pm.response.json();\r",
@@ -2881,7 +2953,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "cc3622c3-0065-4b6d-9fff-06e89a677dd7",
+														"id": "23dfc841-9e3c-461b-8900-fd6288c3d5ca",
 														"exec": [
 															"pm.test(\"given wrong parentId \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -2943,10 +3015,12 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
 							"description": "This is all item related ",
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -2961,7 +3035,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "11a2b96e-a2dc-49f9-87bc-537689c7a716",
 														"exec": [
 															"pm.test(\"checking a policy under cmis:name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3034,7 +3108,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "dec29822-712e-4942-81ec-057f8f7bbe3b",
 														"exec": [
 															"pm.test(\"removed cmis:objectId in Body and equals the cmis:name\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3095,7 +3169,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "3716140a-d423-4b08-8a7b-92d339290a18",
+														"id": "022ca3a4-9968-4441-abba-64d655ca1dd1",
 														"exec": [
 															"pm.test(\"checking Policy under the cmis:objectTypeId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3171,7 +3245,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "1cc7ac6d-2d84-4ebe-9aec-510da142b489",
+														"id": "2c770dff-156d-4586-9b3f-a177005e7668",
 														"exec": [
 															"pm.test(\"checking Item under the cmis:objectId present or not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3246,6 +3320,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -3257,7 +3332,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "54468936-6e18-4ab6-b98b-726cca1c9799",
 														"exec": [
 															"pm.test(\"removed cmis:name in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3318,7 +3393,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "87b3ebce-60bd-4faf-b1ea-c1d4b0f4c45e",
 														"exec": [
 															"pm.test(\"removed cmis:policyText in Body \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3379,7 +3454,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "e541ac80-c4e5-4904-b7a1-129bd82006cb",
 														"exec": [
 															"pm.test(\"removed alla the json data in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3440,7 +3515,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "633a0e5f-47f5-485c-afb4-08c64e7d4de2",
+														"id": "1751339e-a74a-417f-b3af-fe00f3c4d9fb",
 														"exec": [
 															" pm.test(\"given wrong objectTypeId in Body \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3501,7 +3576,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "1b836256-e92e-48a2-84a8-39114051703d",
+														"id": "3e0b3039-8859-448d-8e01-c2aa4ed0a3f0",
 														"exec": [
 															"pm.test(\" given wrong \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -3564,10 +3639,12 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
 							"description": "This is all policy related",
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
@@ -3576,7 +3653,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "aa655a69-6cef-4a42-ba00-a6bbf40ee216",
+								"id": "504aaf15-3091-4e7c-92f7-4ccc512d975a",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -3586,7 +3663,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "047066ef-0d21-4b65-b0ae-ab931cae4e18",
+								"id": "56f1c602-bae4-418e-9245-3de8499c816c",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -3594,6 +3671,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -3608,7 +3686,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "a6a8f4a8-7d2f-4799-bbf2-2ea7188db359",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -3717,7 +3795,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "b3bd0642-9ac4-4630-ab68-ada57f03ef04",
 												"exec": [
 													"pm.test(\"removed objectId in Body and equals to cmis:name\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -3778,7 +3856,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "3fb1327d-0b5d-4e82-9a6a-65b1cf9ba215",
+												"id": "1144780a-1d1f-4b2c-9378-0247dbabedac",
 												"exec": [
 													"pm.test(\"uploading a document present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -3848,7 +3926,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "fe3bde17-0dae-4f10-985a-609de484c34f",
+												"id": "4f554fea-f2ca-4b5e-89f3-3084eba63e38",
 												"exec": [
 													"pm.test(\"checking document under the cmis:objectTypeId present or not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -3948,7 +4026,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "a071c4bf-19af-42b2-ac6d-d90a227c8325",
+												"id": "a9bd6a08-3960-4b61-9f6c-cc7bea8d7ed7",
 												"exec": [
 													"pm.test(\"checking customType under the cmis:objectId present or not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4032,7 +4110,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "3a0792c5-c5c3-4de8-95ec-2454f49b4142",
+												"id": "7f26e2e1-1486-4be5-af9f-aaa2840842fb",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4109,7 +4187,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "ef51eb33-bb3f-4c49-9d10-93114ce7abe6",
+												"id": "78a20177-ed7b-479b-a7cf-64521e8e87d9",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4209,6 +4287,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -4220,7 +4299,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "3dc39e2e-fce8-4821-9dc6-0033b2c99369",
 												"exec": [
 													"pm.test(\"removed cmis:name in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4281,7 +4360,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "9c587d08-a4b6-4e16-b9ee-d4896ec52951",
 												"exec": [
 													"pm.test(\"removed cmis:objectTypeId in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4342,7 +4421,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "93a9ef90-84fe-4876-a7e3-56c23c8f9574",
 												"exec": [
 													"pm.test(\"removed all the json data in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4403,7 +4482,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "ca000c34-c145-4567-be3f-16deeb2c7b8c",
+												"id": "0b337de1-dbf3-4584-af03-f143d1db42d4",
 												"exec": [
 													"pm.test(\"passing a wrong parentId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4470,7 +4549,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8994886e-ccf3-491a-bacf-5d8b0998aea9",
+												"id": "78a7e098-7a9d-49f4-a2e1-7602476e0b5c",
 												"exec": [
 													"pm.test(\"removed cmis:name in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4531,7 +4610,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "fb3142b4-12b8-4b29-9f41-0ef1d1158ff0",
+												"id": "827c3b8e-0ffe-4eb7-bd09-1139b256c0b1",
 												"exec": [
 													"pm.test(\"removed cmis:objectTypeId in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4592,7 +4671,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "42d58767-f046-4718-8e2f-5bc4b835122a",
+												"id": "a5a678a1-0c16-4970-8489-1ed7ff2b5267",
 												"exec": [
 													"pm.test(\"removed all the json data in Body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -4648,6 +4727,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
@@ -4655,7 +4735,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "723b5b7f-9f4c-4e44-9f16-4da9efcb0bb6",
+								"id": "2bc5794e-24ea-4abe-9481-14890d39849a",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -4665,7 +4745,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "ed22057b-7e8e-4d18-af07-cea19b23a2b3",
+								"id": "7577738c-2faf-4c93-b796-68b0842c35b1",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -4673,6 +4753,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -4690,7 +4771,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "10920ccf-902d-4694-be2d-dab2fec41fc5",
 														"exec": [
 															"pm.test(\"checking AddAces under the principalId  present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -4752,6 +4833,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -4763,7 +4845,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "87b9d771-8b48-4d76-9404-734f0f4dcfc1",
 														"exec": [
 															"pm.test(\"removed principalId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -4826,7 +4908,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "5ba80bc3-f13d-41c1-8cfa-625e7606bb82",
 														"exec": [
 															"pm.test(\"removed permissions in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -4889,7 +4971,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "886adaf4-664c-4a84-8fd5-5849c92293a2",
 														"exec": [
 															"pm.test(\"removed objectId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -4952,7 +5034,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "4b26883a-dc22-48fe-b94f-77dacf03dd8f",
 														"exec": [
 															"pm.test(\"removed all the data \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5010,9 +5092,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -5027,7 +5111,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "80e94901-a574-4435-9bfd-627e34870d1d",
 														"exec": [
 															"pm.test(\"checking removeAces under the permisiions present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5085,6 +5169,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -5096,7 +5181,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "7272986b-c604-4c8e-9b71-0d4d1cea587e",
 														"exec": [
 															"pm.test(\"removed principalId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5159,7 +5244,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "333a54a0-5f01-4389-8576-5b1b6d5aebb7",
 														"exec": [
 															"pm.test(\"removed permissions in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5222,7 +5307,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "721906c2-a33e-4500-91bd-2665ef3e4fbe",
 														"exec": [
 															"pm.test(\"removed objectId in Body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5285,7 +5370,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "2dbf7ba8-5d66-4ce9-94ce-ed6e173f33d5",
 														"exec": [
 															"pm.test(\"removed all the json data in Body \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -5343,16 +5428,20 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			],
-			"description": "All post related Apis"
+			"description": "All post related Apis",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "GET",
@@ -5369,7 +5458,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "124e6c11-5ab2-4035-a2e9-d10b4d0ca6f7",
+												"id": "8623d568-e53b-4bb1-a78a-7677d6ca73df",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5500,10 +5589,6 @@
 												"type": "text"
 											}
 										],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/_metadata/type/apple",
 											"host": [
@@ -5524,7 +5609,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8c62a897-5808-4b9b-afb4-31422acff309",
+												"id": "7fba6a0c-c3d6-44b0-a821-8d8b3e4c6b35",
 												"exec": [
 													"pm.test(\"checking customTypeId under relationship present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5643,7 +5728,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8d73916b-2c8f-486b-9290-90fbf1747c9c",
+												"id": "6b50ce44-12a2-4fb8-8d76-359fa9c31066",
 												"exec": [
 													"pm.test(\"checking TypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5735,10 +5820,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/_metadata/type/fv%3Aparty",
 											"host": [
@@ -5754,6 +5835,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -5765,7 +5847,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "cc8f847c-afd2-4526-954f-00220fd48cb1",
+												"id": "aade1982-7855-4e94-8780-3eec534fd6b0",
 												"exec": [
 													"pm.test(\"given wrong cmis:TypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5798,10 +5880,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/_metadata/type/apple12",
 											"host": [
@@ -5822,7 +5900,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "609f2bf7-41ad-46a2-baee-5aa0a5a640a7",
+												"id": "5a91d977-456b-4faf-9e39-0aefaf2d1d87",
 												"exec": [
 													"pm.test(\"given wrong URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5855,10 +5933,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/_metadata/type/all",
 											"host": [
@@ -5879,7 +5953,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "288b5feb-b17c-44f1-8b87-1965e389dfbf",
+												"id": "e4edb65b-5bd7-4e8a-8913-a79693da4b00",
 												"exec": [
 													"pm.test(\"given wrong cmis:TypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -5912,10 +5986,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/_metadata/type/fv%3Apartydvvv",
 											"host": [
@@ -5931,9 +6001,11 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -5951,7 +6023,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "2b3e13e0-70ba-44e6-843a-6c36af1558bb",
 														"exec": [
 															"pm.test(\"checking document under cmis:name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6000,10 +6072,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/2A",
 													"host": [
@@ -6022,7 +6090,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "ea7cbe42-00a8-49ed-aa24-d1f1b86fcc29",
+												"id": "bc309845-bf0b-4896-8a44-8ca94882811a",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -6032,7 +6100,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "6732f7f4-9d05-4c2a-9c5f-c2fa4df4f032",
+												"id": "f4094858-25b8-4b35-9792-d3f7c334cabc",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -6040,6 +6108,7 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6051,7 +6120,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "23d13dd3-830d-43eb-b8cd-07c7a5948e23",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6084,10 +6153,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/25",
 													"host": [
@@ -6107,7 +6172,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "45a5052c-b72d-43f5-a437-649a36f01f30",
 														"exec": [
 															"pm.test(\"given wrong cmis:baseTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6140,10 +6205,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:item/2A",
 													"host": [
@@ -6162,7 +6223,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "25eed1f6-2d25-41ec-baa3-a596c105666c",
+												"id": "1747ab77-e9bc-49ac-8867-15865329e648",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -6172,7 +6233,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "88cadd6a-a8e9-4474-812a-057a5632f515",
+												"id": "5aeacb22-209a-4b84-9673-47bea8999f9f",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -6180,6 +6241,7 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6191,7 +6253,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "a74e1f6f-d5c5-4f2d-85b1-5a130590e068",
+														"id": "cab04ecc-d3bc-4dd7-8ad1-3b11381aadb9",
 														"exec": [
 															"pm.test(\"checking document under skipcount=0 and maxitems=1\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6232,10 +6294,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/getAll?skipcount=0&maxitems=1",
 													"host": [
@@ -6265,7 +6323,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "42e6a899-067f-435c-851e-9538fe9d2777",
+														"id": "84ec668c-50df-44ea-b001-152a529995e4",
 														"exec": [
 															"pm.test(\"checking document under skipcount=0 and maxitems=2\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6309,10 +6367,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/getAll?skipcount=0&maxitems=2",
 													"host": [
@@ -6342,7 +6396,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "81b0d07b-5e29-45b3-aa3f-b6592ac87bce",
+														"id": "3a72ebd6-8b6e-4645-a6a8-99c95c7b8fca",
 														"exec": [
 															"",
 															"pm.test(\"checking document under skipcount=1 and maxitems=2\", function () {",
@@ -6387,10 +6441,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/getAll?skipcount=1&maxitems=2",
 													"host": [
@@ -6420,7 +6470,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "6bbbbfad-1914-4ea7-ae80-be86f8cff767",
+														"id": "f5193f7f-bfa0-4ff9-871e-daf82f98032b",
 														"exec": [
 															"pm.test(\"checking  document under filter \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6462,10 +6512,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/apple/getAll?filter= *, iBookProducts_type eq GHI",
 													"host": [
@@ -6491,7 +6537,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "cc3976c8-6cfb-4539-9d69-f360c4fc4fca",
+														"id": "c5df54c1-332e-4a78-891b-c9b7207d0d6f",
 														"exec": [
 															"pm.test(\"checking  document under orderby \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6523,10 +6569,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/apple/getAll?orderby= cmis:name asc",
 													"host": [
@@ -6547,6 +6589,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6558,7 +6601,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "8fa14b03-b739-4ed3-91d0-e4bd5bff8ab3",
+														"id": "22c14a95-ebaf-4e6a-b86f-4aa7253011c4",
 														"exec": [
 															"pm.test(\"checking customTypes under skipcount=0 and maxitems=0\", function () {",
 															"    var jsonData = pm.response.text();",
@@ -6591,10 +6634,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/getAll?skipcount=0&maxitems=0",
 													"host": [
@@ -6619,6 +6658,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6630,7 +6670,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "0ab4eaa6-3fda-476f-85f0-76a8da12759f",
+														"id": "d9cb8a34-964b-4646-8f54-2c7379a6db14",
 														"exec": [
 															"",
 															"pm.test(\"Status code is 200\", function () {",
@@ -6694,7 +6734,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "d44093aa-aafd-4681-bd5f-2075a9b9dd1f",
+														"id": "88684641-40bd-45dc-8fbd-013419ac6007",
 														"exec": [
 															"pm.test(\"uploading a document present r not\", function () {",
 															"    var jsonData = pm.response.text();",
@@ -6726,10 +6766,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/media/2A",
 													"host": [
@@ -6745,6 +6781,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6756,7 +6793,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "63fe3a6d-eb81-401f-b038-f810650be009",
+														"id": "993cfd82-0539-434f-b4b9-4be7e8255f83",
 														"exec": [
 															"pm.test(\"given wrong objectId in URL\", function () {",
 															"    var jsonData =pm.response.json();",
@@ -6788,10 +6825,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/media/22A",
 													"host": [
@@ -6807,9 +6840,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -6824,7 +6859,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "42cb5123-49f7-444e-94c7-b89c332919b3",
+														"id": "292e963b-f2ff-4df3-a9f5-3b4088cc1de5",
 														"exec": [
 															"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6873,10 +6908,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/1",
 													"host": [
@@ -6891,6 +6922,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -6902,7 +6934,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "67e85375-930b-4df6-9cd7-9c6fd3de51cf",
+														"id": "68a735f4-f607-47e3-a2b0-6a25c9406cdb",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6934,10 +6966,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/12",
 													"host": [
@@ -6957,7 +6985,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "1eca972d-ff17-477f-84d9-26403813b9d4",
+														"id": "78d3f104-59b2-4192-b41b-f903d6e5803b",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -6989,10 +7017,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:policy/1",
 													"host": [
@@ -7012,7 +7036,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "1a543ea6-7d5f-45b0-8354-c2b4925525e8",
+														"id": "a51766b1-dd33-4b0d-80e8-09a0d667b944",
 														"exec": [
 															"pm.test(\"given wrong URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7044,10 +7068,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:item/12",
 													"host": [
@@ -7062,6 +7082,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -7073,7 +7094,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "8328a0a3-dfc3-45fb-8e8e-949ae44093de",
+														"id": "9fa5e948-fc56-40ca-956c-ebeb663e5aa4",
 														"exec": [
 															"pm.test(\"checking folder under skipcount=0 and maxitems=1\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7114,10 +7135,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/getAll?skipcount=0&maxitems=1",
 													"host": [
@@ -7147,7 +7164,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "73c76486-550b-4c2b-9093-c56a38e00fe8",
+														"id": "be7963ce-aef0-4352-9fbd-0a1fa8349d9b",
 														"exec": [
 															"pm.test(\"checking folder under skipcount=2 and maxitems=3\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7183,10 +7200,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/getAll?skipcount=2&maxitems=3",
 													"host": [
@@ -7216,7 +7229,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "65c05cf5-f44f-440b-b9d6-c729f4731536",
+														"id": "8eb41dd4-afd1-4ae4-8060-fe418a0691bf",
 														"exec": [
 															"pm.test(\"checking folder under skipcount=1 and maxitems=2\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7260,10 +7273,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/getAll?skipcount=1&maxitems=2",
 													"host": [
@@ -7293,7 +7302,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "e37368e6-0358-4c54-a390-6ff14d32b8ed",
+														"id": "90f156d0-d4db-4c44-a385-ef4359502428",
 														"exec": [
 															"pm.test(\"checking folder under skipcount=0 and maxitems=0\", function () {",
 															"    var jsonData = pm.response.text();",
@@ -7325,10 +7334,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/getAll?skipcount=0&maxitems=0",
 													"host": [
@@ -7372,10 +7377,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/apple/getAll?filter=*,appleName,appleName eq APPY",
 													"host": [
@@ -7396,6 +7397,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -7407,7 +7409,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "31aec0e7-2e39-4ad7-bb3f-814c4f1088a5",
+														"id": "b69faf1d-952f-4aed-8b27-d5f75abcd740",
 														"exec": [
 															"pm.test(\"removed TypeId in URL\", function () {",
 															"    var jsonData = pm.response.text();",
@@ -7439,10 +7441,6 @@
 												},
 												"method": "GET",
 												"header": [],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:folder/skipcount=0&maxitems=1",
 													"host": [
@@ -7457,9 +7455,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -7474,7 +7474,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "a136cf87-880f-4bfa-9d96-fb70a0c02e0d",
 														"exec": [
 															"pm.test(\"checking item under objectId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7526,10 +7526,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:item/3A",
 													"host": [
@@ -7544,6 +7540,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -7555,7 +7552,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "6f248df4-533b-4a37-8bb1-35460c19ce55",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL\", function() {",
 															"    var jsonData = pm.response.json();",
@@ -7595,10 +7592,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:item/33",
 													"host": [
@@ -7618,7 +7611,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "cb8d8a83-06b2-4cd1-9f0d-7a5999b53374",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectTypeId in URL\", function() {",
 															"    var jsonData = pm.response.json();",
@@ -7658,10 +7651,6 @@
 														"value": "application/json"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:policy/3A",
 													"host": [
@@ -7681,7 +7670,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "0658e227-e1bd-4e85-86d1-6c8936a30139",
 														"exec": [
 															"pm.test(\"given wrong cmis:baseTypeId in URL\", function() {",
 															"    var jsonData = pm.response.json();",
@@ -7721,10 +7710,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/45",
 													"host": [
@@ -7739,9 +7724,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -7756,7 +7743,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "0ed7662f-d07e-4ad8-98cf-52b323e2bf14",
 														"exec": [
 															"pm.test(\"checking a policy under cmis:objectId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7812,10 +7799,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:policy/4A",
 													"host": [
@@ -7830,6 +7813,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -7841,7 +7825,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "8f1a8f64-b65f-4563-a24b-587ec5ea3e67",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7881,10 +7865,6 @@
 														"value": "application/json"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:policy/44",
 													"host": [
@@ -7904,7 +7884,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "b520122c-ccbe-4ae7-95f1-c2985da1467b",
 														"exec": [
 															"pm.test(\"given wrong cmis:baseTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -7944,10 +7924,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:document/45",
 													"host": [
@@ -7967,7 +7943,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "edddff53-77e5-408f-a7da-1a406633fb3b",
 														"exec": [
 															"pm.test(\"given wrong cmis:baseTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -8007,10 +7983,6 @@
 														"type": "text"
 													}
 												],
-												"body": {
-													"mode": "raw",
-													"raw": ""
-												},
 												"url": {
 													"raw": "{{requestURL}}/cmis:item/4A",
 													"host": [
@@ -8025,9 +7997,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
@@ -8035,7 +8009,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "4fdadbe9-698b-4f72-b07e-1711c08cd5f8",
+								"id": "acb3f626-6692-493c-92a9-a85baa7fff72",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -8045,7 +8019,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "967c45bc-4c7d-4f18-937f-3b201ecb2b5c",
+								"id": "89a30d33-4b36-4dbc-83ca-d93f0ca6a609",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -8053,6 +8027,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -8067,7 +8042,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+												"id": "4a1ea08c-84eb-44c6-a17e-d302e49d9dd1",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8121,9 +8096,6 @@
 											}
 										}
 									],
-									"protocolProfileBehavior": {
-										"disableBodyPruning": true
-									},
 									"request": {
 										"auth": {
 											"type": "basic",
@@ -8149,7 +8121,6 @@
 												"type": "text"
 											}
 										],
-										"body": {},
 										"url": {
 											"raw": "{{requestURL}}/apple/11AC",
 											"host": [
@@ -8169,7 +8140,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "42555fbb-58ce-4653-834c-5c659f6eea80",
+												"id": "4814ed59-587e-42cc-be98-3b513d73cc39",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8241,10 +8212,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/fv:party/22",
 											"host": [
@@ -8259,6 +8226,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -8270,7 +8238,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "f4c8e679-e79d-4bfc-9e7a-3e439bfbdc72",
+												"id": "f0a9051d-2c7b-42f3-a16e-8c70e6e28c9c",
 												"exec": [
 													"pm.test(\"given wrong cmis:TypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8302,10 +8270,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/book/1",
 											"host": [
@@ -8325,7 +8289,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "e2172922-7bc5-4b88-b40e-7ebf11546e08",
+												"id": "ecb32d7b-bdee-40d1-958e-1355fe50d5b7",
 												"exec": [
 													"pm.test(\"given wrong cmis:baseTypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8358,10 +8322,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/cmis:folder/6",
 											"host": [
@@ -8381,7 +8341,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "d84b075a-c77a-4dfd-99d8-3b269e3f8fd6",
+												"id": "7bdcd813-2e07-4347-91f5-29390ed39dae",
 												"exec": [
 													"pm.test(\"given wrong cmis:TypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8413,10 +8373,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/fv:partytype/21",
 											"host": [
@@ -8431,6 +8387,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -8442,7 +8399,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "aa628362-16f7-4967-85b7-806c29c65c62",
+												"id": "b13f0e35-2ce8-4c3e-b784-89922f3bb716",
 												"exec": [
 													"pm.test(\"checking customTypes under skipcount=0 and maxitems=1\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8531,7 +8488,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "2f352a2e-aa10-4b4a-ae9d-4041f691039b",
+												"id": "d3d2d1f1-a966-489b-8cfc-6d253ebdabf7",
 												"exec": [
 													"pm.test(\"uploading a document present r not\", function () {",
 													"    var jsonData = pm.response.text();",
@@ -8564,10 +8521,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/apple/media/1234",
 											"host": [
@@ -8588,7 +8541,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "5338dd7e-291b-4ed6-8bd6-adbe44aba71e",
+												"id": "baf604a0-01e3-4b6d-b310-3e94747dd345",
 												"exec": [
 													"pm.test(\"checking customTypes under skipcount=1 and maxitems=1\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8628,10 +8581,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/apple/getAll?skipcount=1&maxitems=1",
 											"host": [
@@ -8661,7 +8610,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "816e9b84-5fc9-43ea-8eea-63b261938629",
+												"id": "47181d04-1c1c-4150-b01e-653fd839392a",
 												"exec": [
 													"pm.test(\"checking customTypes under no skip&no maxitems\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8707,10 +8656,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/apple/getAll",
 											"host": [
@@ -8725,6 +8670,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -8736,7 +8682,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "a0cb9ec1-6547-43ea-9639-6f05c9972c67",
+												"id": "55e613cb-b160-4013-b405-a4dd2cb419de",
 												"exec": [
 													"pm.test(\"checking customTypes under skipcount=0 and maxitems=0\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8769,10 +8715,6 @@
 										},
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": ""
-										},
 										"url": {
 											"raw": "{{requestURL}}/pen1/getAll?skipcount=0&maxitems=0",
 											"host": [
@@ -8797,13 +8739,16 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			],
-			"description": "All GET related Api's"
+			"description": "All GET related Api's",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "PUT",
@@ -8820,7 +8765,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "fbbae9f3-aa74-4130-a2d8-14ac3f37e083",
+												"id": "e13ab99b-79d0-42ea-bcf8-ec338183b799",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -8996,7 +8941,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "324dfe63-9413-452e-9cb1-d39e6727f4bd",
+												"id": "96e9041c-d834-4b5e-b43c-784d5d281047",
 												"exec": [
 													"pm.test(\"checking TypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9118,6 +9063,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -9129,7 +9075,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "561c89f7-0867-4503-b645-37e9c80e7570",
+												"id": "a3aea0d9-a7c3-42a4-82d5-27aa33dd9857",
 												"exec": [
 													"pm.test(\"given wrong id in URL \", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9192,7 +9138,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8d6acd7e-4fb3-471c-8363-eaaf5bc32cad",
+												"id": "edeb51cc-acce-4f94-9cf4-1d5ccc40252b",
 												"exec": [
 													"pm.test(\"given wrong in URL \", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9255,7 +9201,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "7b458805-81e2-4818-a696-59537de80e79",
+												"id": "d4098b91-bd53-4fe0-b2c5-b528191138a2",
 												"exec": [
 													"pm.test(\"remove all the data in Body \", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9318,7 +9264,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "2527698d-85ec-4e60-b266-80902998e1d0",
+												"id": "db7a9831-3b48-45ab-98a8-234e04fb479d",
 												"exec": [
 													"pm.test(\"remove all the data in Body \", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9381,7 +9327,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "efbeff6c-e19a-48c7-b38a-782e091d63b7",
+												"id": "57dff0b8-8bd1-49fc-8255-15c7b713dc9c",
 												"exec": [
 													"pm.test(\"given wrong in URL \", function () {",
 													"    var jsonData = pm.response.json();",
@@ -9438,9 +9384,11 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -9458,7 +9406,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "c13276ab-c888-487b-ac6c-7af3e01bc7b7",
+														"id": "898dac4c-ee3a-46bb-96d8-d97954b2d940",
 														"exec": [
 															"pm.test(\"checking folder under cmis:name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9531,7 +9479,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "8dc86448-76ae-4a50-8493-d017bf969801",
+												"id": "c9b6c191-ed05-4948-9e8a-2edf4587cbb7",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -9541,7 +9489,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "3fb9635d-a393-43d2-a97c-4b892db59307",
+												"id": "56df6dac-5898-4c07-a6eb-bf18e7592292",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -9549,6 +9497,7 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -9560,7 +9509,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "b6cf3980-7a65-42f8-9630-cf3fbca25c71",
+														"id": "1af4b352-9f81-46bf-ac18-808070a9b85c",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in  URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9622,7 +9571,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "7a227159-4f0d-4db6-8205-057a9465b418",
+														"id": "deabb704-cdbf-4bf7-8218-d52591795a69",
 														"exec": [
 															"pm.test(\"given wrong baseTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9684,7 +9633,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "282706ed-db08-483c-b393-b3b4b1c9c953",
+														"id": "18cd3ae3-724a-4491-b50f-f0cbbb652d6d",
 														"exec": [
 															"pm.test(\"given correct URL and removed all the json data in body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9741,9 +9690,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -9758,7 +9709,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "947c992d-6b23-4974-bf6e-7f9ed018aab0",
 														"exec": [
 															"pm.test(\"checking document under cmis:name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9827,6 +9778,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -9838,7 +9790,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "91c0a0c1-ec08-4510-8ccc-4af3ccaa114c",
 														"exec": [
 															"pm.test(\"given wrong URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9900,7 +9852,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9b929d5c-fa31-47b5-b27a-2600fb4e74a5",
+														"id": "68a95b32-e3ac-42b8-8d4b-66b0e9470266",
 														"exec": [
 															"pm.test(\"given wrong baseTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -9962,7 +9914,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "3e6219e6-59f4-44ae-9ddd-f45001b55b99",
+														"id": "403e262b-0b3f-46e2-888e-0d9c95798e5c",
 														"exec": [
 															"pm.test(\" given correct and removed all the json data in body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10019,9 +9971,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -10036,7 +9990,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "a1d019d0-82d2-4c61-af77-7f2fd09f2c05",
+														"id": "4ad1f81f-fc1f-4d5e-bbaa-3d2d78afb9ed",
 														"exec": [
 															"pm.test(\"checking item under objectId present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10109,7 +10063,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "95900a5e-4360-467b-adfd-18e8a5320409",
+												"id": "ecd16201-6d42-438a-9012-c681213c169e",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -10119,7 +10073,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "7f5f3a5d-d15c-4550-96d9-d30d30a0fae2",
+												"id": "080d546a-2ab4-420d-af23-c1abe8ed47b7",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -10127,6 +10081,7 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -10138,7 +10093,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "e3028de9-cf90-4c64-8016-f37554f9742b",
+														"id": "490553af-2bdc-4127-be27-4e068dcd30d0",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL and Body \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10200,7 +10155,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "af59056a-9318-4759-9eb4-65e37acf1fcb",
+														"id": "8937dd4e-4c9c-4aba-8db4-ed336930b95b",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectTypeId in URL \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10262,7 +10217,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "9656c183-bf61-4885-bd36-aac86190b2a9",
+														"id": "6b71d318-0ab1-4a24-800a-05e8e20ef9d9",
 														"exec": [
 															"pm.test(\"given correct URL and removed all th json data in body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10319,9 +10274,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -10336,7 +10293,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "81246493-6ea0-4815-8ca5-642e7cc65600",
+														"id": "40ffc181-f32b-4e86-b7dc-5f78dfb3ee89",
 														"exec": [
 															"pm.test(\"checking a policy under cmis:name present r not\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10405,6 +10362,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -10416,7 +10374,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "6dbbd4db-2fac-4033-873c-70e0b7f8f042",
+														"id": "2cb216d1-9d46-4a18-b34e-c6dc43e6dfe6",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10478,7 +10436,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "3b2a6ff4-970d-4628-afd4-259b7ed656b2",
+														"id": "fbce21ae-7052-4199-9c9d-f351fe1e3e2e",
 														"exec": [
 															"pm.test(\"given wrong cmis:objectTypeId in URL \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10540,7 +10498,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "4be0d203-8722-4d8e-bfc9-e9e2670794dd",
+														"id": "14cec7b3-d295-46da-8d5c-98fbb0af99d9",
 														"exec": [
 															"pm.test(\"removed all the json data in body\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -10597,9 +10555,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
@@ -10607,7 +10567,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "075637dc-a8fd-4018-9d00-06df06485ab2",
+								"id": "d311517b-a509-4f7e-a734-8bb3358c66de",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -10617,7 +10577,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "261dd6c9-cb05-4604-b797-88040a5bdd35",
+								"id": "5a10e036-4d1b-4d9c-bdaf-a5f57480ebc2",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -10625,6 +10585,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -10639,7 +10600,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "cecadef4-efdc-4d76-b543-36f0c2e4e38c",
+												"id": "35ed7fcc-4266-4348-ac56-ca5c80ab69ae",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -10746,7 +10707,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "4bc0f0e5-d221-4bc0-b7b4-a8f85903ae87",
+												"id": "883c6be5-7f12-4ac3-954e-647eec481ef8",
 												"exec": [
 													"pm.test(\"checking customTypeId under objectId present r not\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -10847,7 +10808,7 @@
 								{
 									"listen": "prerequest",
 									"script": {
-										"id": "cf464ae2-ab31-4130-bcbc-92a515c3e334",
+										"id": "9b939544-134f-4d7b-a80d-8dff6b152ab5",
 										"type": "text/javascript",
 										"exec": [
 											""
@@ -10857,7 +10818,7 @@
 								{
 									"listen": "test",
 									"script": {
-										"id": "aaa29901-ec9c-4e54-8a9e-82bd06f90055",
+										"id": "d15b519c-fa27-4335-b482-3720af96f1c8",
 										"type": "text/javascript",
 										"exec": [
 											""
@@ -10865,6 +10826,7 @@
 									}
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -10876,7 +10838,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "2b1c6743-c5f3-470e-a0e6-2780ba6fd173",
+												"id": "a7e121e6-44f5-4f3f-8f8c-7394dae3649c",
 												"exec": [
 													"pm.test(\"given wrong typeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -10938,7 +10900,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "8c8a4d4a-8580-4c3e-89ce-8925e5b4fc41",
+												"id": "ef53fb01-80ec-4371-825b-ebb6fdd90fa8",
 												"exec": [
 													"pm.test(\" given correct URL removed all the json data in body\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -11000,7 +10962,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "b6333808-9b5d-41e9-96c2-bc9c2bb7e404",
+												"id": "c556dafc-a6d9-4879-8bfb-83e66749fe68",
 												"exec": [
 													"pm.test(\"given wrong typeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -11057,13 +11019,16 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			],
-			"description": "All PUT related Api's"
+			"description": "All PUT related Api's",
+			"protocolProfileBehavior": {}
 		},
 		{
 			"name": "DELETE",
@@ -11083,7 +11048,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "99f33f2a-0482-4ef8-b350-fbf1b43d85d2",
+														"id": "b5f58cbd-3297-4101-8f6e-27d6add5f677",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11140,6 +11105,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -11151,7 +11117,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "99f33f2a-0482-4ef8-b350-fbf1b43d85d2",
+														"id": "0ee8f8c7-5756-4c98-a694-9ad51ad483b9",
 														"exec": [
 															"pm.test(\"given wrong id in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11213,7 +11179,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "99f33f2a-0482-4ef8-b350-fbf1b43d85d2",
+														"id": "fc197ec4-303c-480d-a4dc-37ef23a5708c",
 														"exec": [
 															"pm.test(\"given already deleted  id in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11274,7 +11240,7 @@
 										{
 											"listen": "prerequest",
 											"script": {
-												"id": "47c9105d-499e-4e93-88fe-41a27289a43f",
+												"id": "a7d61bcc-a6a1-4ad1-bd5e-f033100fd33c",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -11284,7 +11250,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "0ed88fb1-e0c3-452e-a967-85c728b35515",
+												"id": "3ac273f0-ce2c-4aa1-a19f-154b11cc654f",
 												"type": "text/javascript",
 												"exec": [
 													""
@@ -11292,9 +11258,11 @@
 											}
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -11309,7 +11277,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "87115229-b977-4c55-a976-fe2c1c711403",
+														"id": "00dd881c-6eab-400c-8460-0e6ea0db21bd",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11366,6 +11334,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -11377,7 +11346,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "87115229-b977-4c55-a976-fe2c1c711403",
+														"id": "cb0d585c-f9a2-410c-94ee-c34957f7a31b",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11439,7 +11408,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "8e2cb6d7-adf0-421d-ad08-9f4ebf74cfcf",
+														"id": "d703a767-1417-4679-b4e0-621fadd8ff8c",
 														"exec": [
 															"pm.test(\"given wrong id \", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11496,9 +11465,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -11513,7 +11484,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "5e7698cf-e7df-4046-a40e-57d371b659a5",
+														"id": "40909546-859f-4564-8766-7e32329112fc",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11570,6 +11541,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -11581,7 +11553,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "5e7698cf-e7df-4046-a40e-57d371b659a5",
+														"id": "417ff453-68e1-46bf-b4c7-6a1121f7c64f",
 														"exec": [
 															"pm.test(\"given alraedy deleted id in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11643,7 +11615,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "5e7698cf-e7df-4046-a40e-57d371b659a5",
+														"id": "93c5a3d7-a730-4a3b-a9f2-2e047489d3d6",
 														"exec": [
 															"pm.test(\"given wrong id in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11700,9 +11672,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -11717,7 +11691,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "d2a3d8d4-dd0e-4c6b-96bf-d886fc81cfc5",
+														"id": "336a77e4-eeb4-436f-b5cb-daf7e4dc4fce",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11774,6 +11748,7 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								},
 								{
@@ -11785,7 +11760,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "d2a3d8d4-dd0e-4c6b-96bf-d886fc81cfc5",
+														"id": "740186a0-2224-4d3c-9eaf-66f09333c49c",
 														"exec": [
 															"pm.test(\"deleted Successfully\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11847,7 +11822,7 @@
 												{
 													"listen": "test",
 													"script": {
-														"id": "d2a3d8d4-dd0e-4c6b-96bf-d886fc81cfc5",
+														"id": "46318107-e6b9-408f-a0b0-c1a56225509d",
 														"exec": [
 															"pm.test(\"given wrong objectTypeId in URL\", function () {",
 															"    var jsonData = pm.response.json();",
@@ -11904,9 +11879,11 @@
 											"response": []
 										}
 									],
+									"protocolProfileBehavior": {},
 									"_postman_isSubFolder": true
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
@@ -11914,7 +11891,7 @@
 						{
 							"listen": "prerequest",
 							"script": {
-								"id": "f3206302-1597-4609-bc86-fa1e3e1237e2",
+								"id": "c81f0a09-f2ad-486d-9dac-7045614f1f67",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -11924,7 +11901,7 @@
 						{
 							"listen": "test",
 							"script": {
-								"id": "7eda4389-23ce-493a-8e85-2dbf8141cd97",
+								"id": "e6694880-d7c5-4a18-b836-f8dcc748a32d",
 								"type": "text/javascript",
 								"exec": [
 									""
@@ -11932,6 +11909,7 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -11946,7 +11924,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "c2d95717-d504-4751-b01f-3d222a0919e1",
+												"id": "c365f33f-5856-4e5b-b08f-ff66dfdd90e7",
 												"exec": [
 													"pm.test(\"deleted Id Successfully\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12008,7 +11986,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "f1a9342e-bdf4-4a73-96b9-e20dfb749f80",
+												"id": "179eda02-cfb9-4228-845f-a5471d308a83",
 												"exec": [
 													"pm.test(\"deleted objectId Successfully\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12065,6 +12043,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -12076,7 +12055,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "5d6dd8bb-73ef-4a2b-b4d3-7f51a6dc8291",
+												"id": "7b8a9cec-23f4-490f-b7ca-a0a35d9adc67",
 												"exec": [
 													"pm.test(\"given wrong TypeId in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12138,7 +12117,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "5a8afd3e-ed83-456f-b15b-1c887eac2e39",
+												"id": "f48b7744-a0ab-407e-b4ed-28e60d8c0099",
 												"exec": [
 													"pm.test(\"given wrong id in URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12195,9 +12174,11 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				},
 				{
@@ -12212,7 +12193,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "ee5781f9-aabe-46cb-b214-fcb5d1d06d50",
+												"id": "11bbd8f2-1d71-4221-8f21-db0e98c5b293",
 												"exec": [
 													"pm.test(\"deleted Id Successfully\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12275,7 +12256,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "6ef8bb80-e0a7-45c9-9757-32cb188e4d7c",
+												"id": "c2d53ef6-66c2-46bc-a11d-69e64050a002",
 												"exec": [
 													"pm.test(\"deleted Id Successfully\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12326,6 +12307,7 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						},
 						{
@@ -12337,7 +12319,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "028ea32a-c8ab-4752-81e3-e70c1d43e567",
+												"id": "e5149942-6081-4520-ba22-3e4ef3a953ca",
 												"exec": [
 													"pm.test(\"given wrong URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12393,7 +12375,7 @@
 										{
 											"listen": "test",
 											"script": {
-												"id": "0ff29749-590b-403f-8fe8-e287594fdf05",
+												"id": "47e882ff-6382-4370-97ab-76e828ceac81",
 												"exec": [
 													"pm.test(\"given wrong URL\", function () {",
 													"    var jsonData = pm.response.json();",
@@ -12444,13 +12426,17 @@
 									"response": []
 								}
 							],
+							"protocolProfileBehavior": {},
 							"_postman_isSubFolder": true
 						}
 					],
+					"protocolProfileBehavior": {},
 					"_postman_isSubFolder": true
 				}
 			],
-			"description": "All DELETE realted Api's testing"
+			"description": "All DELETE realted Api's testing",
+			"protocolProfileBehavior": {}
 		}
-	]
+	],
+	"protocolProfileBehavior": {}
 }

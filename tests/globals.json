@@ -1,33 +1,34 @@
 {
-	"id": "146e52f0-fd32-4814-8e58-8a3c0f4d5eb7",
+	"id": "5a34dfd0-836c-4256-887a-fd0587b7bc74",
 	"values": [
 		{
 			"key": "requestURL",
 			"value": "http://localhost:8081/api/Tenant",
-			"description": "",
-			"enabled": true
-		},
-		{
-			"key": "USERNAME",
-			"value": "admin",
-			"description": "",
-			"enabled": true
-		},
-		{
-			"key": "PASSWORD",
-			"value": "admin123",
-			"description": "",
 			"enabled": true
 		},
 		{
 			"key": "FILE",
 			"value": "./hello.txt",
-			"description": "",
+			"enabled": true
+		},
+		{
+			"key": "HOST_URL",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "email",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "password",
+			"value": "",
 			"enabled": true
 		}
 	],
 	"name": "My Workspace Globals",
 	"_postman_variable_scope": "globals",
-	"_postman_exported_at": "2018-11-20T08:21:39.752Z",
-	"_postman_exported_using": "Postman/6.5.2"
+	"_postman_exported_at": "2020-06-16T08:22:31.305Z",
+	"_postman_exported_using": "Postman/7.26.0"
 }

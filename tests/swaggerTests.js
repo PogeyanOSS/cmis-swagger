@@ -7,9 +7,9 @@ newman.run(
         iterationCount: 1,
         reporter: {
             html: {
-            export: "./testResult.html"
+                export: "./testResult.html"
             }
-            }
+        }
     },
     function (err) {
         if (err) {
