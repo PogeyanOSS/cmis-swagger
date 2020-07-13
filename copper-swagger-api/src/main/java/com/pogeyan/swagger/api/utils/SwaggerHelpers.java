@@ -585,6 +585,8 @@ public class SwaggerHelpers {
 						serializeMap.put(var, value);
 					} else if (valueOfType instanceof String) {
 						serializeMap.put(var, Double.valueOf((String) valueOfType));
+					} else if (valueOfType instanceof Integer) {
+						serializeMap.put(var, valueOfType);
 					}
 				} else {
 					// string type
