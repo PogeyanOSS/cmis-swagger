@@ -172,7 +172,6 @@ public class SwaggerGetHelpers {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		}
-		LOG.info("getAll call completed");
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {
 				LOG.debug("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
