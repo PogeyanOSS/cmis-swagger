@@ -97,22 +97,18 @@ public class SwaggerGetHelpers {
 	}
 
 	/**
-	 * @param repositoryId
-	 *            the property repositoryId is identifier for the repository.
-	 * @param type
-	 *            the property type is used to get particular type definition.
-	 * @param skipCount
-	 *            the property skipCount is used to how many objects user want
-	 *            to skip.
-	 * @param maxItems
-	 *            the property maxItems is used to how many objects want per
-	 *            page.
-	 * @param userName
-	 *            the property userName is used to login the particular
-	 *            repository.
-	 * @param password
-	 *            the property password is used to login the particular
-	 *            repository.
+	 * @param repositoryId the property repositoryId is identifier for the
+	 *                     repository.
+	 * @param type         the property type is used to get particular type
+	 *                     definition.
+	 * @param skipCount    the property skipCount is used to how many objects user
+	 *                     want to skip.
+	 * @param maxItems     the property maxItems is used to how many objects want
+	 *                     per page.
+	 * @param userName     the property userName is used to login the particular
+	 *                     repository.
+	 * @param password     the property password is used to login the particular
+	 *                     repository.
 	 * @return list of ObjectData
 	 * @throws Exception
 	 */
@@ -166,11 +162,17 @@ public class SwaggerGetHelpers {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		} else {
-			children = ((Folder) session.getObjectByPath("/" + typeDefinitionObject.getId())).getChildren(context);
+			if (parentId != null) {
+				Folder object = (Folder) session.getObject(parentId);
+				children = object.getChildren(context);
+			} else {
+				children = ((Folder) session.getObjectByPath("/" + typeDefinitionObject.getId())).getChildren(context);
+			}
 			if (skipCount != null) {
 				children = children.skipTo(Integer.parseInt(skipCount));
 			}
 		}
+		LOG.info("getAll call completed");
 		for (CmisObject child : children.getPage()) {
 			if (includeRelationship) {
 				LOG.debug("class name: {}, method name: {}, repositoryId: {}, Fetching RelationshipType for type: {}",
@@ -191,22 +193,17 @@ public class SwaggerGetHelpers {
 	}
 
 	/**
-	 * @param repositoryId
-	 *            the property repositoryId is identifier for the repository.
-	 * @param typeId
-	 *            the property typeId of an object-type specified in the
-	 *            repository.
-	 * @param parentId
-	 *            the property parentId is used to get the object-type�s
-	 *            immediate parent type.
-	 * @param input
-	 *            the property input is used to get all request parameters.
-	 * @param userName
-	 *            the property userName is used to login the particular
-	 *            repository.
-	 * @param password
-	 *            the property password is used to login the particular
-	 *            repository.
+	 * @param repositoryId the property repositoryId is identifier for the
+	 *                     repository.
+	 * @param typeId       the property typeId of an object-type specified in the
+	 *                     repository.
+	 * @param parentId     the property parentId is used to get the object-type�s
+	 *                     immediate parent type.
+	 * @param input        the property input is used to get all request parameters.
+	 * @param userName     the property userName is used to login the particular
+	 *                     repository.
+	 * @param password     the property password is used to login the particular
+	 *                     repository.
 	 * @return response object
 	 * @throws Exception
 	 */
