@@ -1,15 +1,19 @@
 {
-  "name": "swaggertests",
+  "name": "@cmis/test-swagger",
   "version": "1.0.0",
   "description": "Swagger Newman Testcases",
   "main": "index.js",
   "scripts": {
-    "test": "node swaggerTests.js"
+    "swagger": "node swaggerTests.js",
+    "test": "vsts-npm-auth -config .npmrc",
+    "push": "cp -r ../tests ../run && npm publish"
   },
   "author": "Pogeyan Technologies",
   "license": "ISC",
   "dependencies": {
     "newman": "^4.3.1",
-    "newman-reporter-html": "^1.0.2"
+    "newman-reporter-html": "^1.0.2",
+    "cmis": "github:PogeyanOSS/CmisJS",
+    "mongodb": "3.5.9"
   }
 }
